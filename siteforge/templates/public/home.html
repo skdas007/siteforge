@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ hero_title|default:"Home" }} — {{ business_name|default:"SiteForge" }}{% endblock %}
+
+{% block content %}
+{# Hero carousel — min-height from theme (--sf-slider-height, default 400px) #}
+<section class="sf-slider carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000" id="heroCarousel">
+  <div class="carousel-indicators">
+    {% if slider_slides %}
+      {% for slide in slider_slides %}
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.counter }}"></button>
+      {% endfor %}
+    {% else %}
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    {% endif %}
+  </div>
+  <div class="carousel-inner h-100">
+    {% if slider_slides %}
+      {% for slide in slider_slides %}
+      <div class="carousel-item h-100 {% if forloop.first %}active{% endif %}">
+        {% if slide.media_type == 'video' and slide.video %}
+        <video class="d-block w-100 h-100 sf-slider-img" autoplay muted loop playsinline>
+          <source src="{{ slide.video }}" type="video/mp4">
+        </video>
+        {% elif slide.image %}
+        <img src="{{ slide.image }}" class="d-block w-100 h-100 sf-slider-img" alt="{{ slide.caption|default:'' }}">
+        {% else %}
+        <div class="d-block w-100 h-100 d-flex align-items-center justify-content-center text-white {{ slide.bg_class|default:'bg-dark' }} sf-slider-fill">
+          <div class="text-center px-3">{{ slide.caption|default:"Slide" }}</div>
+        </div>
+        {% endif %}
+        {% if slide.caption and slide.media_type %}
+        <div class="carousel-caption d-none d-md-block">
+          <p class="mb-0">{{ slide.caption }}</p>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% elif banner_image %}
+      <div class="carousel-item active h-100">
+        <img src="{{ banner_image }}" class="d-block w-100 h-100 sf-slider-img" alt="">
+      </div>
+    {% else %}
+      <div class="carousel-item active h-100">
+        <div class="d-block w-100 h-100 d-flex align-items-center justify-content-center text-white bg-primary sf-slider-fill">
+          <div class="text-center px-4">
+            <h2 class="h3 mb-2">{{ hero_title|default:"Welcome" }}</h2>
+            <p class="opacity-90 mb-0">{{ hero_subtitle|default:"Your tagline or short description goes here." }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item h-100">
+        <div class="d-block w-100 h-100 d-flex align-items-center justify-content-center text-white bg-secondary sf-slider-fill">
+          <div class="text-center px-4">
+            <p class="lead mb-0">Showcase your products and services</p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item h-100">
+        <div class="d-block w-100 h-100 d-flex align-items-center justify-content-center text-white bg-dark sf-slider-fill">
+          <div class="text-center px-4">
+            <p class="lead mb-0">Get in touch — we'd love to hear from you</p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</section>
+
+{# Hero content: left = text, right = image — both animated on scroll #}
+<section class="sf-hero hero-split py-5 section-padding" id="hero">
+  <div class="container">
+    <div class="row align-items-center g-4 g-lg-5">
+      <div class="col-lg-6 order-lg-1 order-2">
+        <div class="hero-content-block reveal-stagger">
+          <h1 class="display-5 fw-bold hero-title" data-reveal="fade-right">{{ hero_title|default:"Welcome" }}</h1>
+          <p class="lead text-secondary hero-subtitle mt-3" data-reveal="fade-right">{{ hero_subtitle|default:"Your tagline or short description goes here." }}</p>
+          <div class="mt-4 hero-cta" data-reveal="fade-right">
+            <a href="#products" class="btn btn-primary btn-3d px-4 py-2">Explore</a>
+            <a href="#contact" class="btn btn-outline-primary ms-2 px-4 py-2">Contact</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 order-lg-2 order-1">
+        <div class="hero-image-wrap" data-reveal="fade-left">
+          {% if hero_image %}
+          <img src="{{ hero_image }}" alt="{{ hero_title|default:'Hero' }}" class="hero-image img-fluid rounded-3 shadow">
+          {% elif banner_image %}
+          <img src="{{ banner_image }}" alt="{{ hero_title|default:'Hero' }}" class="hero-image img-fluid rounded-3 shadow">
+          {% else %}
+          <div class="hero-image-placeholder rounded-3 shadow d-flex flex-column align-items-center justify-content-center">
+            <span class="hero-placeholder-text">Your image</span>
+            <span class="small text-muted mt-2">Upload in Dashboard → Site settings → Welcome image</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# Features / Services — Clarity-style 3 columns #}
+<section class="py-5 bg-white section-padding" id="features">
+  <div class="container">
+    <div class="text-center mb-5" data-reveal="fade-up">
+      <h2 class="section-title section-title-glow">What We Offer</h2>
+      <p class="section-subtitle">Quality and service you can rely on.</p>
+    </div>
+    <div class="row g-4 reveal-stagger">
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up">
+        <div class="feature-card feature-card-3d card p-4 h-100">
+          <div class="feature-icon feature-icon-3d animate-float">◆</div>
+          <h3 class="h5 fw-bold">Quality</h3>
+          <p class="text-muted mb-0 small">We deliver high standards in everything we do.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up">
+        <div class="feature-card feature-card-3d card p-4 h-100">
+          <div class="feature-icon feature-icon-3d animate-float">◇</div>
+          <h3 class="h5 fw-bold">Service</h3>
+          <p class="text-muted mb-0 small">Dedicated support and attention to your needs.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up">
+        <div class="feature-card feature-card-3d card p-4 h-100">
+          <div class="feature-icon feature-icon-3d animate-float">○</div>
+          <h3 class="h5 fw-bold">Trust</h3>
+          <p class="text-muted mb-0 small">Build lasting relationships with our clients.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# Products — same card grid as product list, with category filter #}
+<section id="products" class="py-5 section-padding" style="background: var(--clarity-light, #f8f9fa);">
+  <div class="container">
+    <div class="text-center mb-5" data-reveal="fade-up">
+      <h2 class="section-title section-title-glow">Products</h2>
+      <p class="section-subtitle">Explore what we have for you.</p>
+    </div>
+    {% if categories %}
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4" data-reveal="fade-up">
+      <a href="{% url 'home' %}#products" class="btn btn-sm {% if not current_category_id %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+      {% for cat in categories %}
+      <a href="{% url 'home' %}?category={{ cat.id }}#products" class="btn btn-sm {% if current_category_id == cat.id %}btn-primary{% else %}btn-outline-primary{% endif %}">{{ cat.name }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="row g-4 reveal-stagger" id="product-list">
+      {% for product in products %}
+      <div class="col-sm-6 col-lg-4 card-3d-wrap" data-reveal="fade-up">
+        <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-dark">
+          <div class="card card-3d card-3d-tilt h-100 shadow-sm">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 220px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+              <span class="text-muted">No image</span>
+            </div>
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ product.name }}</h5>
+              <p class="card-text text-muted small">{{ product.description|default:""|truncatewords:15 }}</p>
+              <p class="fw-bold text-primary mb-0">{{ product.price }}</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center text-muted py-4" data-reveal="fade">
+        <p>No products yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% if products %}
+    <div class="col-12 text-center mt-4" data-reveal="fade-up">
+      <a href="{% url 'product_list' %}" class="btn btn-outline-primary">View all products</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{# Contact #}
+<section id="contact" class="sf-hero py-5 section-padding" data-reveal="fade-up">
+  <div class="container">
+    <div class="text-center mb-5" data-reveal="fade-up">
+      <h2 class="section-title section-title-glow">Contact us</h2>
+      <p class="section-subtitle">Find us on the map or send a message — we'll get back to you.</p>
+    </div>
+    <div class="row g-4 align-items-stretch" data-reveal="fade-up">
+      <div class="col-lg-6 order-2 order-lg-1">
+        <div class="contact-map-wrap h-100 rounded-3 overflow-hidden shadow-sm bg-light">
+          {% if map_embed_url %}
+          <iframe src="{{ map_embed_url }}" width="100%" height="100%" style="border:0; min-height: 380px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map"></iframe>
+          {% else %}
+          <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=77.58%2C12.95%2C77.62%2C12.99&layer=mapnik&marker=12.97%2C77.6" width="100%" height="100%" style="border:0; min-height: 380px;" allowfullscreen="" loading="lazy" title="Map location"></iframe>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-lg-6 order-1 order-lg-2">
+        <div class="card shadow-sm h-100 border-0 rounded-3 p-4">
+          <h3 class="h5 fw-bold mb-4">Send a message</h3>
+          <div id="contact-form-success" class="alert alert-success d-none" role="alert"></div>
+          <form id="contact-form" method="post" action="{% url 'contact_submit' %}" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="id_name" class="form-label">Name</label>
+                <input type="text" name="name" id="id_name" class="form-control input-lift" required minlength="2" maxlength="200" placeholder="Your name" aria-describedby="id_name_error">
+                <div id="id_name_error" class="invalid-feedback"></div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <label for="id_email" class="form-label">Email</label>
+                <input type="email" name="email" id="id_email" class="form-control input-lift" required placeholder="you@example.com" aria-describedby="id_email_error">
+                <div id="id_email_error" class="invalid-feedback"></div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <label for="id_phone" class="form-label">Phone (optional)</label>
+                <input type="text" name="phone" id="id_phone" class="form-control input-lift" maxlength="50" placeholder="+1 234 567 8900">
+              </div>
+              <div class="col-12">
+                <label for="id_message" class="form-label">Message</label>
+                <textarea name="message" id="id_message" class="form-control input-lift" rows="4" required minlength="10" placeholder="Your message" aria-describedby="id_message_error"></textarea>
+                <div id="id_message_error" class="invalid-feedback"></div>
+              </div>
+              <div class="col-12">
+                <button type="submit" id="contact-form-submit" class="btn btn-primary btn-3d w-100">Send message</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  var form = document.getElementById('contact-form');
+  if (!form) return;
+  var successEl = document.getElementById('contact-form-success');
+  var submitBtn = document.getElementById('contact-form-submit');
+  var fieldIds = ['name', 'email', 'message'];
+
+  function clearErrors() {
+    successEl.classList.add('d-none');
+    successEl.classList.remove('alert-danger');
+    successEl.classList.add('alert-success');
+    successEl.textContent = '';
+    fieldIds.forEach(function(name) {
+      var input = document.getElementById('id_' + name);
+      var errEl = document.getElementById('id_' + name + '_error');
+      if (input) { input.classList.remove('is-invalid'); input.removeAttribute('aria-invalid'); }
+      if (errEl) errEl.textContent = '';
+    });
+  }
+
+  function showErrors(errors) {
+    fieldIds.forEach(function(name) {
+      var msgs = errors[name];
+      var errEl = document.getElementById('id_' + name + '_error');
+      var input = document.getElementById('id_' + name);
+      if (!errEl || !input) return;
+      if (msgs && msgs.length) {
+        errEl.textContent = msgs[0];
+        input.classList.add('is-invalid');
+        input.setAttribute('aria-invalid', 'true');
+      } else {
+        errEl.textContent = '';
+        input.classList.remove('is-invalid');
+      }
+    });
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    clearErrors();
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+    var formData = new FormData(form);
+    var csrf = form.querySelector('input[name="csrfmiddlewaretoken"]');
+    if (csrf) formData.append('csrfmiddlewaretoken', csrf.value);
+
+    fetch(form.action, {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+    .then(function(result) {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send message'; }
+      if (result.ok && result.data.success) {
+        successEl.textContent = result.data.message || 'Thank you! We\'ll get back to you soon.';
+        successEl.classList.remove('d-none');
+        form.reset();
+      } else if (result.data && result.data.errors) {
+        showErrors(result.data.errors);
+      } else {
+        successEl.textContent = 'Something went wrong. Please try again.';
+        successEl.classList.remove('alert-success');
+        successEl.classList.add('alert-danger');
+        successEl.classList.remove('d-none');
+      }
+    })
+    .catch(function() {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send message'; }
+      successEl.textContent = 'Something went wrong. Please try again.';
+      successEl.classList.remove('alert-success', 'd-none');
+      successEl.classList.add('alert-danger');
+    });
+  });
+})();
+</script>
+
+{# Footer — Clarity-style #}
+<footer class="mt-auto py-4 bg-dark text-white">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up">
+        <h5 class="fw-bold mb-3">{{ business_name|default:"SiteForge" }}</h5>
+        <p class="small opacity-75 mb-0">Multi-tenant website platform. Build your presence with clarity and style.</p>
+      </div>
+      <div class="col-md-6 col-lg-4" data-reveal="fade-up">
+        <h5 class="fw-bold mb-3">Quick links</h5>
+        <ul class="list-unstyled small mb-0">
+          <li class="mb-2"><a href="{% url 'home' %}">Home</a></li>
+          <li class="mb-2"><a href="#products">Products</a></li>
+          <li class="mb-2"><a href="#contact">Contact</a></li>
+          <li class="mb-2"><a href="{% url 'dashboard:home' %}">Dashboard</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom text-center small opacity-75">
+      &copy; {{ business_name|default:"SiteForge" }}. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+{% if theme_slug == 'clarity' %}
+<script>
+(function() {
+  var nav = document.querySelector('.navbar');
+  if (!nav) return;
+  function onScroll() {
+    if (window.scrollY > 50) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+})();
+</script>
+{% endif %}
+{% endblock %}

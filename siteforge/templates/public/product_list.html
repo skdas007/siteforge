@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Products — {{ business_name|default:"SiteForge" }}{% endblock %}
+{% block extra_css %}
+<style>
+  .product-filter {
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .product-filter .filter-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+  }
+  .product-filter .form-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.35rem;
+  }
+  .product-filter .form-control,
+  .product-filter .form-select {
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9375rem;
+    min-height: 2.5rem;
+  }
+  .product-filter .form-control:focus,
+  .product-filter .form-select:focus {
+    border-color: var(--bs-primary, #0d6efd);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+  }
+  .product-filter .btn-filter {
+    min-height: 2.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+  .product-filter .btn-clear {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-decoration: none;
+    padding: 0.5rem 0;
+  }
+  .product-filter .btn-clear:hover {
+    color: var(--bs-primary, #0d6efd);
+  }
+  @media (min-width: 768px) {
+    .product-filter .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+    .product-filter .filter-group {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .product-filter .filter-group-search { flex: 1 1 12rem; max-width: 18rem; }
+    .product-filter .filter-group-category { flex: 0 1 10rem; }
+    .product-filter .filter-group-price { flex: 0 1 5rem; }
+    .product-filter .filter-actions { flex: 0 0 auto; display: flex; align-items: flex-end; gap: 0.5rem; }
+  }
+  @media (max-width: 767px) {
+    .product-filter { padding: 1rem; }
+    .product-filter .filter-group { margin-bottom: 1rem; }
+    .product-filter .filter-group:last-of-type { margin-bottom: 0; }
+    .product-filter .filter-actions {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .product-filter .btn-filter { flex: 1 1 auto; min-width: 8rem; }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<section class="py-5 section-padding">
+  <div class="container">
+    <div class="text-center mb-5" data-reveal="fade-up">
+      <h1 class="section-title section-title-glow">Products</h1>
+      <p class="section-subtitle">Explore what we have for you.</p>
+    </div>
+    <div class="product-filter mb-4" data-reveal="fade-up">
+      <form method="get" action="{% url 'product_list' %}">
+        <p class="filter-title mb-0">Refine results</p>
+        <div class="filter-row">
+          <div class="filter-group filter-group-search">
+            <label for="filter-q" class="form-label">Search</label>
+            <input type="text" name="q" id="filter-q" class="form-control" placeholder="Name or description…" value="{{ filter_q }}">
+          </div>
+          {% if categories %}
+          <div class="filter-group filter-group-category">
+            <label for="filter-category" class="form-label">Category</label>
+            <select name="category" id="filter-category" class="form-select">
+              <option value="">All categories</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}" {% if current_category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          <div class="filter-group filter-group-price">
+            <label for="filter-min" class="form-label">Min price</label>
+            <input type="number" name="min_price" id="filter-min" class="form-control" placeholder="0" min="0" step="any" value="{{ filter_min_price }}">
+          </div>
+          <div class="filter-group filter-group-price">
+            <label for="filter-max" class="form-label">Max price</label>
+            <input type="number" name="max_price" id="filter-max" class="form-control" placeholder="Max" min="0" step="any" value="{{ filter_max_price }}">
+          </div>
+          <div class="filter-actions">
+            <button type="submit" class="btn btn-primary btn-filter">Apply</button>
+            {% if filter_q or current_category_id or filter_min_price or filter_max_price %}
+            <a href="{% url 'product_list' %}" class="btn btn-clear align-self-center">Clear</a>
+            {% endif %}
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="row g-4 reveal-stagger">
+      {% for product in products %}
+      <div class="col-sm-6 col-lg-4 card-3d-wrap" data-reveal="fade-up">
+        <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-dark">
+          <div class="card card-3d card-3d-tilt h-100 shadow-sm">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 220px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+              <span class="text-muted">No image</span>
+            </div>
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ product.name }}</h5>
+              <p class="card-text text-muted small">{{ product.description|default:""|truncatewords:15 }}</p>
+              <p class="fw-bold text-primary mb-0">{{ product.price }}</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center text-muted py-5" data-reveal="fade">
+        <p>No products yet.</p>
+        <a href="{% url 'home' %}" class="btn btn-outline-primary mt-2">Back to home</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="mt-4 d-flex justify-content-center">
+      <ul class="pagination mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?{% if current_category_id %}category={{ current_category_id }}&amp;{% endif %}{% if filter_q %}q={{ filter_q|urlencode }}&amp;{% endif %}{% if filter_min_price %}min_price={{ filter_min_price }}&amp;{% endif %}{% if filter_max_price %}max_price={{ filter_max_price }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?{% if current_category_id %}category={{ current_category_id }}&amp;{% endif %}{% if filter_q %}q={{ filter_q|urlencode }}&amp;{% endif %}{% if filter_min_price %}min_price={{ filter_min_price }}&amp;{% endif %}{% if filter_max_price %}max_price={{ filter_max_price }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

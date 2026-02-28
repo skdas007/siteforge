@@ -1,0 +1,139 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Products{% endblock %}
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h5 mb-0">Products</h2>
+  <a href="{% url 'dashboard:product_add' %}" class="btn btn-primary">Add product</a>
+</div>
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 52px;" class="text-center" aria-label="Drag to reorder"></th>
+            <th style="width: 60px;">Order</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Main</th>
+            <th>Active</th>
+            <th style="width: 120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="product-list-body">
+          {% for product in products %}
+          <tr data-id="{{ product.id }}" class="product-row">
+            <td class="align-middle text-center product-drag-handle" draggable="true" style="cursor: grab;" title="Drag to reorder" aria-label="Drag to reorder">
+              <span class="text-muted" style="user-select: none;">⋮⋮</span>
+            </td>
+            <td class="align-middle order-num"><span class="text-muted">{{ product.order|default:forloop.counter }}</span></td>
+            <td class="align-middle">
+              {% if product.image %}
+              <img src="{{ product.image.url }}" alt="" style="height: 40px; width: 40px; object-fit: cover;" class="rounded">
+              {% else %}
+              <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="align-middle">{{ product.name }}</td>
+            <td class="align-middle">{% if product.category %}{{ product.category.name }}{% else %}—{% endif %}</td>
+            <td class="align-middle">{{ product.price }}</td>
+            <td class="align-middle">{% if product.is_main %}<span class="badge bg-primary">Main</span>{% else %}—{% endif %}</td>
+            <td class="align-middle">
+              {% if product.is_active %}Yes{% else %}No{% endif %}
+            </td>
+            <td class="align-middle">
+              <a href="{% url 'dashboard:product_edit' product.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+              <a href="{% url 'dashboard:product_delete' product.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center text-muted py-4">No products yet. <a href="{% url 'dashboard:product_add' %}">Add your first product</a>.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<p class="small text-muted mt-2">Drag the <span class="text-dark">⋮⋮</span> handle to reorder products. Order is saved automatically.</p>
+{% block extra_js %}
+<script>
+(function() {
+  const tbody = document.getElementById('product-list-body');
+  if (!tbody) return;
+  const rows = Array.from(tbody.querySelectorAll('tr.product-row'));
+  if (rows.length < 2) return;
+
+  function getCookie(name) {
+    const parts = document.cookie.split('; ');
+    const found = parts.find(function(p) { return p.startsWith(name + '='); });
+    return found ? decodeURIComponent(found.split('=').slice(1).join('=')) : null;
+  }
+
+  function getOrder() {
+    var r = tbody.querySelectorAll('tr.product-row');
+    return Array.prototype.map.call(r, function(el) { return parseInt(el.getAttribute('data-id'), 10); });
+  }
+
+  function saveOrder(ids) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '{% url "dashboard:product_reorder" %}', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var r = tbody.querySelectorAll('tr.product-row');
+        for (var i = 0; i < r.length; i++) {
+          var numCell = r[i].querySelector('.order-num span');
+          if (numCell) numCell.textContent = i + 1;
+        }
+      }
+    };
+    xhr.send(JSON.stringify({ order: ids }));
+  }
+
+  var draggedRow = null;
+
+  tbody.addEventListener('dragstart', function(e) {
+    var handle = e.target.closest('.product-drag-handle');
+    if (!handle) return;
+    var row = handle.closest('tr');
+    if (!row) return;
+    draggedRow = row;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', row.getAttribute('data-id'));
+    row.classList.add('table-primary');
+  });
+
+  tbody.addEventListener('dragend', function(e) {
+    if (draggedRow) draggedRow.classList.remove('table-primary');
+    tbody.querySelectorAll('tr.product-row').forEach(function(r) { r.classList.remove('border-top', 'border-primary', 'border-2'); });
+    draggedRow = null;
+  });
+
+  tbody.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    var row = e.target.closest('tr.product-row');
+    if (!row || row === draggedRow) return;
+    tbody.querySelectorAll('tr.product-row').forEach(function(r) {
+      r.classList.remove('border-top', 'border-primary', 'border-2');
+    });
+    row.classList.add('border-top', 'border-primary', 'border-2');
+  });
+
+  tbody.addEventListener('drop', function(e) {
+    e.preventDefault();
+    var row = e.target.closest('tr.product-row');
+    if (!row || !draggedRow || row === draggedRow) return;
+    if (draggedRow.parentNode === tbody) {
+      tbody.insertBefore(draggedRow, row);
+    }
+    saveOrder(getOrder());
+  });
+})();
+</script>
+{% endblock %}
+{% endblock %}

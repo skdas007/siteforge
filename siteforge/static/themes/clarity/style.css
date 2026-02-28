@@ -1,0 +1,259 @@
+/* Clarity-inspired theme — professional agency look (BootstrapMade Clarity style) */
+
+:root {
+  --clarity-primary: #0ea2bd;
+  --clarity-primary-dark: #0a8a9e;
+  --clarity-dark: #212529;
+  --clarity-light: #f8f9fa;
+  --clarity-section-padding: 5rem 0;
+}
+
+/* Typography */
+body.theme-clarity {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--clarity-dark);
+}
+
+.theme-clarity .display-4,
+.theme-clarity .display-5,
+.theme-clarity h1, .theme-clarity h2, .theme-clarity .h2 {
+  font-weight: 700;
+  color: var(--clarity-dark);
+}
+
+.theme-clarity .section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.theme-clarity .section-subtitle {
+  color: #6c757d;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Navbar — transparent over hero or solid */
+.theme-clarity .navbar {
+  padding: 0.75rem 0;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.theme-clarity .navbar.scrolled {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.08);
+}
+
+.theme-clarity .navbar-brand {
+  font-weight: 700;
+  font-size: 1.35rem;
+}
+
+.theme-clarity .nav-link {
+  font-weight: 500;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 0.25rem;
+}
+
+.theme-clarity .nav-link:hover {
+  color: var(--clarity-primary) !important;
+}
+
+/* Hero / Carousel — static responsive height */
+.theme-clarity .sf-slider {
+  height: 280px !important;
+  min-height: 280px !important;
+}
+@media (min-width: 576px) {
+  .theme-clarity .sf-slider {
+    height: 360px !important;
+    min-height: 360px !important;
+  }
+}
+@media (min-width: 768px) {
+  .theme-clarity .sf-slider {
+    height: 420px !important;
+    min-height: 420px !important;
+  }
+}
+@media (min-width: 992px) {
+  .theme-clarity .sf-slider {
+    height: 500px !important;
+    min-height: 500px !important;
+  }
+}
+
+.theme-clarity .sf-slider .carousel-inner {
+  height: 100% !important;
+  min-height: 100% !important;
+  overflow: hidden;
+}
+
+.theme-clarity .sf-slider .carousel-item {
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Same height for image and video: absolute fill, show top of media */
+.theme-clarity .sf-slider .carousel-item img.sf-slider-img,
+.theme-clarity .sf-slider .carousel-item video.sf-slider-img {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.theme-clarity .sf-slider .carousel-item div.sf-slider-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.theme-clarity .sf-slider .carousel-caption {
+  bottom: 3rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  padding: 2rem 1.5rem;
+  left: 0;
+  right: 0;
+}
+
+.theme-clarity .sf-slider .carousel-control-prev-icon,
+.theme-clarity .sf-slider .carousel-control-next-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  padding: 0.5rem;
+}
+
+/* Sections */
+.theme-clarity .sf-hero,
+.theme-clarity section.section-padding {
+  padding: var(--clarity-section-padding);
+}
+
+.theme-clarity .sf-hero {
+  background: var(--clarity-light);
+}
+
+/* Feature / service cards */
+.theme-clarity .feature-card {
+  background: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s, box-shadow 0.3s;
+  height: 100%;
+}
+
+.theme-clarity .feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.theme-clarity .feature-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: rgba(14, 162, 189, 0.1);
+  color: var(--clarity-primary);
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Product cards */
+.theme-clarity .card {
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+}
+
+.theme-clarity .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.theme-clarity .card-img-top {
+  transition: transform 0.4s;
+}
+
+.theme-clarity .card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+/* Buttons */
+.theme-clarity .btn-primary {
+  background-color: var(--clarity-primary);
+  border-color: var(--clarity-primary);
+}
+
+.theme-clarity .btn-primary:hover {
+  background-color: var(--clarity-primary-dark);
+  border-color: var(--clarity-primary-dark);
+}
+
+.theme-clarity .btn-outline-primary {
+  border-color: var(--clarity-primary);
+  color: var(--clarity-primary);
+}
+
+.theme-clarity .btn-outline-primary:hover {
+  background-color: var(--clarity-primary);
+  border-color: var(--clarity-primary);
+  color: #fff;
+}
+
+/* Contact section */
+.theme-clarity #contact .card {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.theme-clarity #contact .form-control:focus {
+  border-color: var(--clarity-primary);
+  box-shadow: 0 0 0 0.2rem rgba(14, 162, 189, 0.25);
+}
+
+/* Footer */
+.theme-clarity footer {
+  background: var(--clarity-dark) !important;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 3rem 0 1.5rem !important;
+}
+
+.theme-clarity footer .container {
+  max-width: 1140px;
+}
+
+.theme-clarity footer a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+}
+
+.theme-clarity footer a:hover {
+  color: #fff;
+}
+
+.theme-clarity .footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  font-size: 0.9rem;
+}

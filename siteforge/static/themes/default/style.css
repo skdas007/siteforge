@@ -1,0 +1,95 @@
+/* Theme: default — extends Bootstrap with default look */
+:root {
+  --sf-primary: #0d6efd;
+  --sf-hero-bg: #f8f9fa;
+  /* Carousel: static responsive height (image and video) */
+  --sf-slider-height: 280px;
+  --sf-hero-image-height: 380px;
+}
+
+@media (min-width: 576px) {
+  :root {
+    --sf-slider-height: 360px;
+  }
+}
+@media (min-width: 768px) {
+  :root {
+    --sf-slider-height: 420px;
+  }
+}
+@media (min-width: 992px) {
+  :root {
+    --sf-slider-height: 500px;
+  }
+}
+
+.sf-hero {
+  background: var(--sf-hero-bg);
+}
+
+.sf-slider {
+  overflow: hidden;
+  height: var(--sf-slider-height);
+  min-height: var(--sf-slider-height);
+}
+
+.sf-slider .carousel-inner {
+  height: var(--sf-slider-height);
+  min-height: var(--sf-slider-height);
+  overflow: hidden;
+}
+
+.sf-slider .carousel-item {
+  height: var(--sf-slider-height);
+  min-height: var(--sf-slider-height);
+  max-height: var(--sf-slider-height);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Force same height for image and video: fill container, show top of media */
+.sf-slider .carousel-item img.sf-slider-img,
+.sf-slider .carousel-item video.sf-slider-img {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.sf-slider .carousel-item div.sf-slider-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: var(--sf-slider-height);
+}
+
+/* Feature cards (used on home when section "What We Offer" is present) */
+.feature-card {
+  border-radius: 0.5rem;
+  transition: box-shadow 0.2s;
+}
+.feature-card:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+.feature-icon {
+  width: 3rem;
+  height: 3rem;
+  background: rgba(13, 110, 253, 0.1);
+  color: var(--sf-primary, #0d6efd);
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.section-title { font-weight: 700; }
+.section-subtitle { color: #6c757d; }

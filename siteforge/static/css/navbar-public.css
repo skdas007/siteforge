@@ -1,0 +1,207 @@
+/* Public site navbar: attractive style, animations, search bar */
+
+/* ---- Navbar container: subtle glass + shadow ---- */
+.navbar-public {
+  transition: background-color 0.35s ease, box-shadow 0.35s ease, padding 0.35s ease;
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+}
+
+.navbar-public .container {
+  transition: max-width 0.3s ease;
+}
+
+/* Scrolled state: more compact, stronger shadow */
+.navbar-public.navbar-scrolled {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ---- Brand: logo only, larger size + animations ---- */
+.navbar-public .navbar-brand.navbar-brand-logo {
+  padding: 0.25rem 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.navbar-public .navbar-brand-logo .navbar-brand-text {
+  font-size: 1.25rem;
+  transition: opacity 0.25s ease;
+}
+
+/* Logo: minimum size so it's always visible, rounded, animation */
+.navbar-public .navbar-logo-img {
+  min-height: 48px;
+  min-width: 120px;
+  height: 56px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  display: block;
+  border-radius: 0.5rem;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease, box-shadow 0.3s ease;
+  animation: logo-soft-pulse 4s ease-in-out infinite;
+}
+
+.navbar-public .navbar-brand-logo:hover .navbar-logo-img {
+  transform: scale(1.08) rotate(-2deg);
+  filter: brightness(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  animation: none;
+}
+
+@keyframes logo-soft-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.95; transform: scale(1.02); }
+}
+
+/* ---- Nav links: underline + slight lift ---- */
+.navbar-public .nav-link-nav {
+  position: relative;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem !important;
+  margin: 0 0.1rem;
+  border-radius: 0.375rem;
+  transition: color 0.25s ease, transform 0.2s ease, background 0.25s ease;
+}
+
+.navbar-public .nav-link-nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0.25rem;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s ease;
+}
+
+.navbar-public .nav-link-nav:hover {
+  transform: translateY(-1px);
+}
+
+.navbar-public .nav-link-nav:hover::after {
+  width: 85%;
+  left: 7.5%;
+}
+
+/* ---- Search bar ---- */
+.navbar-public .navbar-search-wrap {
+  max-width: 220px;
+  transition: max-width 0.35s ease, opacity 0.3s ease;
+}
+
+.navbar-public .navbar-search-wrap:focus-within {
+  max-width: 280px;
+}
+
+.navbar-public .navbar-search-input {
+  border-radius: 2rem;
+  padding: 0.4rem 1rem 0.4rem 2.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.navbar-public .navbar-search-input::placeholder {
+  color: #6c757d;
+  opacity: 0.9;
+}
+
+.navbar-public .navbar-search-input:focus {
+  outline: none;
+  border-color: rgba(13, 110, 253, 0.4);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+  background: #fff;
+}
+
+.navbar-public .navbar-search-btn {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar-public .navbar-search-btn svg {
+  flex-shrink: 0;
+}
+
+.navbar-public .navbar-search-wrap:focus-within .navbar-search-btn {
+  color: var(--sf-primary, #0d6efd);
+  transform: translateY(-50%) scale(1.08);
+}
+
+/* ---- Toggler: animated icon ---- */
+.navbar-public .navbar-toggler {
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.navbar-public .navbar-toggler:hover {
+  transform: scale(1.05);
+}
+
+.navbar-public .navbar-toggler:focus {
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
+}
+
+/* ---- Entrance animation: slide down ---- */
+@keyframes navbar-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navbar-public {
+  animation: navbar-slide-down 0.5s ease-out;
+}
+
+/* ---- Dropdown / mobile: smooth open ---- */
+.navbar-public .navbar-collapse {
+  transition: opacity 0.3s ease;
+}
+
+/* Dashboard link: subtle pill style */
+.navbar-public .nav-link-dashboard {
+  font-weight: 600;
+  padding: 0.4rem 0.9rem !important;
+  border-radius: 2rem;
+  background: linear-gradient(135deg, var(--sf-primary, #0d6efd) 0%, #0a58ca 100%);
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.navbar-public .nav-link-dashboard:hover {
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.45);
+  opacity: 0.95;
+}
+
+.navbar-public .nav-link-dashboard::after {
+  display: none;
+}
+
+/* ---- Mobile: search full width, spacing ---- */
+@media (max-width: 991.98px) {
+  .navbar-public .navbar-search-wrap {
+    max-width: 100%;
+  }
+  .navbar-public .navbar-search-wrap:focus-within {
+    max-width: 100%;
+  }
+  .navbar-public .nav-link-nav {
+    padding: 0.6rem 0.75rem !important;
+  }
+}

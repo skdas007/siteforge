@@ -1,0 +1,14 @@
+/* Theme: minimal — clean, light */
+:root {
+  --sf-primary: #212529;
+  --sf-hero-bg: #fff;
+}
+
+.sf-hero {
+  background: var(--sf-hero-bg);
+  border-bottom: 1px solid #dee2e6;
+}
+
+.card {
+  border-radius: 0.5rem;
+}

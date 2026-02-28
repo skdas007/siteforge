@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SiteForge{% endblock %}</title>
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  {% if theme_slug %}
+  <link href="{% static 'themes/' %}{{ theme_slug }}/style.css" rel="stylesheet">
+  {% else %}
+  <link href="{% static 'themes/default/style.css' %}" rel="stylesheet">
+  {% endif %}
+  <link href="{% static 'css/scroll-reveal.css' %}" rel="stylesheet">
+  <link href="{% static 'css/animations-3d.css' %}" rel="stylesheet">
+  <link href="{% static 'css/navbar-public.css' %}" rel="stylesheet">
+  <link href="{% static 'css/hero-split.css' %}" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100 {% if theme_slug %}theme-{{ theme_slug }}{% endif %}">
+  {% block nav %}
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-public bg-white border-bottom py-2 py-lg-3" id="publicNavbar">
+    <div class="container">
+      <a class="navbar-brand navbar-brand-logo d-flex align-items-center" href="{% url 'home' %}" aria-label="{{ business_name|default:'SiteForge' }}">
+        {% if logo %}
+        <img src="{{ logo }}" alt="{{ business_name|default:'SiteForge' }}" class="navbar-logo-img">
+        {% else %}
+        <span class="navbar-brand-text">{{ business_name|default:"SiteForge" }}</span>
+        {% endif %}
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#publicNav" aria-controls="publicNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="publicNav">
+        <ul class="navbar-nav align-items-lg-center me-lg-3">
+          <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}#features">Features</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'product_list' %}">Products</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}#contact">Contact</a></li>
+        </ul>
+        <form class="d-flex my-2 my-lg-0 mx-auto mx-lg-0 mb-lg-0 order-lg-0 flex-grow-1 flex-lg-grow-0 justify-content-lg-center" action="{% url 'home' %}" method="get" role="search">
+          <div class="position-relative navbar-search-wrap flex-grow-1 flex-lg-grow-0">
+            <span class="position-absolute navbar-search-btn d-flex align-items-center" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+            </span>
+            <input type="search" name="q" class="form-control form-control-sm navbar-search-input border-0" placeholder="Search products…" aria-label="Search products" autocomplete="off" value="{{ request.GET.q|default:'' }}">
+          </div>
+        </form>
+        <ul class="navbar-nav align-items-lg-center ms-lg-2">
+          <li class="nav-item">
+            <a class="nav-link nav-link-dashboard" href="{% url 'dashboard:home' %}">Dashboard</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  {% endblock %}
+  {% block content %}{% endblock %}
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/scroll-reveal.js' %}"></script>
+  <script src="{% static 'js/card-3d-tilt.js' %}"></script>
+  <script>
+  (function() {
+    var nav = document.getElementById('publicNavbar');
+    if (!nav) return;
+    function onScroll() {
+      if (window.scrollY > 30) nav.classList.add('navbar-scrolled');
+      else nav.classList.remove('navbar-scrolled');
+    }
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+  })();
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

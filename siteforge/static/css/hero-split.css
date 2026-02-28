@@ -1,0 +1,96 @@
+/* Hero section: left content + right image, animated */
+
+.sf-hero.hero-split {
+  background: var(--sf-hero-bg, #f8f9fa);
+  overflow: hidden;
+}
+
+/* Welcome description: smooth zoom on hover */
+.hero-content-block {
+  cursor: default;
+}
+
+.hero-content-block .hero-title {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+  transform-origin: left center;
+}
+
+.hero-content-block .hero-subtitle {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.06s, opacity 0.6s ease 0.06s;
+  transform-origin: left center;
+}
+
+.hero-content-block .hero-cta {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s, opacity 0.6s ease 0.1s;
+}
+
+.hero-content-block:hover .hero-title {
+  transform: translateX(0) scale(1.06);
+}
+
+.hero-content-block:hover .hero-subtitle {
+  transform: translateX(0) scale(1.04);
+}
+
+.hero-content-block:hover .hero-cta {
+  transform: translateX(0) scale(1.03);
+}
+
+/* Right-side welcome image: display as-is (natural size, no cropping) */
+.hero-image-wrap {
+  position: relative;
+}
+
+.hero-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.5s ease;
+  animation: hero-image-float 5s ease-in-out infinite;
+}
+
+.hero-image-wrap:hover .hero-image {
+  transform: scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  animation: none;
+}
+
+@keyframes hero-image-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Placeholder when no image set */
+.hero-image-placeholder {
+  min-height: 160px;
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 50%, #ced4da 100%);
+  color: #6c757d;
+}
+
+.hero-placeholder-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Stagger content when revealed */
+.hero-content-block[data-reveal].reveal-in .hero-title {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.hero-content-block[data-reveal].reveal-in .hero-subtitle {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.hero-content-block[data-reveal].reveal-in .hero-cta {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Mobile: no change — image still as-is */
+@media (max-width: 991.98px) {
+  .hero-image {
+    max-width: 100%;
+  }
+}

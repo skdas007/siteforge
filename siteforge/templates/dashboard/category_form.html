@@ -1,0 +1,20 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Add category{% endblock %}
+{% block dashboard_content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h2 class="h5 mb-0">Add category</h2>
+    <a href="{% url 'dashboard:category_list' %}" class="btn btn-sm btn-outline-secondary">Back to list</a>
+  </div>
+  <div class="card-body">
+    <form method="post" action="{% url 'dashboard:category_add' %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="id_name" class="form-label">Name</label>
+        <input type="text" name="name" id="id_name" class="form-control" required maxlength="100" placeholder="e.g. Electronics">
+      </div>
+      <button type="submit" class="btn btn-primary">Add category</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

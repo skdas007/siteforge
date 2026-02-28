@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ product.name }} — {{ business_name|default:"SiteForge" }}{% endblock %}
+{% block content %}
+<section class="py-5 section-padding">
+  <div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'product_list' %}">Products</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+      </ol>
+    </nav>
+    <div class="row align-items-start g-4">
+      <div class="col-md-5 col-lg-4" data-reveal="fade-right">
+        {% if product.image %}
+        <div class="product-zoom-wrapper mb-2">
+          <div class="product-zoom-area position-relative rounded-3 overflow-hidden shadow" id="product-zoom-area">
+            <img src="{{ product.image.url }}" class="product-zoom-img img-fluid rounded-3" alt="{{ product.name }}" id="product-main-image">
+            <div class="zoom-lens" id="zoom-lens" aria-hidden="true"></div>
+          </div>
+          <div class="zoom-result rounded-3 shadow" id="zoom-result" aria-hidden="true"></div>
+        </div>
+        {% elif product.extra_images.all %}
+        <div class="product-zoom-wrapper mb-2">
+          <div class="product-zoom-area position-relative rounded-3 overflow-hidden shadow" id="product-zoom-area">
+            <img src="{{ product.extra_images.all.0.image.url }}" class="product-zoom-img img-fluid rounded-3" alt="{{ product.name }}" id="product-main-image">
+            <div class="zoom-lens" id="zoom-lens" aria-hidden="true"></div>
+          </div>
+          <div class="zoom-result rounded-3 shadow" id="zoom-result" aria-hidden="true"></div>
+        </div>
+        {% else %}
+        <div class="bg-light rounded-3 d-flex align-items-center justify-content-center shadow mb-2" style="min-height: 280px;">
+          <span class="text-muted">No image</span>
+        </div>
+        {% endif %}
+        {% if product.image or product.extra_images.all %}
+        <div class="d-flex flex-wrap gap-2 mt-2" id="product-gallery">
+          {% if product.image %}
+          <button type="button" class="border rounded p-1 product-gallery-thumb active" data-src="{{ product.image.url }}" style="width: 56px; height: 56px; overflow: hidden; flex-shrink: 0;">
+            <img src="{{ product.image.url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+          </button>
+          {% endif %}
+          {% for img in product.extra_images.all %}
+          <button type="button" class="border rounded p-1 product-gallery-thumb{% if not product.image and forloop.first %} active{% endif %}" data-src="{{ img.image.url }}" style="width: 56px; height: 56px; overflow: hidden; flex-shrink: 0;">
+            <img src="{{ img.image.url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+          </button>
+          {% endfor %}
+        </div>
+        <style>
+          .product-gallery-thumb.active { border-color: var(--bs-primary) !important; border-width: 2px !important; }
+          .product-zoom-wrapper { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+          .product-zoom-area { cursor: crosshair; flex: 1 1 auto; min-width: 0; }
+          .product-zoom-img { display: block; width: 100%; max-height: 400px; object-fit: cover; }
+          .zoom-lens {
+            position: absolute; width: 120px; height: 120px;
+            border: 2px solid rgba(0,0,0,0.25); border-radius: 50%;
+            background: rgba(255,255,255,0.25); pointer-events: none;
+            display: none; box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+          }
+          .zoom-result {
+            width: 320px; height: 320px; flex-shrink: 0;
+            background-repeat: no-repeat; background-color: #f8f9fa;
+            display: none; border: 1px solid rgba(0,0,0,0.08);
+          }
+          @media (max-width: 767px) {
+            .zoom-result { width: 280px; height: 280px; }
+          }
+        </style>
+        <script>
+        (function(){
+          var main = document.getElementById('product-main-image');
+          var gallery = document.getElementById('product-gallery');
+          var zoomArea = document.getElementById('product-zoom-area');
+          var lens = document.getElementById('zoom-lens');
+          var result = document.getElementById('zoom-result');
+
+          function showZoom() {
+            if (!main || !lens || !result) return;
+            result.style.backgroundImage = 'url("' + main.src + '")';
+            lens.style.display = 'block';
+            result.style.display = 'block';
+          }
+          function hideZoom() {
+            if (lens) lens.style.display = 'none';
+            if (result) result.style.display = 'none';
+          }
+          function moveLens(e) {
+            if (!main || !lens || !result || lens.style.display !== 'block') return;
+            var rect = main.getBoundingClientRect();
+            var x = e.clientX - rect.left;
+            var y = e.clientY - rect.top;
+            if (x < 0 || x > rect.width || y < 0 || y > rect.height) { hideZoom(); return; }
+            var lensW = 120, lensH = 120;
+            var lensLeft = Math.max(0, Math.min(x - lensW/2, rect.width - lensW));
+            var lensTop = Math.max(0, Math.min(y - lensH/2, rect.height - lensH));
+            lens.style.left = lensLeft + 'px';
+            lens.style.top = lensTop + 'px';
+            var scale = 320 / lensW;
+            var bgW = rect.width * scale, bgH = rect.height * scale;
+            result.style.backgroundSize = bgW + 'px ' + bgH + 'px';
+            result.style.backgroundPosition = (-lensLeft * scale) + 'px ' + (-lensTop * scale) + 'px';
+          }
+
+          if (zoomArea && lens && result) {
+            zoomArea.addEventListener('mouseenter', showZoom);
+            zoomArea.addEventListener('mousemove', moveLens);
+            zoomArea.addEventListener('mouseleave', hideZoom);
+          }
+
+          if (main && gallery) {
+            gallery.querySelectorAll('.product-gallery-thumb').forEach(function(btn){
+              btn.addEventListener('click', function(){
+                var src = this.getAttribute('data-src');
+                if (src) {
+                  main.src = src;
+                  if (result) result.style.backgroundImage = 'url("' + src + '")';
+                }
+                gallery.querySelectorAll('.product-gallery-thumb').forEach(function(b){ b.classList.remove('active'); });
+                this.classList.add('active');
+              });
+            });
+          }
+        })();
+        </script>
+        {% endif %}
+      </div>
+      <div class="col-md-7 col-lg-8" data-reveal="fade-left">
+        <h1 class="h2 fw-bold mb-3">{{ product.name }}</h1>
+        <p class="lead text-primary fw-bold mb-4">{{ product.price }}</p>
+        {% if product.description %}
+        <div class="text-muted mb-4">{{ product.description|linebreaks }}</div>
+        {% endif %}
+        {% if whatsapp_digits %}
+        <a href="https://wa.me/{{ whatsapp_digits }}?text={{ whatsapp_message|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-success">Buy in WhatsApp</a>
+        {% endif %}
+        <a href="{% url 'product_list' %}" class="btn btn-outline-secondary ms-2">View all products</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

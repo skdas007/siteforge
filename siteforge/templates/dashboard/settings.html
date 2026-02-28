@@ -1,0 +1,365 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+{% block title %}Site settings{% endblock %}
+{% block extra_css %}
+<style>
+  .carousel-slide-row.carousel-dragging { opacity: 0.6; }
+  .carousel-slide-row.carousel-drag-over { border: 2px dashed var(--bs-primary); }
+</style>
+{% endblock %}
+{% block dashboard_content %}
+<div class="card shadow-sm">
+  <div class="card-header">
+    <h2 class="h5 mb-0">Site settings</h2>
+  </div>
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" action="{% url 'dashboard:settings' %}">
+      {% csrf_token %}
+      {% if form.errors %}
+      <div class="alert alert-danger mb-3">
+        <strong>Please fix the errors below.</strong>
+        {% if form.non_field_errors %}<ul class="mb-0 mt-1">{% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>{% endif %}
+        {% for field in form %}{% if field.errors %}<div class="mt-1"><strong>{{ field.label }}:</strong> {{ field.errors|striptags }}</div>{% endif %}{% endfor %}
+      </div>
+      {% endif %}
+      <h3 class="h6 mt-3">Carousel / Slider</h3>
+      <p class="form-text text-muted small">Images or MP4 videos appear in the auto-scroll slider on your homepage. Add as many slides as you need (max 100). Order is top to bottom. Wide images or landscape videos work best.</p>
+      <div id="carousel-slides-container" class="mb-3" data-reorder-url="{% url 'dashboard:carousel_reorder' %}">
+        {% for slide in existing_slides %}
+        <div class="card mb-2 carousel-slide-row" data-slide-index="{{ forloop.counter0 }}" data-slide-id="{{ slide.id }}">
+          <div class="card-body py-2 py-sm-3 d-flex gap-2">
+            <div class="carousel-drag-handle align-self-start pt-1" draggable="true" title="Drag to reorder" aria-label="Drag to reorder" style="cursor: grab; user-select: none;">⋮⋮</div>
+            <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h4 class="h6 text-muted mb-0">Slide <span class="slide-number">{{ forloop.counter }}</span></h4>
+              <button type="button" class="btn btn-sm btn-outline-danger carousel-remove-slide" aria-label="Remove slide">Remove</button>
+            </div>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="form-label small">Image or video (MP4)</label>
+                <input type="file" name="carousel_image_{{ forloop.counter0 }}" class="form-control form-control-sm carousel-image-input" accept="image/*,video/mp4,.mp4">
+                {% if slide.image_url %}<div class="mt-1"><img src="{{ slide.image_url }}" alt="" class="img-thumbnail carousel-preview" style="max-height: 60px;"></div>{% elif slide.is_video %}<div class="mt-1 text-muted small">Video (MP4)</div>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Caption (optional)</label>
+                <input type="text" name="carousel_caption_{{ forloop.counter0 }}" class="form-control form-control-sm" value="{{ slide.caption|default:'' }}" placeholder="Caption" maxlength="200">
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="card mb-2 carousel-slide-row" data-slide-index="0">
+          <div class="card-body py-2 py-sm-3 d-flex gap-2">
+            <div class="carousel-drag-handle align-self-start pt-1" draggable="true" title="Drag to reorder" aria-label="Drag to reorder" style="cursor: grab; user-select: none;">⋮⋮</div>
+            <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h4 class="h6 text-muted mb-0">Slide <span class="slide-number">1</span></h4>
+              <button type="button" class="btn btn-sm btn-outline-danger carousel-remove-slide" aria-label="Remove slide">Remove</button>
+            </div>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="form-label small">Image or video (MP4)</label>
+                <input type="file" name="carousel_image_0" class="form-control form-control-sm carousel-image-input" accept="image/*,video/mp4,.mp4">
+                <div class="mt-1 carousel-preview-wrap" style="display: none;"><img src="" alt="" class="img-thumbnail carousel-preview" style="max-height: 60px;"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Caption (optional)</label>
+                <input type="text" name="carousel_caption_0" class="form-control form-control-sm" value="" placeholder="Caption" maxlength="200">
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="mb-3">
+        <button type="button" id="carousel-add-slide" class="btn btn-outline-primary btn-sm">+ Add slide</button>
+        <span id="carousel-slide-count" class="text-muted small ms-2"></span>
+      </div>
+      <template id="carousel-row-tpl">
+        <div class="card mb-2 carousel-slide-row" data-slide-index="">
+          <div class="card-body py-2 py-sm-3 d-flex gap-2">
+            <div class="carousel-drag-handle align-self-start pt-1" draggable="true" title="Drag to reorder" aria-label="Drag to reorder" style="cursor: grab; user-select: none;">⋮⋮</div>
+            <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h4 class="h6 text-muted mb-0">Slide <span class="slide-number"></span></h4>
+              <button type="button" class="btn btn-sm btn-outline-danger carousel-remove-slide" aria-label="Remove slide">Remove</button>
+            </div>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="form-label small">Image or video (MP4)</label>
+                <input type="file" name="carousel_image_TMP" class="form-control form-control-sm carousel-image-input" accept="image/*,video/mp4,.mp4">
+                <div class="mt-1 carousel-preview-wrap" style="display: none;"><img src="" alt="" class="img-thumbnail carousel-preview" style="max-height: 60px;"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Caption (optional)</label>
+                <input type="text" name="carousel_caption_TMP" class="form-control form-control-sm" value="" placeholder="Caption" maxlength="200">
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <h3 class="h6 mt-4">Fallback banner image</h3>
+      <div class="mb-3">
+        <label for="id_banner" class="form-label">Single banner (used if no carousel images)</label>
+        {% if banner_image_url %}
+        <p class="small text-success mb-1">Current: <img src="{{ banner_image_url }}" alt="" class="img-thumbnail" style="max-height: 50px;"> Saved.</p>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="remove_banner" id="id_remove_banner" value="1">
+          <label class="form-check-label" for="id_remove_banner">Remove current banner (and delete from storage)</label>
+        </div>
+        {% endif %}
+        <input type="file" name="banner_image" id="id_banner" class="form-control" accept="image/*">
+        <div class="form-text">Optional. Choose an image and click Save settings.</div>
+      </div>
+
+      <h3 class="h6 mt-4">Hero content</h3>
+      <div class="mb-3">
+        <label for="id_hero_title" class="form-label">Hero title</label>
+        <input type="text" name="hero_title" id="id_hero_title" class="form-control" value="{{ hero_title|default:'' }}" placeholder="Welcome to our site">
+      </div>
+      <div class="mb-3">
+        <label for="id_hero_subtitle" class="form-label">Hero subtitle</label>
+        <textarea name="hero_subtitle" id="id_hero_subtitle" class="form-control" rows="2" placeholder="Short tagline or description">{{ hero_subtitle|default:'' }}</textarea>
+      </div>
+
+      <h3 class="h6 mt-4">Welcome image</h3>
+      <p class="form-text text-muted small">Shown on the right in the welcome/hero section (below the carousel).</p>
+      <div class="mb-3">
+        <label for="id_hero_image" class="form-label">Upload welcome image</label>
+        {% if hero_image_url %}
+        <p class="small text-success mb-1">Current: <img src="{{ hero_image_url }}" alt="" class="img-thumbnail" style="max-height: 50px;"> Saved.</p>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="remove_hero_image" id="id_remove_hero_image" value="1">
+          <label class="form-check-label" for="id_remove_hero_image">Remove current welcome image (and delete from storage)</label>
+        </div>
+        {% endif %}
+        <input type="file" name="hero_image" id="id_hero_image" class="form-control" accept="image/*">
+        <div class="form-text">Optional. Choose an image and click Save settings.</div>
+      </div>
+
+      <h3 class="h6 mt-4">Logo</h3>
+      <div class="mb-3">
+        <label for="id_logo" class="form-label">Upload logo</label>
+        {% if logo_url %}
+        <p class="small text-success mb-1">Current: <img src="{{ logo_url }}" alt="" class="img-thumbnail" style="max-height: 40px;"> Saved.</p>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="remove_logo" id="id_remove_logo" value="1">
+          <label class="form-check-label" for="id_remove_logo">Remove current logo (and delete from storage)</label>
+        </div>
+        {% endif %}
+        <input type="file" name="logo" id="id_logo" class="form-control" accept="image/*">
+      </div>
+
+      <h3 class="h6 mt-4">Theme</h3>
+      <div class="mb-3">
+        <label class="form-label">Select theme</label>
+        <div class="d-flex flex-wrap gap-3">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="theme" id="theme_default" value="default" {% if theme_slug == "default" or not theme_slug %}checked{% endif %}>
+            <label class="form-check-label" for="theme_default">Default</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="theme" id="theme_minimal" value="minimal" {% if theme_slug == "minimal" %}checked{% endif %}>
+            <label class="form-check-label" for="theme_minimal">Minimal</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="theme" id="theme_clarity" value="clarity" {% if theme_slug == "clarity" %}checked{% endif %}>
+            <label class="form-check-label" for="theme_clarity">Clarity (agency + animations)</label>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="h6 mt-4">Contact & WhatsApp</h3>
+      <div class="mb-3">
+        <label for="id_contact_email" class="form-label">Email for contact form notifications</label>
+        <input type="email" name="contact_email" id="id_contact_email" class="form-control" value="{{ contact_email|default:'' }}" placeholder="you@example.com">
+      </div>
+      <div class="mb-3">
+        <label for="id_whatsapp_number" class="form-label">WhatsApp number</label>
+        <input type="text" name="whatsapp_number" id="id_whatsapp_number" class="form-control" value="{{ whatsapp_number|default:'' }}" placeholder="919876543210" maxlength="20">
+        <p class="form-text small text-muted">Country code + number, no spaces (e.g. 919876543210). Shown as &quot;Buy in WhatsApp&quot; on product pages.</p>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-3">Save settings</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var CAROUSEL_MAX_SLIDES = 100;
+  var container = document.getElementById('carousel-slides-container');
+  var tpl = document.getElementById('carousel-row-tpl');
+  var addBtn = document.getElementById('carousel-add-slide');
+  var countEl = document.getElementById('carousel-slide-count');
+
+  function nextIndex() {
+    var rows = container.querySelectorAll('.carousel-slide-row');
+    var max = -1;
+    for (var i = 0; i < rows.length; i++) {
+      var idx = parseInt(rows[i].getAttribute('data-slide-index'), 10);
+      if (!isNaN(idx) && idx > max) max = idx;
+    }
+    return max + 1;
+  }
+
+  function updateSlideNumbers() {
+    var rows = container.querySelectorAll('.carousel-slide-row');
+    rows.forEach(function(row, i) {
+      var num = row.querySelector('.slide-number');
+      if (num) num.textContent = i + 1;
+    });
+  }
+
+  function updateCount() {
+    var n = container.querySelectorAll('.carousel-slide-row').length;
+    countEl.textContent = n + ' slide' + (n !== 1 ? 's' : '') + (n >= CAROUSEL_MAX_SLIDES ? ' (max)' : '');
+    addBtn.disabled = n >= CAROUSEL_MAX_SLIDES;
+  }
+
+  function addSlide() {
+    if (container.querySelectorAll('.carousel-slide-row').length >= CAROUSEL_MAX_SLIDES) return;
+    var idx = nextIndex();
+    var html = tpl.innerHTML.replace(/TMP/g, idx);
+    var wrap = document.createElement('div');
+    wrap.innerHTML = html.trim();
+    var row = wrap.firstChild;
+    row.setAttribute('data-slide-index', idx);
+    row.querySelector('.slide-number').textContent = idx + 1;
+    var handle = row.querySelector('.carousel-drag-handle');
+    if (handle) handle.setAttribute('draggable', 'true');
+    container.appendChild(row);
+    updateCount();
+    bindRow(row);
+  }
+
+  function bindRow(row) {
+    var removeBtn = row.querySelector('.carousel-remove-slide');
+    if (removeBtn) {
+      removeBtn.onclick = function() {
+        row.remove();
+        updateSlideNumbers();
+        updateCount();
+      };
+    }
+    var fileInput = row.querySelector('.carousel-image-input');
+    if (fileInput) {
+      fileInput.onchange = function() {
+        var wrap = row.querySelector('.carousel-preview-wrap');
+        var img = row.querySelector('.carousel-preview');
+        if (!wrap || !img) return;
+        if (this.files && this.files[0]) {
+          var r = new FileReader();
+          r.onload = function(e) { img.src = e.target.result; wrap.style.display = ''; };
+          r.readAsDataURL(this.files[0]);
+        } else {
+          img.src = ''; wrap.style.display = 'none';
+        }
+      };
+    }
+  }
+
+  function renumberRows() {
+    var rows = container.querySelectorAll('.carousel-slide-row');
+    rows.forEach(function(row, i) {
+      row.setAttribute('data-slide-index', i);
+      var num = row.querySelector('.slide-number');
+      if (num) num.textContent = i + 1;
+      var imgInput = row.querySelector('input[name^="carousel_image_"]');
+      var capInput = row.querySelector('input[name^="carousel_caption_"]');
+      if (imgInput) imgInput.name = 'carousel_image_' + i;
+      if (capInput) capInput.name = 'carousel_caption_' + i;
+    });
+  }
+
+  function getCsrfToken() {
+    var el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    return el ? el.value : '';
+  }
+
+  var draggedRow = null;
+  container.addEventListener('dragstart', function(e) {
+    var handle = e.target.closest('.carousel-drag-handle');
+    if (!handle) return;
+    var row = handle.closest('.carousel-slide-row');
+    if (!row) return;
+    draggedRow = row;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', '');
+    row.classList.add('carousel-dragging');
+  });
+  container.addEventListener('dragend', function(e) {
+    if (draggedRow) draggedRow.classList.remove('carousel-dragging');
+    draggedRow = null;
+    container.querySelectorAll('.carousel-slide-row').forEach(function(r) { r.classList.remove('carousel-drag-over'); });
+  });
+  container.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    var row = e.target.closest('.carousel-slide-row');
+    if (row && row !== draggedRow) {
+      container.querySelectorAll('.carousel-slide-row').forEach(function(r) { r.classList.remove('carousel-drag-over'); });
+      row.classList.add('carousel-drag-over');
+    }
+  });
+  container.addEventListener('dragleave', function(e) {
+    if (!e.target.closest('.carousel-slide-row')) return;
+    var row = e.target.closest('.carousel-slide-row');
+    if (!container.contains(e.relatedTarget) || !row.contains(e.relatedTarget)) row.classList.remove('carousel-drag-over');
+  });
+  container.addEventListener('drop', function(e) {
+    e.preventDefault();
+    var row = e.target.closest('.carousel-slide-row');
+    if (!row || !draggedRow || row === draggedRow) return;
+    container.querySelectorAll('.carousel-slide-row').forEach(function(r) { r.classList.remove('carousel-drag-over'); });
+    var allRows = [].slice.call(container.querySelectorAll('.carousel-slide-row'));
+    var fromIdx = allRows.indexOf(draggedRow);
+    var toIdx = allRows.indexOf(row);
+    if (fromIdx === -1 || toIdx === -1) return;
+    if (fromIdx < toIdx) row.parentNode.insertBefore(draggedRow, row.nextSibling);
+    else row.parentNode.insertBefore(draggedRow, row);
+    var orderIds = [];
+    container.querySelectorAll('.carousel-slide-row').forEach(function(r) {
+      var id = r.getAttribute('data-slide-id');
+      if (id) orderIds.push(parseInt(id, 10));
+    });
+    if (orderIds.length === 0) {
+      renumberRows();
+      updateCount();
+      return;
+    }
+    var url = container.getAttribute('data-reorder-url');
+    if (!url) { renumberRows(); updateCount(); return; }
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ order: orderIds })
+    }).then(function(res) {
+      return res.json().then(function(data) {
+        if (res.ok && data.ok) {
+          renumberRows();
+          updateCount();
+        }
+      });
+    }).catch(function() {}).then(function() {
+      draggedRow = null;
+    });
+  });
+
+  container.querySelectorAll('.carousel-slide-row').forEach(bindRow);
+  addBtn.addEventListener('click', addSlide);
+  updateSlideNumbers();
+  updateCount();
+})();
+</script>
+{% endblock %}
