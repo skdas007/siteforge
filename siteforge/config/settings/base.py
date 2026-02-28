@@ -94,36 +94,39 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 STATIC_ROOT = os.environ.get("STATIC_ROOT", str(BASE_DIR / "staticfiles"))
 
-# Media: use S3 when AWS_STORAGE_BUCKET_NAME is set, else local MEDIA_ROOT
+# Media and static: use S3 when AWS_STORAGE_BUCKET_NAME is set
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "").strip()
 if AWS_STORAGE_BUCKET_NAME:
-    # S3 for media (Django 4.2+ uses STORAGES so uploads actually go to S3)
     _aws_access = os.environ.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY", "")
     _aws_secret = os.environ.get("AWS_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECREAT_KEY", "")
     _aws_region = os.environ.get("AWS_S3_REGION_NAME", "us-east-1")
     _aws_domain = os.environ.get("AWS_S3_CUSTOM_DOMAIN", "").strip() or None
+    _s3_base = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{_aws_region}.amazonaws.com/"
+    if _aws_domain:
+        _s3_base = f"https://{_aws_domain}/"
+    _s3_opts = {
+        "bucket_name": AWS_STORAGE_BUCKET_NAME,
+        "access_key": _aws_access,
+        "secret_key": _aws_secret,
+        "region_name": _aws_region,
+        "object_parameters": {"CacheControl": "max-age=86400"},
+        "default_acl": None,
+        "file_overwrite": False,
+        "querystring_auth": True,
+        "custom_domain": _aws_domain,
+    }
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {
-                "bucket_name": AWS_STORAGE_BUCKET_NAME,
-                "access_key": _aws_access,
-                "secret_key": _aws_secret,
-                "region_name": _aws_region,
-                "object_parameters": {"CacheControl": "max-age=86400"},
-                "default_acl": None,
-                "file_overwrite": False,
-                "querystring_auth": True,
-                "custom_domain": _aws_domain,
-            },
+            "OPTIONS": {**_s3_opts, "location": "media"},
         },
         "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {**_s3_opts, "location": "static"},
         },
     }
-    MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{_aws_region}.amazonaws.com/"
-    if _aws_domain:
-        MEDIA_URL = f"https://{_aws_domain}/"
+    MEDIA_URL = _s3_base + "media/"
+    STATIC_URL = _s3_base + "static/"
     MEDIA_ROOT = ""
 else:
     MEDIA_URL = "media/"

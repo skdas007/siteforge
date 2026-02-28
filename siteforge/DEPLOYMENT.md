@@ -4,6 +4,8 @@ This guide covers deploying the Django project on a Linux server using **Gunicor
 
 **Database**: The app uses **SQLite** by default. The file `db.sqlite3` is created in the project root (same directory as `manage.py`). No extra database server is required.
 
+**Config in repo**: Nginx and Gunicorn configs live in **`deploy/`** so you can version them and copy or link from the project on the server.
+
 ---
 
 ## 1. Server requirements
@@ -72,19 +74,21 @@ Use these variables for **production** (adjust values):
 # Required
 DJANGO_SETTINGS_MODULE=config.settings.production
 SECRET_KEY=your-long-random-secret-key-here
-ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com,203.0.113.10
+ALLOWED_HOSTS=bobdyinternational.com,www.bobdyinternational.com
 
 # Optional (defaults shown)
 DEBUG=False
 # SQLite: leave DATABASE_PATH unset to use db.sqlite3 in project root
-STATIC_ROOT=/home/siteforge/app/siteforge/staticfiles
-MEDIA_ROOT=/home/siteforge/app/siteforge/media
+# When using S3 (below), static and media are in the bucket; no STATIC_ROOT/MEDIA_ROOT needed for serving.
+# STATIC_ROOT=...
+# MEDIA_ROOT=...
 
-# If using S3 for uploads (optional)
-# AWS_STORAGE_BUCKET_NAME=your-bucket
+# S3: when set, static and media are stored in the bucket (recommended for production)
+# AWS_STORAGE_BUCKET_NAME=your-bucket-name
 # AWS_ACCESS_KEY_ID=...
 # AWS_SECRET_ACCESS_KEY=...
 # AWS_S3_REGION_NAME=us-east-1
+# AWS_S3_CUSTOM_DOMAIN=   # optional, e.g. cdn.bobdyinternational.com
 ```
 
 Generate a secret key (run once, paste into `.env`):
@@ -115,6 +119,8 @@ python manage.py migrate
 python manage.py collectstatic --noinput
 ```
 
+**Static and media on S3:** When `AWS_STORAGE_BUCKET_NAME` is set in `.env`, both static and media files are stored in that bucket (`static/` and `media/` prefixes). `collectstatic --noinput` uploads static files to S3. Nginx does not need to serve `/static/` or `/media/` in that case; the app uses S3 URLs.
+
 Create a superuser if needed:
 
 ```bash
@@ -125,12 +131,12 @@ python manage.py createsuperuser
 
 ## 6. Run Gunicorn (test)
 
-From the project directory (where `manage.py` is):
+From the project directory (where `manage.py` is). The repo includes a config at `deploy/gunicorn.conf.py`:
 
 ```bash
 source venv/bin/activate
 export DJANGO_SETTINGS_MODULE=config.settings.production
-gunicorn config.wsgi:application --bind 127.0.0.1:8000
+gunicorn -c deploy/gunicorn.conf.py config.wsgi:application
 ```
 
 Visit `http://your-server-ip:8000` only if you temporarily allow it (e.g. for testing). Normally you’ll put Nginx in front (next step).
@@ -139,7 +145,7 @@ Visit `http://your-server-ip:8000` only if you temporarily allow it (e.g. for te
 
 ## 7. Systemd service (Gunicorn as a daemon)
 
-Create a unit file (adjust paths and user):
+Config files live in the project under **`deploy/`**. Create the unit file (adjust paths to your server):
 
 ```bash
 sudo nano /etc/systemd/system/siteforge.service
@@ -156,12 +162,7 @@ Group=siteforge
 WorkingDirectory=/home/siteforge/app/siteforge
 Environment="PATH=/home/siteforge/app/siteforge/venv/bin"
 EnvironmentFile=/home/siteforge/app/siteforge/.env
-ExecStart=/home/siteforge/app/siteforge/venv/bin/gunicorn \
-    --workers 3 \
-    --bind 127.0.0.1:8000 \
-    --access-logfile - \
-    --error-logfile - \
-    config.wsgi:application
+ExecStart=/home/siteforge/app/siteforge/venv/bin/gunicorn -c deploy/gunicorn.conf.py config.wsgi:application
 
 Restart=always
 RestartSec=3
@@ -175,7 +176,7 @@ If `EnvironmentFile` doesn’t load `.env` on your system, replace it with expli
 ```ini
 Environment=DJANGO_SETTINGS_MODULE=config.settings.production
 Environment=SECRET_KEY=your-secret-key
-Environment=ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+Environment=ALLOWED_HOSTS=bobdyinternational.com,www.bobdyinternational.com
 ```
 
 Then:
@@ -191,46 +192,37 @@ sudo systemctl status siteforge
 
 ## 8. Nginx (reverse proxy and static files)
 
-Create a site config (replace `yourdomain.com` and paths):
+The project includes **`deploy/siteforge.nginx.conf`** as a template. You can **copy** it to Nginx and edit, or **symlink** after filling placeholders.
+
+### Option A – Copy (recommended)
+
+Copy the config, replace placeholders with your app path and domain, then enable:
 
 ```bash
-sudo nano /etc/nginx/sites-available/siteforge
-```
-
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com www.yourdomain.com;
-    client_max_body_size 20M;
-
-    # Static files (Django collectstatic)
-    location /static/ {
-        alias /home/siteforge/app/siteforge/staticfiles/;
-    }
-
-    # Media files (if not using S3)
-    location /media/ {
-        alias /home/siteforge/app/siteforge/media/;
-    }
-
-    # Proxy to Gunicorn
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-Enable the site and reload Nginx:
-
-```bash
+# From your project root (where manage.py is)
+APP_ROOT=/home/siteforge/app/siteforge
+sudo cp deploy/siteforge.nginx.conf /etc/nginx/sites-available/siteforge
+sudo sed -i "s|APP_ROOT|$APP_ROOT|g; s|SERVER_NAME|bobdyinternational.com www.bobdyinternational.com|g" /etc/nginx/sites-available/siteforge
 sudo ln -s /etc/nginx/sites-available/siteforge /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
+
+### Option B – Symlink from project
+
+If your server path and domain are fixed, you can put them in the repo (or a one-time `sed` on the server) and then symlink so Nginx uses the file from the project:
+
+```bash
+# One-time: replace placeholders in the project file (or use a branch/config per server)
+sed -i "s|APP_ROOT|/root/Mythee/siteforge/siteforge/siteforge|g; s|SERVER_NAME|bobdyinternational.com www.bobdyinternational.com|g" deploy/siteforge.nginx.conf
+
+# Symlink into Nginx (Nginx will read the file from the project)
+sudo ln -sf /home/siteforge/app/siteforge/deploy/siteforge.nginx.conf /etc/nginx/sites-enabled/siteforge
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+**Recommendation:** Use **Option A** so the repo file stays a template and server-specific values stay only on the server.
 
 ---
 
@@ -238,7 +230,7 @@ sudo systemctl reload nginx
 
 ```bash
 sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+sudo certbot --nginx -d bobdyinternational.com -d www.bobdyinternational.com
 ```
 
 Certbot will adjust your Nginx config for HTTPS. Renewal is automatic.
@@ -278,6 +270,6 @@ sudo systemctl restart siteforge
 - **502 Bad Gateway**: Gunicorn not running or not listening on `127.0.0.1:8000`. Check `systemctl status siteforge` and `journalctl -u siteforge -n 50`.
 - **Static files 404**: Run `collectstatic` and ensure `location /static/` alias path matches `STATIC_ROOT`.
 - **ModuleNotFoundError / dotenv**: Ensure `python-dotenv` is installed (`pip install -r requirements/production.txt`) and `.env` path is correct.
-- **ALLOWED_HOSTS**: Add your domain and server IP to `ALLOWED_HOSTS` in `.env`.
+- **ALLOWED_HOSTS**: Ensure your domain (e.g. `bobdyinternational.com,www.bobdyinternational.com`) and server IP are in `ALLOWED_HOSTS` in `.env`.
 
 If you use **PostgreSQL** later, set `DATABASE_URL` (or equivalent) in `.env` and switch `config.settings.base` to use it; the same deployment steps apply.
