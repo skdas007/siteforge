@@ -145,7 +145,9 @@ Visit `http://your-server-ip:8000` only if you temporarily allow it (e.g. for te
 
 ## 7. Systemd service (Gunicorn as a daemon)
 
-Config files live in the project under **`deploy/`**. Create the unit file (adjust paths to your server):
+Config files live in the project under **`deploy/`**. Create the unit file and set paths to your project root (same directory as `manage.py`).
+
+**Example:** project at `/root/Mythee/siteforge/siteforge/siteforge` (run as root):
 
 ```bash
 sudo nano /etc/systemd/system/siteforge.service
@@ -157,12 +159,12 @@ Description=SiteForge Gunicorn
 After=network.target
 
 [Service]
-User=siteforge
-Group=siteforge
-WorkingDirectory=/home/siteforge/app/siteforge
-Environment="PATH=/home/siteforge/app/siteforge/venv/bin"
-EnvironmentFile=/home/siteforge/app/siteforge/.env
-ExecStart=/home/siteforge/app/siteforge/venv/bin/gunicorn -c deploy/gunicorn.conf.py config.wsgi:application
+User=root
+Group=root
+WorkingDirectory=/root/Mythee/siteforge/siteforge/siteforge
+Environment="PATH=/root/Mythee/siteforge/siteforge/siteforge/venv/bin"
+EnvironmentFile=/root/Mythee/siteforge/siteforge/siteforge/.env
+ExecStart=/root/Mythee/siteforge/siteforge/siteforge/venv/bin/gunicorn -c deploy/gunicorn.conf.py config.wsgi:application
 
 Restart=always
 RestartSec=3
@@ -171,7 +173,9 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-If `EnvironmentFile` doesn’t load `.env` on your system, replace it with explicit variables:
+Use your own path if different; for a dedicated user, set `User=` and `Group=` to that user and put the app under e.g. `/home/siteforge/app/siteforge`.
+
+If `EnvironmentFile` doesn’t load `.env` on your system, either fix the path so `EnvironmentFile=` points to your real `.env`, or remove that line and use explicit variables:
 
 ```ini
 Environment=DJANGO_SETTINGS_MODULE=config.settings.production
@@ -199,8 +203,9 @@ The project includes **`deploy/siteforge.nginx.conf`** as a template. You can **
 Copy the config, replace placeholders with your app path and domain, then enable:
 
 ```bash
-# From your project root (where manage.py is)
-APP_ROOT=/home/siteforge/app/siteforge
+# From your project root (where manage.py is), e.g.:
+cd /root/Mythee/siteforge/siteforge/siteforge
+APP_ROOT=/root/Mythee/siteforge/siteforge/siteforge
 sudo cp deploy/siteforge.nginx.conf /etc/nginx/sites-available/siteforge
 sudo sed -i "s|APP_ROOT|$APP_ROOT|g; s|SERVER_NAME|bobdyinternational.com www.bobdyinternational.com|g" /etc/nginx/sites-available/siteforge
 sudo ln -s /etc/nginx/sites-available/siteforge /etc/nginx/sites-enabled/
@@ -210,14 +215,12 @@ sudo systemctl reload nginx
 
 ### Option B – Symlink from project
 
-If your server path and domain are fixed, you can put them in the repo (or a one-time `sed` on the server) and then symlink so Nginx uses the file from the project:
+If your server path and domain are fixed, you can replace placeholders in the project file and symlink:
 
 ```bash
-# One-time: replace placeholders in the project file (or use a branch/config per server)
+cd /root/Mythee/siteforge/siteforge/siteforge
 sed -i "s|APP_ROOT|/root/Mythee/siteforge/siteforge/siteforge|g; s|SERVER_NAME|bobdyinternational.com www.bobdyinternational.com|g" deploy/siteforge.nginx.conf
-
-# Symlink into Nginx (Nginx will read the file from the project)
-sudo ln -sf /home/siteforge/app/siteforge/deploy/siteforge.nginx.conf /etc/nginx/sites-enabled/siteforge
+sudo ln -sf /root/Mythee/siteforge/siteforge/siteforge/deploy/siteforge.nginx.conf /etc/nginx/sites-enabled/siteforge
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -271,5 +274,6 @@ sudo systemctl restart siteforge
 - **Static files 404**: Run `collectstatic` and ensure `location /static/` alias path matches `STATIC_ROOT`.
 - **ModuleNotFoundError / dotenv**: Ensure `python-dotenv` is installed (`pip install -r requirements/production.txt`) and `.env` path is correct.
 - **ALLOWED_HOSTS**: Ensure your domain (e.g. `bobdyinternational.com,www.bobdyinternational.com`) and server IP are in `ALLOWED_HOSTS` in `.env`.
+- **S3 images not loading (local or production)**: By default the app uses signed (querystring) URLs for media. Browsers can block these or the URLs can be malformed. **Fix:** (1) In `.env` set `AWS_S3_QUERYSTRING_AUTH=false` so media URLs are plain (no signature). (2) In AWS S3: open your bucket → Permissions → Block public access: turn off for this bucket if you want public read. (3) Add a bucket policy allowing public GetObject, e.g. `{"Version":"2012-10-17","Statement":[{"Sid":"PublicRead","Effect":"Allow","Principal":"*","Action":"s3:GetObject","Resource":"arn:aws:s3:::YOUR_BUCKET_NAME/media/*"}]}`. (4) If you keep signed URLs, add CORS to the bucket for your origins (e.g. `https://bobdyinternational.com`, `http://bobdy:8000`). Then restart the app (`sudo systemctl restart siteforge`).
 
 If you use **PostgreSQL** later, set `DATABASE_URL` (or equivalent) in `.env` and switch `config.settings.base` to use it; the same deployment steps apply.

@@ -94,16 +94,19 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 STATIC_ROOT = os.environ.get("STATIC_ROOT", str(BASE_DIR / "staticfiles"))
 
-# Media and static: use S3 when AWS_STORAGE_BUCKET_NAME is set
+# Media and static: use S3 when AWS_STORAGE_BUCKET_NAME is set (and not in DEBUG for static)
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "").strip()
 if AWS_STORAGE_BUCKET_NAME:
     _aws_access = os.environ.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY", "")
     _aws_secret = os.environ.get("AWS_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECREAT_KEY", "")
     _aws_region = os.environ.get("AWS_S3_REGION_NAME", "us-east-1")
-    _aws_domain = os.environ.get("AWS_S3_CUSTOM_DOMAIN", "").strip() or None
-    _s3_base = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{_aws_region}.amazonaws.com/"
-    if _aws_domain:
-        _s3_base = f"https://{_aws_domain}/"
+    # Use regional endpoint for URLs so they match S3 (e.g. bucket.s3.us-east-1.amazonaws.com)
+    _regional_host = f"{AWS_STORAGE_BUCKET_NAME}.s3.{_aws_region}.amazonaws.com"
+    _aws_domain = os.environ.get("AWS_S3_CUSTOM_DOMAIN", "").strip() or _regional_host
+    _s3_base = f"https://{_aws_domain}/"
+    # querystring_auth=False: use plain URLs (no signed params). Requires bucket policy
+    # allowing public GetObject on media/. Avoids CORS/signing issues in the browser.
+    _s3_querystring_auth = os.environ.get("AWS_S3_QUERYSTRING_AUTH", "true").lower() in ("1", "true", "yes")
     _s3_opts = {
         "bucket_name": AWS_STORAGE_BUCKET_NAME,
         "access_key": _aws_access,
@@ -112,21 +115,24 @@ if AWS_STORAGE_BUCKET_NAME:
         "object_parameters": {"CacheControl": "max-age=86400"},
         "default_acl": None,
         "file_overwrite": False,
-        "querystring_auth": True,
+        "querystring_auth": _s3_querystring_auth,
         "custom_domain": _aws_domain,
     }
+    # In DEBUG (local dev), serve static locally so CSS/JS work without uploading to S3
+    _use_s3_static = not DEBUG
+    # Use location="" so URLs are .../catalog/... (objects in S3 have no "media/" prefix)
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {**_s3_opts, "location": "media"},
+            "OPTIONS": {**_s3_opts, "location": ""},
         },
         "staticfiles": {
-            "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {**_s3_opts, "location": "static"},
+            "BACKEND": "storages.backends.s3.S3Storage" if _use_s3_static else "django.contrib.staticfiles.storage.StaticFilesStorage",
+            "OPTIONS": {**_s3_opts, "location": "static"} if _use_s3_static else {},
         },
     }
-    MEDIA_URL = _s3_base + "media/"
-    STATIC_URL = _s3_base + "static/"
+    MEDIA_URL = _s3_base
+    STATIC_URL = (_s3_base + "static/") if _use_s3_static else "static/"
     MEDIA_ROOT = ""
 else:
     MEDIA_URL = "media/"
