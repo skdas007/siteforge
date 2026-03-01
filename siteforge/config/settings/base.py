@@ -119,7 +119,7 @@ if AWS_STORAGE_BUCKET_NAME:
         "custom_domain": _aws_domain,
     }
     # Serve static from S3 only when not DEBUG and not SERVE_STATIC_FROM_SERVER (set in .env to serve CSS from server via Nginx)
-    _serve_static_from_server = os.environ.get("SERVE_STATIC_FROM_SERVER", "").lower() in ("1", "true", "yes")
+    _serve_static_from_server = os.environ.get("SERVE_STATIC_FROM_SERVER", "true").lower() in ("1", "true", "yes")
     _use_s3_static = not DEBUG and not _serve_static_from_server
     # Use location="" so URLs are .../catalog/... (objects in S3 have no "media/" prefix)
     STORAGES = {

@@ -119,6 +119,18 @@ python manage.py migrate
 python manage.py collectstatic --noinput
 ```
 
+**Why admin CSS loads but site CSS doesn’t:** Django collects admin static files from the `admin` app automatically. Your site’s CSS/JS (e.g. `static/css/hero-split.css`, `static/vendor/`) are only collected if the project **`static/`** folder exists in the same directory as `manage.py` and you run `collectstatic` from that directory. If `static/` is missing or you ran `collectstatic` from the wrong path, `staticfiles/` will contain `admin/` but not `css/` or `vendor/`, so `/static/admin/...` works but `/static/css/...` returns 404.
+
+**Verify after collectstatic:** On the server, from the project root (where `manage.py` is):
+
+```bash
+ls -la static/                    # should show css/ vendor/ themes/
+ls staticfiles/css/ staticfiles/admin/   # both should exist
+curl -sI https://bobdyinternational.com/static/css/hero-split.css  # expect 200
+```
+
+If `staticfiles/css/` is missing, ensure the repo has `static/css/` (and `static/vendor/`, `static/themes/`) at project root, then run `collectstatic --noinput` again from that root.
+
 **Static and media on S3:** When `AWS_STORAGE_BUCKET_NAME` is set in `.env`, both static and media files are stored in that bucket (`static/` and `media/` prefixes). `collectstatic --noinput` uploads static files to S3. Nginx does not need to serve `/static/` or `/media/` in that case; the app uses S3 URLs.
 
 Create a superuser if needed:
