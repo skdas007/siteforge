@@ -118,8 +118,9 @@ if AWS_STORAGE_BUCKET_NAME:
         "querystring_auth": _s3_querystring_auth,
         "custom_domain": _aws_domain,
     }
-    # In DEBUG (local dev), serve static locally so CSS/JS work without uploading to S3
-    _use_s3_static = not DEBUG
+    # Serve static from S3 only when not DEBUG and not SERVE_STATIC_FROM_SERVER (set in .env to serve CSS from server via Nginx)
+    _serve_static_from_server = os.environ.get("SERVE_STATIC_FROM_SERVER", "").lower() in ("1", "true", "yes")
+    _use_s3_static = not DEBUG and not _serve_static_from_server
     # Use location="" so URLs are .../catalog/... (objects in S3 have no "media/" prefix)
     STORAGES = {
         "default": {
@@ -132,7 +133,7 @@ if AWS_STORAGE_BUCKET_NAME:
         },
     }
     MEDIA_URL = _s3_base
-    STATIC_URL = (_s3_base + "static/") if _use_s3_static else "static/"
+    STATIC_URL = (_s3_base + "static/") if _use_s3_static else "/static/"
     MEDIA_ROOT = ""
 else:
     MEDIA_URL = "media/"
