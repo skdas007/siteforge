@@ -94,3 +94,5 @@ If you created a Client with **domain** = `bobdy`, the browser must send `Host: 
    You should see the client you created with domain `bobdy`.  
    Login: **http://bobdy:8000/accounts/login/**  
    Dashboard: **http://bobdy:8000/dashboard/**
+
+
