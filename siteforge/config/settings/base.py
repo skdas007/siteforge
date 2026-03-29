@@ -90,11 +90,12 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+# Leading slash: relative "static/" breaks resolution from nested URLs (e.g. /dashboard/...).
+STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 STATIC_ROOT = os.environ.get("STATIC_ROOT", str(BASE_DIR / "staticfiles"))
 
-# Media and static: use S3 when AWS_STORAGE_BUCKET_NAME is set (and not in DEBUG for static)
+# Media and static: use S3 when AWS_STORAGE_BUCKET_NAME is set (see _use_s3_static below)
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "").strip()
 if AWS_STORAGE_BUCKET_NAME:
     _aws_access = os.environ.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY", "")
@@ -114,13 +115,24 @@ if AWS_STORAGE_BUCKET_NAME:
         "region_name": _aws_region,
         "object_parameters": {"CacheControl": "max-age=86400"},
         "default_acl": None,
+        # Media: avoid overwriting user uploads by accident.
         "file_overwrite": False,
         "querystring_auth": _s3_querystring_auth,
         "custom_domain": _aws_domain,
     }
-    # Serve static from S3 only when not DEBUG and not SERVE_STATIC_FROM_SERVER (set in .env to serve CSS from server via Nginx)
+    # Static on S3: must overwrite each deploy (collectstatic). file_overwrite=False would skip
+    # replacing existing keys and the server would keep serving old CSS/JS.
+    _s3_staticfiles_opts = {
+        **_s3_opts,
+        "location": "static",
+        "file_overwrite": True,
+    }
+    # Serve static from S3 when using production settings and not serving from Nginx.
+    # Do not use DEBUG: config.settings.production sets DEBUG=False after base import.
     _serve_static_from_server = os.environ.get("SERVE_STATIC_FROM_SERVER", "true").lower() in ("1", "true", "yes")
-    _use_s3_static = not DEBUG and not _serve_static_from_server
+    _settings_module = os.environ.get("DJANGO_SETTINGS_MODULE", "")
+    _is_production_settings = _settings_module.endswith(".production")
+    _use_s3_static = _is_production_settings and (not _serve_static_from_server)
     # Use location="" so URLs are .../catalog/... (objects in S3 have no "media/" prefix)
     STORAGES = {
         "default": {
@@ -129,7 +141,7 @@ if AWS_STORAGE_BUCKET_NAME:
         },
         "staticfiles": {
             "BACKEND": "storages.backends.s3.S3Storage" if _use_s3_static else "django.contrib.staticfiles.storage.StaticFilesStorage",
-            "OPTIONS": {**_s3_opts, "location": "static"} if _use_s3_static else {},
+            "OPTIONS": _s3_staticfiles_opts if _use_s3_static else {},
         },
     }
     MEDIA_URL = _s3_base
