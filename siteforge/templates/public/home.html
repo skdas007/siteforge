@@ -3,7 +3,7 @@
 {% block title %}{{ hero_title|default:"Home" }} — {{ business_name|default:"SiteForge" }}{% endblock %}
 
 {% block content %}
-{# Hero carousel — min-height from theme (--sf-slider-height, default 400px) #}
+{# Hero carousel — slide images use natural height (full image visible) #}
 <section class="sf-slider carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000" id="heroCarousel">
   <div class="carousel-indicators">
     {% if slider_slides %}
@@ -16,18 +16,18 @@
       <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
     {% endif %}
   </div>
-  <div class="carousel-inner h-100">
+  <div class="carousel-inner">
     {% if slider_slides %}
       {% for slide in slider_slides %}
-      <div class="carousel-item h-100 {% if forloop.first %}active{% endif %}">
+      <div class="carousel-item {% if forloop.first %}active{% endif %}">
         {% if slide.media_type == 'video' and slide.video %}
-        <video class="d-block w-100 h-100 sf-slider-img" autoplay muted loop playsinline>
+        <video class="d-block w-100 sf-slider-img" autoplay muted loop playsinline>
           <source src="{{ slide.video }}" type="video/mp4">
         </video>
         {% elif slide.image %}
-        <img src="{{ slide.image }}" class="d-block w-100 h-100 sf-slider-img" alt="{{ slide.caption|default:'' }}">
+        <img src="{{ slide.image }}" class="d-block w-100 sf-slider-img" alt="{{ slide.caption|default:'' }}">
         {% else %}
-        <div class="d-block w-100 h-100 d-flex align-items-center justify-content-center text-white {{ slide.bg_class|default:'bg-dark' }} sf-slider-fill">
+        <div class="d-block w-100 d-flex align-items-center justify-content-center text-white {{ slide.bg_class|default:'bg-dark' }} sf-slider-fill">
           <div class="text-center px-3">{{ slide.caption|default:"Slide" }}</div>
         </div>
         {% endif %}
@@ -39,27 +39,27 @@
       </div>
       {% endfor %}
     {% elif banner_image %}
-      <div class="carousel-item active h-100">
-        <img src="{{ banner_image }}" class="d-block w-100 h-100 sf-slider-img" alt="">
+      <div class="carousel-item active">
+        <img src="{{ banner_image }}" class="d-block w-100 sf-slider-img" alt="">
       </div>
     {% else %}
-      <div class="carousel-item active h-100">
-        <div class="d-block w-100 h-100 d-flex align-items-center justify-content-center text-white bg-primary sf-slider-fill">
+      <div class="carousel-item active">
+        <div class="d-block w-100 d-flex align-items-center justify-content-center text-white bg-primary sf-slider-fill">
           <div class="text-center px-4">
             <h2 class="h3 mb-2">{{ hero_title|default:"Welcome" }}</h2>
             <p class="opacity-90 mb-0">{{ hero_subtitle|default:"Your tagline or short description goes here." }}</p>
           </div>
         </div>
       </div>
-      <div class="carousel-item h-100">
-        <div class="d-block w-100 h-100 d-flex align-items-center justify-content-center text-white bg-secondary sf-slider-fill">
+      <div class="carousel-item">
+        <div class="d-block w-100 d-flex align-items-center justify-content-center text-white bg-secondary sf-slider-fill">
           <div class="text-center px-4">
             <p class="lead mb-0">Showcase your products and services</p>
           </div>
         </div>
       </div>
-      <div class="carousel-item h-100">
-        <div class="d-block w-100 h-100 d-flex align-items-center justify-content-center text-white bg-dark sf-slider-fill">
+      <div class="carousel-item">
+        <div class="d-block w-100 d-flex align-items-center justify-content-center text-white bg-dark sf-slider-fill">
           <div class="text-center px-4">
             <p class="lead mb-0">Get in touch — we'd love to hear from you</p>
           </div>

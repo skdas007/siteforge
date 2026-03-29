@@ -14,8 +14,10 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 
 from apps.core.views import ContactSubmitView, IndexView, ProductDetailView, ProductListView
@@ -30,3 +32,8 @@ urlpatterns = [
     path("dashboard/", include("apps.tenants.urls", namespace="dashboard")),
     path("admin/", admin.site.urls),
 ]
+
+# When DEBUG=True, serve static from STATICFILES_DIRS / app static (not only via runserver's handler).
+# Helps: django.test.Client, Gunicorn/uWSGI with DEBUG=True, and some local setups.
+if settings.DEBUG:
+    urlpatterns += staticfiles_urlpatterns()
