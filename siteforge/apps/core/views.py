@@ -1,6 +1,7 @@
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404, JsonResponse
 from django.urls import reverse, reverse_lazy
+from django.views import View
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from apps.core.seo_utils import add_seo_context, client_site_og_image_url, product_og_image_url
@@ -83,8 +84,8 @@ class IndexView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Search: ?q= for product search (filter products in future)
-        context.setdefault("search_query", self.request.GET.get("q", ""))
+        # Search: ?q= filters home product grid (name / description).
+        context.setdefault("search_query", (self.request.GET.get("q") or "").strip())
         # Query param ?theme= for preview overrides
         q = self.request.GET.get("theme")
         if q in ("default", "minimal", "clarity"):
@@ -106,6 +107,12 @@ class IndexView(TemplateView):
             if context.get("current_category_id"):
                 context["products"] = context["products"].filter(category_id=context["current_category_id"])
             products_qs = context["products"]
+            sq = (self.request.GET.get("q") or "").strip()
+            context["search_query"] = sq
+            if sq:
+                from django.db.models import Q
+
+                products_qs = products_qs.filter(Q(name__icontains=sq) | Q(description__icontains=sq))
             context["home_products_total_count"] = products_qs.count()
             paginator = Paginator(products_qs, HOME_PRODUCTS_PER_PAGE)
             raw_page = self.request.GET.get("page") or 1
@@ -207,6 +214,41 @@ class ContactSubmitView(FormView):
                 status=400,
             )
         return super().form_invalid(form)
+
+
+class ProductSearchSuggestView(View):
+    """JSON suggestions for navbar product search (current tenant only)."""
+
+    http_method_names = ["get"]
+
+    def get(self, request):
+        client = getattr(request, "client", None)
+        if not client:
+            return JsonResponse({"results": []})
+        q = (request.GET.get("q") or "").strip()
+        if len(q) < 2:
+            return JsonResponse({"results": []})
+        from django.db.models import Q
+
+        from apps.catalog.models import Product
+
+        qs = (
+            Product.objects.filter(client=client, is_active=True)
+            .filter(Q(name__icontains=q) | Q(description__icontains=q))
+            .select_related("category")
+            .order_by("order", "name")[:12]
+        )
+        results = []
+        for p in qs:
+            results.append(
+                {
+                    "id": p.pk,
+                    "name": p.name,
+                    "url": reverse("product_detail", kwargs={"pk": p.pk}),
+                    "category": p.category.name if p.category_id else "",
+                }
+            )
+        return JsonResponse({"results": results})
 
 
 class ProductListView(ListView):

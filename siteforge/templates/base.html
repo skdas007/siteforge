@@ -14,48 +14,49 @@
   {% endif %}
   <link href="{% static 'css/scroll-reveal.css' %}" rel="stylesheet">
   <link href="{% static 'css/animations-3d.css' %}" rel="stylesheet">
-  <link href="{% static 'css/navbar-public.css' %}" rel="stylesheet">
   <link href="{% static 'css/hero-split.css' %}" rel="stylesheet">
+  <link href="{% static 'css/navbar-public.css' %}" rel="stylesheet">
   {% block extra_css %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100 {% if theme_slug %}theme-{{ theme_slug }}{% endif %}">
   {% block nav %}
-  <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-public bg-white border-bottom py-2 py-lg-3" id="publicNavbar">
-    <div class="container">
-      <a class="navbar-brand navbar-brand-logo d-flex align-items-center" href="{% url 'home' %}" aria-label="{{ business_name|default:'SiteForge' }}">
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-public" id="publicNavbar">
+    <div class="container navbar-public-container">
+      <a class="navbar-brand navbar-brand-logo d-flex align-items-center gap-2 flex-shrink-0" href="{% url 'home' %}" aria-label="{{ business_name|default:'SiteForge' }}">
         {% if logo %}
-        <img src="{{ logo }}" alt="{{ business_name|default:'SiteForge' }}" class="navbar-logo-img">
+        <span class="navbar-logo-frame d-inline-flex align-items-center justify-content-center">
+          <img src="{{ logo }}" alt="{{ business_name|default:'SiteForge' }}" class="navbar-logo-img" decoding="async" fetchpriority="high">
+        </span>
         {% else %}
         <span class="navbar-brand-text">{{ business_name|default:"SiteForge" }}</span>
         {% endif %}
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#publicNav" aria-controls="publicNav" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler border-0 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#publicNav" aria-controls="publicNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="publicNav">
-        <ul class="navbar-nav align-items-lg-center me-lg-3">
-          <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}">Home</a></li>
-          <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}#features">Features</a></li>
-          <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'product_list' %}">Products</a></li>
-          <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}#contact">Contact</a></li>
-        </ul>
-        <form class="d-flex my-2 my-lg-0 mx-auto mx-lg-0 mb-lg-0 order-lg-0 flex-grow-1 flex-lg-grow-0 justify-content-lg-center" action="{% url 'home' %}" method="get" role="search">
-          <div class="position-relative navbar-search-wrap flex-grow-1 flex-lg-grow-0">
-            <span class="position-absolute navbar-search-btn d-flex align-items-center" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
-            </span>
-            <input type="search" name="q" class="form-control form-control-sm navbar-search-input border-0" placeholder="Search products…" aria-label="Search products" autocomplete="off" value="{{ request.GET.q|default:'' }}">
-          </div>
-        </form>
-        {% comment %}
-        Dashboard link hidden from public nav; use /dashboard/ URL directly if needed.
-        <ul class="navbar-nav align-items-lg-center ms-lg-2">
-          <li class="nav-item">
-            <a class="nav-link nav-link-dashboard" href="{% url 'dashboard:home' %}">Dashboard</a>
-          </li>
-        </ul>
-        {% endcomment %}
+      <div class="collapse navbar-collapse navbar-public-collapse" id="publicNav">
+        <div class="navbar-public-inner d-flex flex-column flex-lg-row align-items-lg-center ms-lg-auto gap-3 gap-lg-4 py-2 py-lg-0 w-100 w-lg-auto">
+          <ul class="navbar-nav align-items-lg-center mb-0">
+            <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}">Home</a></li>
+            <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}#features">Features</a></li>
+            <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'product_list' %}">Products</a></li>
+            <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}#contact">Contact</a></li>
+          </ul>
+          <form class="navbar-public-search-form d-flex flex-wrap flex-sm-nowrap align-items-stretch w-100 w-lg-auto flex-shrink-0 gap-2 gap-sm-0" action="{% url 'product_list' %}" method="get" role="search">
+            <div class="position-relative navbar-search-combo navbar-search-wrap w-100 flex-grow-1 flex-lg-grow-0">
+              <span class="position-absolute navbar-search-btn d-flex align-items-center" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+              </span>
+              <input type="search" name="q" id="navbarProductSearch" class="form-control navbar-search-input" placeholder="Search products…" aria-label="Search products" autocomplete="off" value="{{ request.GET.q|default:'' }}" {% if request.client %}data-suggest-url="{% url 'product_search_suggest' %}"{% endif %}>
+              <div class="navbar-search-suggestions" id="navbarSearchSuggestions" hidden></div>
+            </div>
+            <button type="submit" class="btn navbar-search-submit ms-sm-2 d-inline-flex align-items-center justify-content-center flex-shrink-0">Search</button>
+          </form>
+        </div>
       </div>
+      {% comment %}
+      Dashboard link hidden from public nav; use /dashboard/ URL directly if needed.
+      {% endcomment %}
     </div>
   </nav>
   {% endblock %}
@@ -63,6 +64,7 @@
   <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'js/scroll-reveal.js' %}"></script>
   <script src="{% static 'js/card-3d-tilt.js' %}"></script>
+  <script src="{% static 'js/navbar-search-autocomplete.js' %}"></script>
   <script>
   (function() {
     var nav = document.getElementById('publicNavbar');

@@ -345,6 +345,11 @@
   document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
 </script>
 {% endif %}
+{% if search_query %}
+<script>
+  document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+</script>
+{% endif %}
 
 {% include "public/includes/public_site_footer.html" %}
 

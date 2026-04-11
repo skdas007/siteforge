@@ -20,11 +20,18 @@ from django.contrib.auth import views as auth_views
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 
-from apps.core.views import ContactSubmitView, IndexView, ProductDetailView, ProductListView
+from apps.core.views import (
+    ContactSubmitView,
+    IndexView,
+    ProductDetailView,
+    ProductListView,
+    ProductSearchSuggestView,
+)
 
 urlpatterns = [
     path("", IndexView.as_view(), name="home"),
     path("contact/", ContactSubmitView.as_view(), name="contact_submit"),
+    path("api/product-suggest/", ProductSearchSuggestView.as_view(), name="product_search_suggest"),
     path("products/", ProductListView.as_view(), name="product_list"),
     path("products/<int:pk>/", ProductDetailView.as_view(), name="product_detail"),
     path(
