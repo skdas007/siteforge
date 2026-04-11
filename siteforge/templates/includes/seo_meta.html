@@ -1,0 +1,22 @@
+{% load seo_tags %}
+{# Basic SEO + Open Graph + Twitter Cards for link previews (WhatsApp, Facebook, X, LinkedIn, etc.) #}
+{% canonical_page_url as canonical_href %}
+{% share_page_url as og_page_url %}
+<link rel="canonical" href="{{ canonical_href }}">
+<meta name="description" content="{{ seo_description|default:''|truncatechars:320 }}">
+<meta property="og:site_name" content="{{ business_name|default:'SiteForge' }}">
+<meta property="og:title" content="{{ seo_title|default:business_name|default:'SiteForge' }}">
+<meta property="og:description" content="{{ seo_description|default:''|truncatechars:320 }}">
+<meta property="og:type" content="{{ seo_type|default:'website' }}">
+<meta property="og:url" content="{{ og_page_url }}">
+{% absolute_og_image seo_image_url as seo_image_absolute %}
+{% if seo_image_absolute %}
+<meta property="og:image" content="{{ seo_image_absolute }}">
+<meta property="og:image:alt" content="{{ seo_title|default:business_name|default:'SiteForge' }}">
+{% endif %}
+<meta name="twitter:card" content="{% if seo_image_absolute %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ seo_title|default:business_name|default:'SiteForge' }}">
+<meta name="twitter:description" content="{{ seo_description|default:''|truncatechars:320 }}">
+{% if seo_image_absolute %}
+<meta name="twitter:image" content="{{ seo_image_absolute }}">
+{% endif %}

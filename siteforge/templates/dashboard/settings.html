@@ -178,6 +178,31 @@
         <p class="form-text small text-muted">Country code + number, no spaces (e.g. 919876543210). Shown as &quot;Buy in WhatsApp&quot; on product pages.</p>
       </div>
 
+      <h3 class="h6 mt-4">SEO &amp; social previews</h3>
+      <p class="form-text text-muted small">Used for Google and when someone shares your site (WhatsApp, Facebook, LinkedIn). You can also set SEO per product on the product form.</p>
+      <div class="mb-3">
+        <label for="id_seo_title" class="form-label">Default page title (home)</label>
+        <input type="text" name="seo_title" id="id_seo_title" class="form-control" value="{{ seo_title|default:'' }}" maxlength="200" placeholder="e.g. Acme Co — Quality widgets since 1999">
+        <p class="form-text small text-muted mb-0">Leave empty to use your hero title and business name.</p>
+      </div>
+      <div class="mb-3">
+        <label for="id_seo_description" class="form-label">Default description</label>
+        <textarea name="seo_description" id="id_seo_description" class="form-control" rows="2" maxlength="500" placeholder="Short summary for search and link previews">{{ seo_description|default:'' }}</textarea>
+        <p class="form-text small text-muted mb-0">Shown on your home page and product listing. Product-specific SEO overrides this on product pages.</p>
+      </div>
+      <div class="mb-3">
+        <label for="id_seo_image" class="form-label">Default share image</label>
+        {% if seo_image_url %}
+        <p class="small text-success mb-1">Current: <img src="{{ seo_image_url }}" alt="" class="img-thumbnail" style="max-height: 60px;"> Saved.</p>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="remove_seo_image" id="id_remove_seo_image" value="1">
+          <label class="form-check-label" for="id_remove_seo_image">Remove current SEO image</label>
+        </div>
+        {% endif %}
+        <input type="file" name="seo_image" id="id_seo_image" class="form-control" accept="image/*">
+        <p class="form-text small text-muted mb-0">Optional. Landscape ~1200×630 px works well. Max 3 MB.</p>
+      </div>
+
       <button type="submit" class="btn btn-primary mt-3">Save settings</button>
     </form>
   </div>

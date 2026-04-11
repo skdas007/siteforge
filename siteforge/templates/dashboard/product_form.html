@@ -18,6 +18,28 @@
         <label for="id_description" class="form-label">Description</label>
         <textarea name="description" id="id_description" class="form-control" rows="3">{% if form.is_bound %}{{ form.description.value|default:'' }}{% else %}{{ product.description|default:'' }}{% endif %}</textarea>
       </div>
+      <h3 class="h6 mt-4">SEO &amp; social previews (optional)</h3>
+      <p class="form-text text-muted small">Override how this product appears in Google and when its link is shared. If you leave these empty, the product name, description, and primary image are used.</p>
+      <div class="mb-3">
+        <label for="id_seo_title" class="form-label">SEO title</label>
+        <input type="text" name="seo_title" id="id_seo_title" class="form-control" maxlength="200" value="{% if form.is_bound %}{{ form.seo_title.value|default:'' }}{% else %}{{ product.seo_title|default:'' }}{% endif %}" placeholder="e.g. Blue cotton shirt — summer collection">
+      </div>
+      <div class="mb-3">
+        <label for="id_seo_description" class="form-label">SEO description</label>
+        <textarea name="seo_description" id="id_seo_description" class="form-control" rows="2" maxlength="500" placeholder="Short snippet for search and chat apps">{% if form.is_bound %}{{ form.seo_description.value|default:'' }}{% else %}{{ product.seo_description|default:'' }}{% endif %}</textarea>
+      </div>
+      <div class="mb-3">
+        <label for="id_seo_image" class="form-label">SEO / share image</label>
+        <p class="form-text small text-muted mb-1">Optional. If empty, the primary product image is used for link previews. Max 3 MB.</p>
+        {% if product.seo_image %}
+        <div class="mb-2"><img src="{{ product.seo_image }}" alt="" style="max-height: 60px;" class="rounded"></div>
+        <div class="form-check mb-2">
+          <input type="checkbox" name="remove_product_seo_image" id="id_remove_product_seo_image" value="1" class="form-check-input">
+          <label class="form-check-label" for="id_remove_product_seo_image">Remove current SEO image</label>
+        </div>
+        {% endif %}
+        <input type="file" name="seo_image" id="id_seo_image" class="form-control" accept="image/*">
+      </div>
       <div class="mb-3">
         <label for="id_price" class="form-label">Sale price</label>
         <input type="text" name="price" id="id_price" class="form-control" value="{% if form.is_bound %}{{ form.price.value|default:'' }}{% else %}{{ product.price|default:'' }}{% endif %}" placeholder="0.00" inputmode="decimal">

@@ -27,7 +27,19 @@ urlpatterns = [
     path("contact/", ContactSubmitView.as_view(), name="contact_submit"),
     path("products/", ProductListView.as_view(), name="product_list"),
     path("products/<int:pk>/", ProductDetailView.as_view(), name="product_detail"),
-    path("accounts/login/", auth_views.LoginView.as_view(template_name="registration/login.html"), name="login"),
+    path(
+        "accounts/login/",
+        auth_views.LoginView.as_view(
+            template_name="registration/login.html",
+            extra_context={
+                "seo_title": "Log in — Dashboard",
+                "seo_description": "Sign in to manage your SiteForge dashboard.",
+                "seo_image_url": None,
+                "seo_type": "website",
+            },
+        ),
+        name="login",
+    ),
     path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("dashboard/", include("apps.tenants.urls", namespace="dashboard")),
     path("admin/", admin.site.urls),

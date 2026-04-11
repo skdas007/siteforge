@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}{{ hero_title|default:"Home" }} — {{ business_name|default:"SiteForge" }}{% endblock %}
+{% block title %}{{ seo_title }}{% endblock %}
 
 {% block content %}
 {# Hero carousel — slide images use natural height (full image visible) #}
@@ -346,29 +346,7 @@
 </script>
 {% endif %}
 
-{# Footer — Clarity-style #}
-<footer class="mt-auto py-4 bg-dark text-white">
-  <div class="container">
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4" data-reveal="fade-up">
-        <h5 class="fw-bold mb-3">{{ business_name|default:"SiteForge" }}</h5>
-        <p class="small opacity-75 mb-0">Multi-tenant website platform. Build your presence with clarity and style.</p>
-      </div>
-      <div class="col-md-6 col-lg-4" data-reveal="fade-up">
-        <h5 class="fw-bold mb-3">Quick links</h5>
-        <ul class="list-unstyled small mb-0">
-          <li class="mb-2"><a href="{% url 'home' %}">Home</a></li>
-          <li class="mb-2"><a href="#products">Products</a></li>
-          <li class="mb-2"><a href="#contact">Contact</a></li>
-          {# <li class="mb-2"><a href="{% url 'dashboard:home' %}">Dashboard</a></li> #}
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom text-center small opacity-75">
-      &copy; {{ business_name|default:"SiteForge" }}. All rights reserved.
-    </div>
-  </div>
-</footer>
+{% include "public/includes/public_site_footer.html" %}
 
 {% if theme_slug == 'clarity' %}
 <script>

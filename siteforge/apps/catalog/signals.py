@@ -12,6 +12,11 @@ def delete_product_image(sender, instance, **kwargs):
             instance.image.delete(save=False)
         except Exception:
             pass
+    if getattr(instance, "seo_image", None):
+        try:
+            instance.seo_image.delete(save=False)
+        except Exception:
+            pass
 
 
 @receiver(post_delete, sender=ProductImage)

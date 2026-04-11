@@ -51,6 +51,22 @@ class Client(models.Model):
         blank=True,
         help_text="WhatsApp number with country code (e.g. 919876543210). Used for 'Buy in WhatsApp' on product pages.",
     )
+    seo_title = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Optional. Overrides the home page title for Google and social previews. If empty, hero title and business name are used.",
+    )
+    seo_description = models.TextField(
+        blank=True,
+        help_text="Optional. Default description for your home page and product listing when you do not set a product-specific description. Aim for under ~160 characters.",
+    )
+    seo_image = models.ImageField(
+        upload_to="tenants/seo/",
+        blank=True,
+        null=True,
+        validators=[validate_image_upload_size],
+        help_text="Optional. Default image when sharing your site (WhatsApp, Facebook, etc.). Recommended ~1200×630 px. Max 3 MB.",
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

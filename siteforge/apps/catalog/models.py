@@ -68,6 +68,22 @@ class Product(models.Model):
         null=True,
         validators=[validate_image_upload_size],
     )
+    seo_title = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Optional. Overrides the product name in search and link previews.",
+    )
+    seo_description = models.TextField(
+        blank=True,
+        help_text="Optional. Overrides the product description in search and social snippets.",
+    )
+    seo_image = models.ImageField(
+        upload_to="catalog/seo/",
+        blank=True,
+        null=True,
+        validators=[validate_image_upload_size],
+        help_text="Optional. Image shown when this product link is shared. If empty, the primary product image is used. Max 3 MB.",
+    )
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_main = models.BooleanField(

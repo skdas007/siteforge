@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Products — {{ business_name|default:"SiteForge" }}{% endblock %}
+{% block title %}{{ seo_title }}{% endblock %}
 {% block extra_css %}
 <style>
   .product-filter {
@@ -229,4 +229,5 @@
     {% endif %}
   </div>
 </section>
+{% include "public/includes/public_site_footer.html" %}
 {% endblock %}

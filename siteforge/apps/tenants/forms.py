@@ -35,6 +35,24 @@ class SiteSettingsForm(forms.Form):
         validators=[validate_image_upload_size],
         help_text=_IMAGE_HELP,
     )
+    seo_title = forms.CharField(
+        max_length=200,
+        required=False,
+        label="SEO title (home)",
+        help_text="Optional. Shown in Google and when sharing your home page. If empty, hero title and business name are used.",
+    )
+    seo_description = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        required=False,
+        label="SEO description (default)",
+        help_text="Optional. Default snippet for your home and products listing. Product-specific SEO overrides this on product pages.",
+    )
+    seo_image = forms.ImageField(
+        required=False,
+        validators=[validate_image_upload_size],
+        label="SEO / share image (default)",
+        help_text="Optional. Image for link previews (~1200×630 px works well). " + _IMAGE_HELP,
+    )
 
     def __init__(self, theme_choices=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -97,6 +115,24 @@ class ProductForm(forms.Form):
         initial=False,
         label="Main product (show on home page)",
         help_text="Only one product can be main. It will appear on your home page.",
+    )
+    seo_title = forms.CharField(
+        max_length=200,
+        required=False,
+        label="SEO title",
+        help_text="Optional. Overrides the product name in search results and social previews.",
+    )
+    seo_description = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        required=False,
+        label="SEO description",
+        help_text="Optional. Overrides the product description in snippets. If empty, the main description is used.",
+    )
+    seo_image = forms.ImageField(
+        required=False,
+        validators=[validate_image_upload_size],
+        label="SEO / share image",
+        help_text="Optional. Image when this product link is shared. If empty, the primary product image is used. " + _IMAGE_HELP,
     )
 
     def __init__(self, category_queryset=None, *args, **kwargs):

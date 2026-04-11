@@ -124,6 +124,8 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
             "theme": client.theme.slug if client.theme_id else "default",
             "contact_email": client.contact_email or "",
             "whatsapp_number": getattr(client, "whatsapp_number", "") or "",
+            "seo_title": getattr(client, "seo_title", "") or "",
+            "seo_description": getattr(client, "seo_description", "") or "",
         }
 
     def get_context_data(self, **kwargs):
@@ -151,6 +153,13 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         context["banner_image_url"] = client.banner_image.url if client.banner_image else None
         context["hero_image_url"] = client.hero_image.url if client.hero_image else None
         context["logo_url"] = client.logo.url if client.logo else None
+        if self.request.method == "POST":
+            context["seo_title"] = post.get("seo_title", "")
+            context["seo_description"] = post.get("seo_description", "")
+        else:
+            context["seo_title"] = getattr(client, "seo_title", "") or ""
+            context["seo_description"] = getattr(client, "seo_description", "") or ""
+        context["seo_image_url"] = client.seo_image.url if getattr(client, "seo_image", None) and client.seo_image else None
         return context
 
     def _delete_file_from_storage(self, file_field):
@@ -191,6 +200,15 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         elif form.cleaned_data.get("logo"):
             self._delete_file_from_storage(client.logo)
             client.logo = form.cleaned_data["logo"]
+
+        client.seo_title = (form.cleaned_data.get("seo_title", "") or "")[:200]
+        client.seo_description = form.cleaned_data.get("seo_description", "") or ""
+        if self.request.POST.get("remove_seo_image"):
+            self._delete_file_from_storage(getattr(client, "seo_image", None))
+            client.seo_image = None
+        elif form.cleaned_data.get("seo_image"):
+            self._delete_file_from_storage(getattr(client, "seo_image", None))
+            client.seo_image = form.cleaned_data["seo_image"]
 
         from apps.themes.models import Theme
         try:
@@ -297,7 +315,12 @@ class ProductAddView(DashboardClientMixin, FormView):
         context = super().get_context_data(**kwargs)
         context["form_title"] = "Add product"
         context["form_action"] = reverse("dashboard:product_add")
-        context["product"] = {"extra_images": []}
+        context["product"] = {
+            "extra_images": [],
+            "seo_title": "",
+            "seo_description": "",
+            "seo_image": None,
+        }
         return context
 
     def form_valid(self, form):
@@ -312,6 +335,9 @@ class ProductAddView(DashboardClientMixin, FormView):
             compare_at_price=form.cleaned_data.get("compare_at_price"),
             category=form.cleaned_data.get("category") or None,
             image=form.cleaned_data.get("image") or None,
+            seo_title=(form.cleaned_data.get("seo_title", "") or "")[:200],
+            seo_description=form.cleaned_data.get("seo_description", "") or "",
+            seo_image=form.cleaned_data.get("seo_image") or None,
             is_active=form.cleaned_data.get("is_active", True),
             is_main=form.cleaned_data.get("is_main", False),
             order=_get_product_queryset(self.request).count(),
@@ -362,6 +388,9 @@ class ProductEditView(DashboardClientMixin, FormView):
             "price": product.price,
             "compare_at_price": product.compare_at_price,
             "image": product.image.url if product.image else None,
+            "seo_title": getattr(product, "seo_title", "") or "",
+            "seo_description": getattr(product, "seo_description", "") or "",
+            "seo_image": product.seo_image.url if getattr(product, "seo_image", None) and product.seo_image else None,
             "is_active": product.is_active,
             "is_main": product.is_main,
             "extra_images": extra,
@@ -376,6 +405,8 @@ class ProductEditView(DashboardClientMixin, FormView):
             "price": product.price,
             "compare_at_price": product.compare_at_price,
             "category": product.category,
+            "seo_title": getattr(product, "seo_title", "") or "",
+            "seo_description": getattr(product, "seo_description", "") or "",
             "is_active": product.is_active,
             "is_main": product.is_main,
         }
@@ -398,6 +429,20 @@ class ProductEditView(DashboardClientMixin, FormView):
                 except Exception:
                     pass
             product.image = None
+        if self.request.POST.get("remove_product_seo_image"):
+            if getattr(product, "seo_image", None):
+                try:
+                    product.seo_image.delete(save=False)
+                except Exception:
+                    pass
+            product.seo_image = None
+        elif form.cleaned_data.get("seo_image"):
+            if getattr(product, "seo_image", None):
+                try:
+                    product.seo_image.delete(save=False)
+                except Exception:
+                    pass
+            product.seo_image = form.cleaned_data["seo_image"]
         for pk in self.request.POST.getlist("remove_extra_image") or []:
             try:
                 pi = product.extra_images.filter(pk=int(pk)).first()
@@ -414,6 +459,8 @@ class ProductEditView(DashboardClientMixin, FormView):
         product.price = form.cleaned_data.get("price") or 0
         product.compare_at_price = form.cleaned_data.get("compare_at_price")
         product.category = form.cleaned_data.get("category") or None
+        product.seo_title = (form.cleaned_data.get("seo_title", "") or "")[:200]
+        product.seo_description = form.cleaned_data.get("seo_description", "") or ""
         product.is_active = form.cleaned_data.get("is_active", True)
         product.is_main = form.cleaned_data.get("is_main", False)
         product.save()
