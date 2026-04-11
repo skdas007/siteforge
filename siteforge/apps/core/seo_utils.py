@@ -33,6 +33,34 @@ def plain_text_excerpt(html_or_text: str, max_len: int = 160) -> str:
     return t[: max_len - 1].rstrip() + "…"
 
 
+def client_site_og_image_url(client, context: dict):
+    """
+    og:image for home, product list, and other non-product pages:
+    client's uploaded SEO image, else logo, then banner, then hero/welcome image.
+    """
+    if client is not None and getattr(client, "seo_image", None) and client.seo_image:
+        return client.seo_image.url
+    return context.get("logo") or context.get("banner_image") or context.get("hero_image")
+
+
+def product_og_image_url(product, client, context: dict):
+    """
+    og:image for a product detail page:
+    product SEO image → primary product image → first gallery image →
+    client's site SEO image → logo → banner → hero.
+    """
+    if getattr(product, "seo_image", None) and product.seo_image:
+        return product.seo_image.url
+    if product.image:
+        return product.image.url
+    first_extra = product.extra_images.first()
+    if first_extra:
+        return first_extra.image.url
+    if client is not None and getattr(client, "seo_image", None) and client.seo_image:
+        return client.seo_image.url
+    return context.get("logo") or context.get("banner_image") or context.get("hero_image")
+
+
 def add_seo_context(request, context: dict, *, title: str, description: str = "", image_url=None, og_type: str = "website"):
     """
     Set template variables used by templates/includes/seo_meta.html.

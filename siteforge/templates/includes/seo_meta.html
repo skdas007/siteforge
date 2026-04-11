@@ -12,6 +12,8 @@
 {% absolute_og_image seo_image_url as seo_image_absolute %}
 {% if seo_image_absolute %}
 <meta property="og:image" content="{{ seo_image_absolute }}">
+<meta property="og:image:secure_url" content="{{ seo_image_absolute }}">
+<meta property="og:image:type" content="{{ seo_image_absolute|og_image_mime }}">
 <meta property="og:image:alt" content="{{ seo_title|default:business_name|default:'SiteForge' }}">
 {% endif %}
 <meta name="twitter:card" content="{% if seo_image_absolute %}summary_large_image{% else %}summary{% endif %}">

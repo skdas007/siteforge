@@ -3,7 +3,7 @@ from django.http import Http404, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
-from apps.core.seo_utils import add_seo_context
+from apps.core.seo_utils import add_seo_context, client_site_og_image_url, product_og_image_url
 
 HOME_PRODUCTS_PER_PAGE = 6
 PRODUCT_LIST_PER_PAGE = 9
@@ -147,9 +147,7 @@ class IndexView(TemplateView):
             sub = context.get("hero_subtitle") or ""
             title = (getattr(c, "seo_title", "") or "").strip() or f"{hero} — {biz}"
             desc = (getattr(c, "seo_description", "") or "").strip() or sub or f"Explore products and contact {biz}."
-            img = c.seo_image.url if getattr(c, "seo_image", None) and c.seo_image else None
-            if not img:
-                img = context.get("banner_image") or context.get("hero_image") or context.get("logo")
+            img = client_site_og_image_url(c, context)
             add_seo_context(
                 self.request,
                 context,
@@ -163,7 +161,7 @@ class IndexView(TemplateView):
                 context,
                 title=f"{context.get('hero_title', 'Welcome')} — SiteForge",
                 description=context.get("hero_subtitle", ""),
-                image_url=context.get("banner_image") or context.get("logo"),
+                image_url=context.get("logo") or context.get("banner_image"),
             )
         return context
 
@@ -282,9 +280,7 @@ class ProductListView(ListView):
             c = self.request.client
             biz = context.get("business_name") or "SiteForge"
             desc = (getattr(c, "seo_description", "") or "").strip() or f"Browse products from {biz}."
-            img = c.seo_image.url if getattr(c, "seo_image", None) and c.seo_image else None
-            if not img:
-                img = context.get("logo") or context.get("banner_image") or context.get("hero_image")
+            img = client_site_og_image_url(c, context)
             add_seo_context(
                 self.request,
                 context,
@@ -326,17 +322,7 @@ class ProductDetailView(DetailView):
             c = getattr(self.request, "client", None)
             title = (getattr(product, "seo_title", "") or "").strip() or f"{product.name} — {biz}"
             desc = (getattr(product, "seo_description", "") or "").strip() or product.description or product.name
-            img = product.seo_image.url if getattr(product, "seo_image", None) and product.seo_image else None
-            if not img:
-                img = product.image.url if product.image else None
-            if not img:
-                first_extra = product.extra_images.first()
-                if first_extra:
-                    img = first_extra.image.url
-            if not img and c and getattr(c, "seo_image", None) and c.seo_image:
-                img = c.seo_image.url
-            if not img:
-                img = context.get("logo") or context.get("banner_image") or context.get("hero_image")
+            img = product_og_image_url(product, c, context)
             add_seo_context(
                 self.request,
                 context,
