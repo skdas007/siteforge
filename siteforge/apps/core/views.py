@@ -1,5 +1,6 @@
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404, JsonResponse
+from django.templatetags.static import static
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import DetailView, FormView, ListView, TemplateView
@@ -359,6 +360,16 @@ class ProductDetailView(DetailView):
                     context.setdefault(k, v)
         product = context.get("product")
         if product:
+            gallery_urls = []
+            if product.image:
+                gallery_urls.append(product.image.url)
+            for ei in product.extra_images.all():
+                u = ei.image.url
+                if u not in gallery_urls:
+                    gallery_urls.append(u)
+            if not gallery_urls:
+                gallery_urls = [static("img/no-image.svg")]
+            context["product_gallery_urls"] = gallery_urls
             context["whatsapp_message"] = _whatsapp_product_inquiry_message(self.request, product)
             biz = context.get("business_name") or "SiteForge"
             c = getattr(self.request, "client", None)

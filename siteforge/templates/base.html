@@ -35,15 +35,15 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse navbar-public-collapse" id="publicNav">
-        <div class="navbar-public-inner d-flex flex-column flex-lg-row align-items-lg-center ms-lg-auto gap-3 gap-lg-4 py-2 py-lg-0 w-100 w-lg-auto">
+        <div class="navbar-public-inner d-flex flex-column flex-lg-row align-items-lg-center gap-3 gap-lg-4 py-2 py-lg-0 w-100">
           <ul class="navbar-nav align-items-lg-center mb-0">
             <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}">Home</a></li>
             <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}#features">Features</a></li>
             <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'product_list' %}">Products</a></li>
             <li class="nav-item"><a class="nav-link nav-link-nav" href="{% url 'home' %}#contact">Contact</a></li>
           </ul>
-          <form class="navbar-public-search-form d-flex flex-wrap flex-sm-nowrap align-items-stretch w-100 w-lg-auto flex-shrink-0 gap-2 gap-sm-0" action="{% url 'product_list' %}" method="get" role="search">
-            <div class="position-relative navbar-search-combo navbar-search-wrap w-100 flex-grow-1 flex-lg-grow-0">
+          <form class="navbar-public-search-form d-flex flex-wrap flex-sm-nowrap align-items-stretch w-100 gap-2 gap-sm-0" action="{% url 'product_list' %}" method="get" role="search">
+            <div class="position-relative navbar-search-combo navbar-search-wrap w-100">
               <span class="position-absolute navbar-search-btn d-flex align-items-center" aria-hidden="true">
                 <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
               </span>

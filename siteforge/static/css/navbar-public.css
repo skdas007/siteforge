@@ -7,6 +7,60 @@
   transition: background-color 0.35s ease, box-shadow 0.35s ease;
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
+  /* Bar fades in; motion is on children (left → right) */
+  animation: nav-shell-fade 0.3s ease both;
+}
+
+/* Accent line grows left → right after nav items */
+#publicNavbar.navbar-public::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(37, 99, 235, 0.5) 0%,
+    rgba(56, 189, 248, 0.35) 50%,
+    rgba(37, 99, 235, 0.2) 100%
+  );
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: nav-accent-ltr 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+}
+
+@keyframes nav-shell-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes nav-accent-ltr {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Shared: each piece enters from the left in sequence */
+@keyframes nav-reveal-ltr {
+  from {
+    opacity: 0;
+    transform: translateX(-1.1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Let search dropdown paint above nav links (Bootstrap collapse / flex can clip otherwise) */
@@ -38,8 +92,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
+  justify-content: flex-start;
+  gap: 0.5rem 0.75rem;
   padding-top: 0.65rem;
   padding-bottom: 0.65rem;
 }
@@ -49,6 +103,7 @@
     flex-wrap: nowrap;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
+    gap: 0.75rem 1rem;
   }
 }
 
@@ -60,6 +115,7 @@
   letter-spacing: -0.02em;
   text-decoration: none;
   transition: opacity 0.2s ease;
+  animation: nav-reveal-ltr 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0s both;
 }
 
 .navbar-public .navbar-brand-logo:hover {
@@ -107,62 +163,95 @@
   }
 }
 
-/* ---- Collapse: push nav + search to the right on desktop ---- */
+/* ---- Collapse: full-width row; nav after logo; search grows into remaining space (no dead zone on the right) ---- */
 .navbar-public .navbar-public-collapse {
-  flex-grow: 1;
-  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-start;
 }
 
 .navbar-public .navbar-public-inner {
   width: 100%;
+  align-items: stretch;
 }
 
 @media (min-width: 992px) {
+  /* Bootstrap collapse must participate as flex so inner can span the row */
+  #publicNavbar .navbar-public-collapse {
+    display: flex !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    align-items: center;
+    /* Small breathing room after the logo before Home / search */
+    padding-left: 0.65rem;
+  }
+
   .navbar-public .navbar-public-inner {
-    width: auto;
-    max-width: min(100%, 52rem);
+    flex: 1 1 auto;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    gap: clamp(0.5rem, 1.5vw, 1.25rem) !important;
+  }
+
+  .navbar-public .navbar-public-inner > .navbar-nav {
+    flex-shrink: 0;
+  }
+
+  /* Grow search into the right side; cap width so the field stays readable */
+  .navbar-public .navbar-public-search-form {
+    margin-left: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-end;
+    max-width: none;
   }
 }
 
-/* ---- Nav links (larger type + entrance + hover motion) ---- */
-@keyframes nav-link-text-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.4rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .navbar-public .navbar-public-inner {
+    gap: 0.65rem !important;
   }
 }
 
+@media (max-width: 991.98px) {
+  .navbar-public .navbar-public-search-form {
+    max-width: 100%;
+  }
+}
+
+/* ---- Nav links: same LTR reveal, staggered after logo ---- */
 .navbar-public .navbar-nav .nav-item .nav-link-nav {
-  animation: nav-link-text-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: nav-reveal-ltr 0.48s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
+/* Left → right: Home … Contact */
 .navbar-public .navbar-nav .nav-item:nth-child(1) .nav-link-nav {
-  animation-delay: 0.05s;
+  animation-delay: 0.09s;
 }
 .navbar-public .navbar-nav .nav-item:nth-child(2) .nav-link-nav {
-  animation-delay: 0.11s;
+  animation-delay: 0.15s;
 }
 .navbar-public .navbar-nav .nav-item:nth-child(3) .nav-link-nav {
-  animation-delay: 0.17s;
+  animation-delay: 0.21s;
 }
 .navbar-public .navbar-nav .nav-item:nth-child(4) .nav-link-nav {
-  animation-delay: 0.23s;
+  animation-delay: 0.27s;
 }
 .navbar-public .navbar-nav .nav-item:nth-child(5) .nav-link-nav {
-  animation-delay: 0.29s;
+  animation-delay: 0.33s;
 }
 .navbar-public .navbar-nav .nav-item:nth-child(6) .nav-link-nav {
-  animation-delay: 0.35s;
+  animation-delay: 0.39s;
 }
 
 .navbar-public .nav-link-nav {
   position: relative;
   font-weight: 600;
-  font-size: 1.0625rem;
+  font-size: 1.1875rem;
   color: #334155 !important;
   padding: 0.5rem 0.85rem !important;
   margin: 0 0.05rem;
@@ -199,22 +288,38 @@
   left: 15%;
 }
 
+/* Search: field then button, still left → right in time (after Contact) */
+.navbar-public .navbar-public-search-form .navbar-search-wrap {
+  animation: nav-reveal-ltr 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.33s both;
+}
+
+.navbar-public .navbar-public-search-form .navbar-search-submit {
+  animation: nav-reveal-ltr 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.39s both;
+}
+
 /* ---- Search field (visible border; was hidden by Bootstrap border-0) ---- */
 .navbar-public .navbar-search-wrap {
   min-width: 0;
   max-width: 100%;
-  transition: max-width 0.3s ease;
+  transition: flex-basis 0.3s ease, max-width 0.3s ease;
 }
 
 @media (min-width: 992px) {
   .navbar-public .navbar-search-wrap {
-    width: 16.5rem;
-    max-width: 18rem;
+    flex: 1 1 auto;
+    width: auto !important;
+    min-width: min(12rem, 100%);
+    max-width: min(28rem, 100%);
   }
 
   .navbar-public .navbar-search-combo:focus-within.navbar-search-wrap {
-    width: 20rem;
-    max-width: 22rem;
+    max-width: min(32rem, 100%);
+  }
+}
+
+@media (min-width: 1200px) {
+  .navbar-public .navbar-search-wrap {
+    max-width: min(32rem, 100%);
   }
 }
 
@@ -348,39 +453,32 @@
   color: #64748b !important;
 }
 
-/* ---- Toggler ---- */
+/* ---- Toggler (mobile): right after logo in LTR sequence ---- */
 .navbar-public .navbar-toggler {
   border-radius: 0.5rem;
   padding: 0.45rem 0.65rem;
+  animation: nav-reveal-ltr 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
 }
 
 .navbar-public .navbar-toggler:focus {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
 }
 
-/* Entrance */
-@keyframes navbar-slide-down {
-  from {
-    opacity: 0;
-    transform: translateY(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.navbar-public {
-  animation: navbar-slide-down 0.45s ease-out;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .navbar-public {
-    animation: none;
+  .navbar-public,
+  #publicNavbar.navbar-public::after,
+  .navbar-public .navbar-brand.navbar-brand-logo,
+  .navbar-public .navbar-toggler,
+  .navbar-public .navbar-public-search-form .navbar-search-wrap,
+  .navbar-public .navbar-public-search-form .navbar-search-submit,
+  .navbar-public .navbar-nav .nav-item .nav-link-nav {
+    animation: none !important;
   }
 
-  .navbar-public .navbar-nav .nav-item .nav-link-nav {
-    animation: none;
+  #publicNavbar.navbar-public::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+    opacity: 0.35;
   }
 
   .navbar-public .nav-link-nav:hover {

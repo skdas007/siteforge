@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% static 'img/no-image.svg' as no_image_url %}
+{% block extra_css %}
+<link href="{% static 'css/product-detail.css' %}" rel="stylesheet">
+{% endblock %}
 {% block title %}{{ seo_title }}{% endblock %}
 {% block content %}
 <section class="py-5 section-padding">
@@ -13,120 +16,137 @@
       </ol>
     </nav>
     <div class="row align-items-start g-4">
-      <div class="col-md-5 col-lg-4" data-reveal="fade-right">
-        {% if product.image %}
+      <div class="col-md-5 col-lg-4 product-media-column" data-reveal="fade-right">
         <div class="product-zoom-wrapper mb-2">
-          <div class="product-zoom-area position-relative rounded-3 overflow-hidden shadow" id="product-zoom-area">
-            <img src="{{ product.image.url }}" class="product-zoom-img img-fluid rounded-3" alt="{{ product.name }}" id="product-main-image" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
-            <div class="zoom-lens" id="zoom-lens" aria-hidden="true"></div>
+          <div class="flex-grow-1 min-w-0 w-100">
+            <div id="productImageCarousel" class="carousel slide" data-bs-ride="false" data-bs-interval="false">
+              <div class="carousel-inner shadow rounded-3">
+                {% for img_url in product_gallery_urls %}
+                <div class="carousel-item{% if forloop.first %} active{% endif %}">
+                  <div class="product-zoom-area position-relative rounded-3 overflow-hidden">
+                    <img src="{{ img_url }}" class="product-zoom-img d-block w-100" alt="{{ product.name }}{% if not forloop.first %} ({{ forloop.counter }}){% endif %}" data-slide-index="{{ forloop.counter0 }}" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}" decoding="async" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
+                    <div class="zoom-lens" aria-hidden="true"></div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% if product_gallery_urls|length > 1 %}
+              <button class="carousel-control-prev" type="button" data-bs-target="#productImageCarousel" data-bs-slide="prev" aria-label="Previous image">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#productImageCarousel" data-bs-slide="next" aria-label="Next image">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              </button>
+              {% endif %}
+            </div>
+
+            {% if product_gallery_urls|length > 1 %}
+            <div class="product-gallery-thumbs-strip" id="product-gallery-thumbs" role="tablist" aria-label="Product images">
+              {% for img_url in product_gallery_urls %}
+              <button type="button"
+                class="product-gallery-thumb-btn{% if forloop.first %} active{% endif %}"
+                id="product-thumb-{{ forloop.counter0 }}"
+                data-bs-target="#productImageCarousel"
+                data-bs-slide-to="{{ forloop.counter0 }}"
+                aria-label="Show image {{ forloop.counter }}"
+                aria-current="{% if forloop.first %}true{% else %}false{% endif %}">
+                <img src="{{ img_url }}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
+              </button>
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
           <div class="zoom-result rounded-3 shadow" id="zoom-result" aria-hidden="true"></div>
         </div>
-        {% elif product.extra_images.all %}
-        <div class="product-zoom-wrapper mb-2">
-          <div class="product-zoom-area position-relative rounded-3 overflow-hidden shadow" id="product-zoom-area">
-            <img src="{{ product.extra_images.all.0.image.url }}" class="product-zoom-img img-fluid rounded-3" alt="{{ product.name }}" id="product-main-image" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
-            <div class="zoom-lens" id="zoom-lens" aria-hidden="true"></div>
-          </div>
-          <div class="zoom-result rounded-3 shadow" id="zoom-result" aria-hidden="true"></div>
-        </div>
-        {% else %}
-        <div class="product-zoom-wrapper mb-2">
-          <div class="product-zoom-area position-relative rounded-3 overflow-hidden shadow bg-light" id="product-zoom-area">
-            <img src="{{ no_image_url }}" class="product-zoom-img img-fluid rounded-3" alt="" id="product-main-image" style="min-height: 200px; object-fit: contain;">
-          </div>
-        </div>
-        {% endif %}
-        {% if product.image or product.extra_images.all %}
-        <div class="d-flex flex-wrap gap-2 mt-2" id="product-gallery">
-          {% if product.image %}
-          <button type="button" class="border rounded p-1 product-gallery-thumb active" data-src="{{ product.image.url }}" style="width: 56px; height: 56px; overflow: hidden; flex-shrink: 0;">
-            <img src="{{ product.image.url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
-          </button>
-          {% endif %}
-          {% for img in product.extra_images.all %}
-          <button type="button" class="border rounded p-1 product-gallery-thumb{% if not product.image and forloop.first %} active{% endif %}" data-src="{{ img.image.url }}" style="width: 56px; height: 56px; overflow: hidden; flex-shrink: 0;">
-            <img src="{{ img.image.url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
-          </button>
-          {% endfor %}
-        </div>
-        <style>
-          .product-gallery-thumb.active { border-color: var(--bs-primary) !important; border-width: 2px !important; }
-          .product-zoom-wrapper { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
-          .product-zoom-area { cursor: crosshair; flex: 1 1 auto; min-width: 0; }
-          .product-zoom-img { display: block; width: 100%; height: auto; }
-          .zoom-lens {
-            position: absolute; width: 120px; height: 120px;
-            border: 2px solid rgba(0,0,0,0.25); border-radius: 50%;
-            background: rgba(255,255,255,0.25); pointer-events: none;
-            display: none; box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-          }
-          .zoom-result {
-            width: 320px; height: 320px; flex-shrink: 0;
-            background-repeat: no-repeat; background-color: #f8f9fa;
-            display: none; border: 1px solid rgba(0,0,0,0.08);
-          }
-          @media (max-width: 767px) {
-            .zoom-result { width: 280px; height: 280px; }
-          }
-        </style>
         <script>
         (function(){
-          var main = document.getElementById('product-main-image');
-          var gallery = document.getElementById('product-gallery');
-          var zoomArea = document.getElementById('product-zoom-area');
-          var lens = document.getElementById('zoom-lens');
-          var result = document.getElementById('zoom-result');
+          var carouselEl = document.getElementById('productImageCarousel');
+          var thumbsHost = document.getElementById('product-gallery-thumbs');
+          var zoomResult = document.getElementById('zoom-result');
+
+          function activeSlideEls() {
+            if (!carouselEl) return null;
+            var item = carouselEl.querySelector('.carousel-item.active');
+            if (!item) return null;
+            return {
+              main: item.querySelector('.product-zoom-img'),
+              area: item.querySelector('.product-zoom-area'),
+              lens: item.querySelector('.zoom-lens')
+            };
+          }
+
+          function syncThumbs(idx) {
+            if (!thumbsHost || idx === undefined || idx === null) return;
+            var buttons = thumbsHost.querySelectorAll('.product-gallery-thumb-btn');
+            buttons.forEach(function(btn, i) {
+              var on = i === idx;
+              btn.classList.toggle('active', on);
+              btn.setAttribute('aria-current', on ? 'true' : 'false');
+              if (on) {
+                try {
+                  btn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+                } catch (e) {
+                  btn.scrollIntoView(false);
+                }
+              }
+            });
+          }
+
+          if (carouselEl && thumbsHost && window.bootstrap) {
+            carouselEl.addEventListener('slid.bs.carousel', function(ev) {
+              var idx = typeof ev.to === 'number' ? ev.to : 0;
+              syncThumbs(idx);
+              if (zoomResult) zoomResult.style.display = 'none';
+              var z = activeSlideEls();
+              if (z && z.lens) z.lens.style.display = 'none';
+            });
+          }
 
           function showZoom() {
-            if (!main || !lens || !result) return;
-            result.style.backgroundImage = 'url("' + main.src + '")';
-            lens.style.display = 'block';
-            result.style.display = 'block';
+            var z = activeSlideEls();
+            if (!z || !z.main || !z.lens || !zoomResult) return;
+            zoomResult.style.backgroundImage = 'url("' + z.main.src + '")';
+            z.lens.style.display = 'block';
+            zoomResult.style.display = 'block';
           }
           function hideZoom() {
-            if (lens) lens.style.display = 'none';
-            if (result) result.style.display = 'none';
+            var z = activeSlideEls();
+            if (z && z.lens) z.lens.style.display = 'none';
+            if (zoomResult) zoomResult.style.display = 'none';
           }
           function moveLens(e) {
-            if (!main || !lens || !result || lens.style.display !== 'block') return;
+            var z = activeSlideEls();
+            if (!z || !z.main || !z.lens || !zoomResult || z.lens.style.display !== 'block') return;
+            var main = z.main;
             var rect = main.getBoundingClientRect();
             var x = e.clientX - rect.left;
             var y = e.clientY - rect.top;
-            if (x < 0 || x > rect.width || y < 0 || y > rect.height) { hideZoom(); return; }
-            var lensW = 120, lensH = 120;
-            var lensLeft = Math.max(0, Math.min(x - lensW/2, rect.width - lensW));
-            var lensTop = Math.max(0, Math.min(y - lensH/2, rect.height - lensH));
-            lens.style.left = lensLeft + 'px';
-            lens.style.top = lensTop + 'px';
-            var scale = 320 / lensW;
-            var bgW = rect.width * scale, bgH = rect.height * scale;
-            result.style.backgroundSize = bgW + 'px ' + bgH + 'px';
-            result.style.backgroundPosition = (-lensLeft * scale) + 'px ' + (-lensTop * scale) + 'px';
+            if (x < 0 || x > rect.width || y < 0 || y > rect.height) {
+              hideZoom();
+              return;
+            }
+            var lensW = 120;
+            var lensLeft = Math.max(0, Math.min(x - lensW / 2, rect.width - lensW));
+            var lensTop = Math.max(0, Math.min(y - lensW / 2, rect.height - lensW));
+            z.lens.style.left = lensLeft + 'px';
+            z.lens.style.top = lensTop + 'px';
+            var rw = zoomResult.offsetWidth || 320;
+            var scale = rw / lensW;
+            var bgW = rect.width * scale;
+            var bgH = rect.height * scale;
+            zoomResult.style.backgroundSize = bgW + 'px ' + bgH + 'px';
+            zoomResult.style.backgroundPosition = -lensLeft * scale + 'px ' + -lensTop * scale + 'px';
           }
 
-          if (zoomArea && lens && result) {
-            zoomArea.addEventListener('mouseenter', showZoom);
-            zoomArea.addEventListener('mousemove', moveLens);
-            zoomArea.addEventListener('mouseleave', hideZoom);
-          }
-
-          if (main && gallery) {
-            gallery.querySelectorAll('.product-gallery-thumb').forEach(function(btn){
-              btn.addEventListener('click', function(){
-                var src = this.getAttribute('data-src');
-                if (src) {
-                  main.src = src;
-                  if (result) result.style.backgroundImage = 'url("' + src + '")';
-                }
-                gallery.querySelectorAll('.product-gallery-thumb').forEach(function(b){ b.classList.remove('active'); });
-                this.classList.add('active');
-              });
+          if (carouselEl) {
+            carouselEl.querySelectorAll('.product-zoom-area').forEach(function(area) {
+              area.addEventListener('mouseenter', showZoom);
+              area.addEventListener('mousemove', moveLens);
+              area.addEventListener('mouseleave', hideZoom);
             });
           }
         })();
         </script>
-        {% endif %}
       </div>
       <div class="col-md-7 col-lg-8" data-reveal="fade-left">
         <h1 class="h2 fw-bold mb-3">{{ product.name }}</h1>
