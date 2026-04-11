@@ -3,7 +3,7 @@ Multi-tenant resolution: set request.client from request host.
 Skip for admin, dashboard, static, media so they work without a tenant domain.
 """
 from django.conf import settings
-from django.http import HttpResponseNotFound
+from django.shortcuts import render
 from django.utils.deprecation import MiddlewareMixin
 
 
@@ -49,7 +49,12 @@ class TenantResolutionMiddleware(MiddlewareMixin):
             if settings.DEBUG:
                 request.client = None
                 return None
-            return HttpResponseNotFound("<h1>Site not found</h1><p>No site is configured for this domain.</p>")
+            return render(
+                request,
+                "errors/site_not_found.html",
+                {"business_name": None},
+                status=404,
+            )
 
         request.client = client
         return None

@@ -1,6 +1,7 @@
 from django.contrib.sitemaps.views import sitemap as sitemap_index_view
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404, JsonResponse
+from django.shortcuts import render
 from django.templatetags.static import static
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -409,3 +410,25 @@ def tenant_public_sitemap(request):
     if not client:
         raise Http404("No site is configured for this host.")
     return sitemap_index_view(request, {"public": TenantPublicSitemap(client)})
+
+
+def handler404(request, exception):
+    """Friendly page not found (used when DEBUG is False, and for some debug 404s)."""
+    ctx = {}
+    client = getattr(request, "client", None)
+    if client:
+        ctx["business_name"] = client.business_name
+    return render(request, "errors/404.html", ctx, status=404)
+
+
+def handler500(request):
+    """Friendly server error; keep logic minimal (DB may be unavailable)."""
+    return render(request, "errors/500.html", status=500)
+
+
+def handler403(request, exception):
+    ctx = {}
+    client = getattr(request, "client", None)
+    if client:
+        ctx["business_name"] = client.business_name
+    return render(request, "errors/403.html", ctx, status=403)

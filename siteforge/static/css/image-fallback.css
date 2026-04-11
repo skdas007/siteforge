@@ -1,0 +1,5 @@
+/* Applied by image-fallback.js when S3/network/decode fails (broken primary image) */
+img.sf-img-fallback-applied {
+  object-fit: contain !important;
+  background-color: #e9ecef !important;
+}

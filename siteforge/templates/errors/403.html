@@ -1,0 +1,9 @@
+{% extends "errors/base_error.html" %}
+{% block error_title %}Access denied{% endblock %}
+{% block error_label %}Access denied{% endblock %}
+{% block error_code %}<div class="sf-error-code mb-3" aria-hidden="true">403</div>{% endblock %}
+{% block error_body %}
+<h1 class="h3 fw-bold mb-3">You don’t have permission to view this</h1>
+<p class="text-muted mb-4">If you think this is a mistake, sign in with a different account or contact the site owner.</p>
+<a href="/" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Go to home</a>
+{% endblock %}

@@ -1,4 +1,5 @@
 {% load static %}
+{% static 'img/no-image.svg' as sf_no_image %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,16 +20,18 @@
   <link href="{% static 'css/animations-3d.css' %}" rel="stylesheet">
   <link href="{% static 'css/hero-split.css' %}" rel="stylesheet">
   <link href="{% static 'css/navbar-public.css' %}" rel="stylesheet">
+  <link href="{% static 'css/image-fallback.css' %}" rel="stylesheet">
   {% block extra_css %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100 {% if theme_slug %}theme-{{ theme_slug }}{% endif %}">
+<body class="d-flex flex-column min-vh-100 {% if theme_slug %}theme-{{ theme_slug }}{% endif %}" data-sf-no-image="{% static 'img/no-image.svg' %}">
+  <script src="{% static 'js/image-fallback.js' %}"></script>
   {% block nav %}
   <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-public" id="publicNavbar">
     <div class="container navbar-public-container">
       <a class="navbar-brand navbar-brand-logo d-flex align-items-center gap-2 flex-shrink-0" href="{% url 'home' %}" aria-label="{{ business_name|default:'SiteForge' }}">
         {% if logo %}
         <span class="navbar-logo-frame d-inline-flex align-items-center justify-content-center">
-          <img src="{{ logo }}" alt="{{ business_name|default:'SiteForge' }}" class="navbar-logo-img" decoding="async" fetchpriority="high">
+          <img src="{{ logo }}" alt="{{ business_name|default:'SiteForge' }}" class="navbar-logo-img" decoding="async" fetchpriority="high" onerror="this.onerror=null;this.src='{{ sf_no_image }}';">
         </span>
         {% else %}
         <span class="navbar-brand-text">{{ business_name|default:"SiteForge" }}</span>

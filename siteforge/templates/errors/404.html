@@ -1,0 +1,14 @@
+{% extends "errors/base_error.html" %}
+{% load static %}
+{% block error_title %}Page not found{% endblock %}
+{% block error_label %}Page not found{% endblock %}
+{% block error_code %}<div class="sf-error-code mb-3" aria-hidden="true">404</div>{% endblock %}
+{% block error_body %}
+<h1 class="h3 fw-bold mb-3">We can’t find that page</h1>
+<p class="text-muted mb-4">The link may be broken, or the page may have been removed. Check the address or use the button below to go back.</p>
+{% if business_name %}
+<a href="{% url 'home' %}" class="btn btn-primary btn-lg rounded-pill px-4">Back to {{ business_name }}</a>
+{% else %}
+<a href="/" class="btn btn-primary btn-lg rounded-pill px-4">Go to home</a>
+{% endif %}
+{% endblock %}

@@ -58,3 +58,7 @@ urlpatterns = [
 # Helps: django.test.Client, Gunicorn/uWSGI with DEBUG=True, and some local setups.
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
+
+handler404 = "apps.core.views.handler404"
+handler500 = "apps.core.views.handler500"
+handler403 = "apps.core.views.handler403"

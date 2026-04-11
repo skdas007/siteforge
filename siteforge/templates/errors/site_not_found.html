@@ -1,0 +1,8 @@
+{% extends "errors/base_error.html" %}
+{% block error_title %}Site not found{% endblock %}
+{% block error_label %}Domain{% endblock %}
+{% block error_code %}<div class="sf-error-code mb-3" aria-hidden="true">?</div>{% endblock %}
+{% block error_body %}
+<h1 class="h3 fw-bold mb-3">No website at this address</h1>
+<p class="text-muted mb-4">This domain isn’t set up with a site yet, or it may have been deactivated. Double-check the web address you entered.</p>
+{% endblock %}
