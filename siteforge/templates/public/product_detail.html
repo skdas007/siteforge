@@ -167,15 +167,15 @@
     <div class="row mt-5 pt-4 border-top">
       <div class="col-12" data-reveal="fade-up">
         <h2 class="h5 fw-bold mb-3">More in {{ product.category.name }}</h2>
-        <p class="text-muted small mb-3">Swipe or use the arrows to browse other products in this category.</p>
+        <p class="text-muted small mb-3">Up to four products appear at once; the row moves slowly when there are more. Hover to pause. Use arrows to jump.</p>
         <div class="product-related-carousel position-relative">
-          <button type="button" class="product-related-nav product-related-nav--prev btn btn-light border shadow-sm" id="product-related-prev" aria-label="Show previous products">
+          <button type="button" class="product-related-nav product-related-nav--prev btn btn-light border shadow-sm" id="product-related-prev" aria-label="Scroll related products left">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           </button>
-          <button type="button" class="product-related-nav product-related-nav--next btn btn-light border shadow-sm" id="product-related-next" aria-label="Show next products">
+          <button type="button" class="product-related-nav product-related-nav--next btn btn-light border shadow-sm" id="product-related-next" aria-label="Scroll related products right">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
           </button>
-          <div class="product-related-strip" id="product-related-strip" tabindex="0" role="region" aria-label="Related products in {{ product.category.name }}">
+          <div class="product-related-viewport" id="product-related-viewport" tabindex="0" role="region" aria-label="Related products in {{ product.category.name }}">
             {% for rp in related_products %}
             <div class="product-related-card-wrap">
               <a href="{% url 'product_detail' rp.pk %}" class="text-decoration-none text-dark h-100 d-block">
@@ -203,43 +203,98 @@
     </div>
     <script>
     (function(){
-      var strip = document.getElementById('product-related-strip');
+      var viewport = document.getElementById('product-related-viewport');
       var prevBtn = document.getElementById('product-related-prev');
       var nextBtn = document.getElementById('product-related-next');
-      if (!strip || !prevBtn || !nextBtn) return;
+      if (!viewport || !prevBtn || !nextBtn) return;
 
-      function step() {
-        var el = strip.querySelector('.product-related-card-wrap');
-        if (!el) return Math.max(240, strip.clientWidth * 0.85);
-        var gap = 16;
+      var gapPx = 16;
+      var autoSpeed = 0.3;
+      var paused = false;
+      var touchResumeTimer = null;
+      var reducedMotion = false;
+      try {
+        reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      } catch (e) {}
+
+      function readGap() {
         try {
-          var cs = window.getComputedStyle(strip);
-          var g = cs.gap || cs.columnGap;
-          if (g && g.endsWith('px')) gap = parseFloat(g) || gap;
+          var cs = window.getComputedStyle(viewport);
+          var g = cs.columnGap || cs.gap;
+          if (g && g.endsWith('px')) gapPx = parseFloat(g) || gapPx;
         } catch (e) {}
-        return el.getBoundingClientRect().width + gap;
+      }
+
+      function stepDistance() {
+        var el = viewport.querySelector('.product-related-card-wrap');
+        if (!el) return Math.max(200, viewport.clientWidth * 0.25);
+        readGap();
+        return el.getBoundingClientRect().width + gapPx;
+      }
+
+      function maxScroll() {
+        return Math.max(0, viewport.scrollWidth - viewport.clientWidth - 1);
       }
 
       function updateNav() {
-        var maxScroll = strip.scrollWidth - strip.clientWidth - 2;
-        if (maxScroll <= 0) {
+        var maxS = maxScroll();
+        if (maxS <= 1) {
           prevBtn.hidden = true;
           nextBtn.hidden = true;
           return;
         }
-        prevBtn.hidden = strip.scrollLeft <= 4;
-        nextBtn.hidden = strip.scrollLeft >= maxScroll - 4;
+        prevBtn.hidden = false;
+        nextBtn.hidden = false;
+      }
+
+      function tickAuto() {
+        if (reducedMotion) return;
+        if (!paused && maxScroll() > 1) {
+          viewport.scrollLeft += autoSpeed;
+          if (viewport.scrollLeft >= maxScroll() - 0.5) {
+            viewport.scrollLeft = 0;
+          }
+        }
+        rafId = window.requestAnimationFrame(tickAuto);
       }
 
       prevBtn.addEventListener('click', function() {
-        strip.scrollBy({ left: -step(), behavior: 'smooth' });
+        var maxS = maxScroll();
+        if (viewport.scrollLeft <= 2) {
+          viewport.scrollTo({ left: maxS, behavior: 'smooth' });
+        } else {
+          viewport.scrollBy({ left: -stepDistance(), behavior: 'smooth' });
+        }
       });
       nextBtn.addEventListener('click', function() {
-        strip.scrollBy({ left: step(), behavior: 'smooth' });
+        var maxS = maxScroll();
+        if (viewport.scrollLeft >= maxS - 2) {
+          viewport.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          viewport.scrollBy({ left: stepDistance(), behavior: 'smooth' });
+        }
       });
-      strip.addEventListener('scroll', function() { window.requestAnimationFrame(updateNav); }, { passive: true });
-      window.addEventListener('resize', function() { window.requestAnimationFrame(updateNav); });
+      viewport.addEventListener('mouseenter', function() { paused = true; });
+      viewport.addEventListener('mouseleave', function() { paused = false; });
+      viewport.addEventListener('touchstart', function() {
+        paused = true;
+        if (touchResumeTimer) clearTimeout(touchResumeTimer);
+      }, { passive: true });
+      viewport.addEventListener('touchend', function() {
+        if (touchResumeTimer) clearTimeout(touchResumeTimer);
+        touchResumeTimer = setTimeout(function() { paused = false; }, 1800);
+      }, { passive: true });
+      viewport.addEventListener('scroll', function() { window.requestAnimationFrame(updateNav); }, { passive: true });
+      window.addEventListener('resize', function() {
+        readGap();
+        window.requestAnimationFrame(updateNav);
+      });
+
       updateNav();
+      readGap();
+      if (!reducedMotion && maxScroll() > 1) {
+        rafId = window.requestAnimationFrame(tickAuto);
+      }
     })();
     </script>
     {% endif %}

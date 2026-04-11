@@ -149,7 +149,7 @@
 
 .navbar-public .navbar-logo-img {
   display: block;
-  height: 2.65rem;
+  height: 3.5 rem;
   width: auto;
   max-width: 10rem;
   object-fit: contain;
@@ -158,7 +158,7 @@
 
 @media (min-width: 576px) {
   .navbar-public .navbar-logo-img {
-    height: 2.8rem;
+    height: 4.65rem;
     max-width: 11.5rem;
   }
 }

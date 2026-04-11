@@ -179,37 +179,47 @@
   }
 }
 
-/* Same-category related products: horizontal slider (up to 6 cards) */
+/* Same-category related products: up to 10 items, 4 visible on large screens, slow auto-scroll */
 .product-related-carousel {
   padding: 0 2.75rem;
 }
 
-.product-related-strip {
-  display: flex;
+.product-related-viewport {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 100%);
+  align-items: stretch;
   gap: 1rem;
+  width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 0.5rem;
   padding: 0.35rem 0 1rem;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(15, 23, 42, 0.25) transparent;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
 }
 
-.product-related-strip::-webkit-scrollbar {
-  height: 6px;
+.product-related-viewport::-webkit-scrollbar {
+  display: none;
+  height: 0;
 }
 
-.product-related-strip::-webkit-scrollbar-thumb {
-  background: rgba(15, 23, 42, 0.2);
-  border-radius: 3px;
+/* Tablet: 2 products per “page” */
+@media (min-width: 768px) {
+  .product-related-viewport {
+    grid-auto-columns: calc((100% - 1rem) / 2);
+  }
+}
+
+/* Desktop: 4 products visible at once */
+@media (min-width: 992px) {
+  .product-related-viewport {
+    grid-auto-columns: calc((100% - 3rem) / 4);
+  }
 }
 
 .product-related-card-wrap {
-  flex: 0 0 min(78vw, 260px);
-  max-width: 260px;
-  scroll-snap-align: start;
+  min-width: 0;
 }
 
 .product-related-nav {

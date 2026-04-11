@@ -394,7 +394,7 @@ class ProductDetailView(DetailView):
                     )
                     .exclude(pk=product.pk)
                     .select_related("category")
-                    .order_by("order", "name")[:6]
+                    .order_by("order", "name")[:10]
                 )
             else:
                 context["related_products"] = []
