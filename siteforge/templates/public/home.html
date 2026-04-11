@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% static 'img/no-image.svg' as no_image_url %}
 {% block title %}{{ seo_title }}{% endblock %}
 
 {% block content %}
@@ -25,7 +26,7 @@
           <source src="{{ slide.video }}" type="video/mp4">
         </video>
         {% elif slide.image %}
-        <img src="{{ slide.image }}" class="d-block w-100 sf-slider-img" alt="{{ slide.caption|default:'' }}">
+        <img src="{{ slide.image }}" class="d-block w-100 sf-slider-img" alt="{{ slide.caption|default:'' }}" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
         {% else %}
         <div class="d-block w-100 d-flex align-items-center justify-content-center text-white {{ slide.bg_class|default:'bg-dark' }} sf-slider-fill">
           <div class="text-center px-3">{{ slide.caption|default:"Slide" }}</div>
@@ -40,7 +41,7 @@
       {% endfor %}
     {% elif banner_image %}
       <div class="carousel-item active">
-        <img src="{{ banner_image }}" class="d-block w-100 sf-slider-img" alt="">
+        <img src="{{ banner_image }}" class="d-block w-100 sf-slider-img" alt="" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
       </div>
     {% else %}
       <div class="carousel-item active">
@@ -94,9 +95,9 @@
       <div class="col-lg-6 order-lg-2 order-1">
         <div class="hero-image-wrap" data-reveal="fade-left">
           {% if hero_image %}
-          <img src="{{ hero_image }}" alt="{{ hero_title|default:'Hero' }}" class="hero-image img-fluid rounded-3 shadow">
+          <img src="{{ hero_image }}" alt="{{ hero_title|default:'Hero' }}" class="hero-image img-fluid rounded-3 shadow" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
           {% elif banner_image %}
-          <img src="{{ banner_image }}" alt="{{ hero_title|default:'Hero' }}" class="hero-image img-fluid rounded-3 shadow">
+          <img src="{{ banner_image }}" alt="{{ hero_title|default:'Hero' }}" class="hero-image img-fluid rounded-3 shadow" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
           {% else %}
           <div class="hero-image-placeholder rounded-3 shadow d-flex flex-column align-items-center justify-content-center">
             <span class="hero-placeholder-text">Your image</span>
@@ -166,11 +167,9 @@
             <span class="position-absolute top-0 start-0 m-2 badge bg-danger z-1">{{ product.discount_percent }}% OFF</span>
             {% endif %}
             {% if product.image %}
-            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 220px; object-fit: cover;">
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 220px; object-fit: cover;" loading="lazy" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
             {% else %}
-            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
-              <span class="text-muted">No image</span>
-            </div>
+            <img src="{{ no_image_url }}" class="card-img-top" alt="" style="height: 220px; object-fit: contain; background: #e9ecef;" loading="lazy">
             {% endif %}
             <div class="card-body">
               <h5 class="card-title">{{ product.name }}</h5>

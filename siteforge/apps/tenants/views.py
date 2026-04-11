@@ -12,6 +12,7 @@ from django.views.generic import FormView, ListView, TemplateView
 from django.views.generic.edit import DeleteView
 
 from apps.catalog.models import Category, Product
+from apps.core.storage_cleanup import delete_stored_file
 from apps.core.validators import MAX_IMAGE_UPLOAD_BYTES, MAX_VIDEO_UPLOAD_BYTES
 
 from .forms import CategoryForm, ProductForm, SiteSettingsForm
@@ -163,53 +164,47 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         context["seo_image_url"] = client.seo_image.url if getattr(client, "seo_image", None) and client.seo_image else None
         return context
 
-    def _delete_file_from_storage(self, file_field):
-        """Remove file from S3/storage. Safe if missing."""
-        if file_field:
-            try:
-                file_field.delete(save=False)
-            except Exception:
-                pass
-
     def form_valid(self, form):
         client = self.request.user.client
+        client.refresh_from_db()
         client.hero_title = form.cleaned_data.get("hero_title", "")[:300]
         client.hero_subtitle = form.cleaned_data.get("hero_subtitle", "")
         client.contact_email = form.cleaned_data.get("contact_email", "") or ""
         client.whatsapp_number = (form.cleaned_data.get("whatsapp_number", "") or "").strip()[:20]
 
-        # Banner: remove from S3 when cleared or replaced
-        if self.request.POST.get("remove_banner"):
-            self._delete_file_from_storage(client.banner_image)
-            client.banner_image = None
-        elif form.cleaned_data.get("banner_image"):
-            self._delete_file_from_storage(client.banner_image)
+        # Prefer new upload over "remove" so replace-by-file-picker deletes the old S3 object.
+        # Banner
+        if form.cleaned_data.get("banner_image"):
+            delete_stored_file(client.banner_image)
             client.banner_image = form.cleaned_data["banner_image"]
+        elif self.request.POST.get("remove_banner"):
+            delete_stored_file(client.banner_image)
+            client.banner_image = None
 
-        # Welcome / Hero image: remove from S3 when cleared or replaced
-        if self.request.POST.get("remove_hero_image"):
-            self._delete_file_from_storage(client.hero_image)
-            client.hero_image = None
-        elif form.cleaned_data.get("hero_image"):
-            self._delete_file_from_storage(client.hero_image)
+        # Welcome / Hero image
+        if form.cleaned_data.get("hero_image"):
+            delete_stored_file(client.hero_image)
             client.hero_image = form.cleaned_data["hero_image"]
+        elif self.request.POST.get("remove_hero_image"):
+            delete_stored_file(client.hero_image)
+            client.hero_image = None
 
-        # Logo: remove from S3 when cleared or replaced
-        if self.request.POST.get("remove_logo"):
-            self._delete_file_from_storage(client.logo)
-            client.logo = None
-        elif form.cleaned_data.get("logo"):
-            self._delete_file_from_storage(client.logo)
+        # Logo
+        if form.cleaned_data.get("logo"):
+            delete_stored_file(client.logo)
             client.logo = form.cleaned_data["logo"]
+        elif self.request.POST.get("remove_logo"):
+            delete_stored_file(client.logo)
+            client.logo = None
 
         client.seo_title = (form.cleaned_data.get("seo_title", "") or "")[:200]
         client.seo_description = form.cleaned_data.get("seo_description", "") or ""
-        if self.request.POST.get("remove_seo_image"):
-            self._delete_file_from_storage(getattr(client, "seo_image", None))
-            client.seo_image = None
-        elif form.cleaned_data.get("seo_image"):
-            self._delete_file_from_storage(getattr(client, "seo_image", None))
+        if form.cleaned_data.get("seo_image"):
+            delete_stored_file(getattr(client, "seo_image", None))
             client.seo_image = form.cleaned_data["seo_image"]
+        elif self.request.POST.get("remove_seo_image"):
+            delete_stored_file(getattr(client, "seo_image", None))
+            client.seo_image = None
 
         from apps.themes.models import Theme
         try:
@@ -416,34 +411,19 @@ class ProductEditView(DashboardClientMixin, FormView):
         from apps.catalog.models import Product, ProductImage
 
         product = get_object_or_404(_get_product_queryset(self.request), pk=self.kwargs["pk"])
+        product.refresh_from_db()
         if form.cleaned_data.get("image"):
-            if product.image:
-                try:
-                    product.image.delete(save=False)
-                except Exception:
-                    pass
+            delete_stored_file(product.image)
             product.image = form.cleaned_data["image"]
-        if self.request.POST.get("remove_product_image"):
-            if product.image:
-                try:
-                    product.image.delete(save=False)
-                except Exception:
-                    pass
+        elif self.request.POST.get("remove_product_image"):
+            delete_stored_file(product.image)
             product.image = None
-        if self.request.POST.get("remove_product_seo_image"):
-            if getattr(product, "seo_image", None):
-                try:
-                    product.seo_image.delete(save=False)
-                except Exception:
-                    pass
-            product.seo_image = None
-        elif form.cleaned_data.get("seo_image"):
-            if getattr(product, "seo_image", None):
-                try:
-                    product.seo_image.delete(save=False)
-                except Exception:
-                    pass
+        if form.cleaned_data.get("seo_image"):
+            delete_stored_file(getattr(product, "seo_image", None))
             product.seo_image = form.cleaned_data["seo_image"]
+        elif self.request.POST.get("remove_product_seo_image"):
+            delete_stored_file(getattr(product, "seo_image", None))
+            product.seo_image = None
         for pk in self.request.POST.getlist("remove_extra_image") or []:
             try:
                 pi = product.extra_images.filter(pk=int(pk)).first()

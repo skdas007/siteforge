@@ -1,4 +1,6 @@
 {% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+{% static 'img/no-image.svg' as no_image_url %}
 {% block title %}Products{% endblock %}
 {% block dashboard_content %}
 <div class="card dashboard-card">
@@ -34,9 +36,9 @@
             <td class="text-center order-num"><span class="badge rounded-pill bg-light text-dark border fw-normal">{{ forloop.counter }}</span></td>
             <td>
               {% if product.image %}
-              <img src="{{ product.image.url }}" alt="" class="dashboard-product-thumb" width="44" height="44">
+              <img src="{{ product.image.url }}" alt="" class="dashboard-product-thumb" width="44" height="44" loading="lazy" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
               {% else %}
-              <span class="text-muted small">—</span>
+              <img src="{{ no_image_url }}" alt="" class="dashboard-product-thumb" width="44" height="44" loading="lazy">
               {% endif %}
             </td>
             <td class="fw-medium">{{ product.name }}</td>

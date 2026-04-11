@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% static 'img/no-image.svg' as no_image_url %}
 {% block title %}{{ seo_title }}{% endblock %}
 {% block content %}
 <section class="py-5 section-padding">
@@ -16,7 +17,7 @@
         {% if product.image %}
         <div class="product-zoom-wrapper mb-2">
           <div class="product-zoom-area position-relative rounded-3 overflow-hidden shadow" id="product-zoom-area">
-            <img src="{{ product.image.url }}" class="product-zoom-img img-fluid rounded-3" alt="{{ product.name }}" id="product-main-image">
+            <img src="{{ product.image.url }}" class="product-zoom-img img-fluid rounded-3" alt="{{ product.name }}" id="product-main-image" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
             <div class="zoom-lens" id="zoom-lens" aria-hidden="true"></div>
           </div>
           <div class="zoom-result rounded-3 shadow" id="zoom-result" aria-hidden="true"></div>
@@ -24,26 +25,28 @@
         {% elif product.extra_images.all %}
         <div class="product-zoom-wrapper mb-2">
           <div class="product-zoom-area position-relative rounded-3 overflow-hidden shadow" id="product-zoom-area">
-            <img src="{{ product.extra_images.all.0.image.url }}" class="product-zoom-img img-fluid rounded-3" alt="{{ product.name }}" id="product-main-image">
+            <img src="{{ product.extra_images.all.0.image.url }}" class="product-zoom-img img-fluid rounded-3" alt="{{ product.name }}" id="product-main-image" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
             <div class="zoom-lens" id="zoom-lens" aria-hidden="true"></div>
           </div>
           <div class="zoom-result rounded-3 shadow" id="zoom-result" aria-hidden="true"></div>
         </div>
         {% else %}
-        <div class="bg-light rounded-3 d-flex align-items-center justify-content-center shadow mb-2" style="min-height: 280px;">
-          <span class="text-muted">No image</span>
+        <div class="product-zoom-wrapper mb-2">
+          <div class="product-zoom-area position-relative rounded-3 overflow-hidden shadow bg-light" id="product-zoom-area">
+            <img src="{{ no_image_url }}" class="product-zoom-img img-fluid rounded-3" alt="" id="product-main-image" style="min-height: 200px; object-fit: contain;">
+          </div>
         </div>
         {% endif %}
         {% if product.image or product.extra_images.all %}
         <div class="d-flex flex-wrap gap-2 mt-2" id="product-gallery">
           {% if product.image %}
           <button type="button" class="border rounded p-1 product-gallery-thumb active" data-src="{{ product.image.url }}" style="width: 56px; height: 56px; overflow: hidden; flex-shrink: 0;">
-            <img src="{{ product.image.url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="{{ product.image.url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
           </button>
           {% endif %}
           {% for img in product.extra_images.all %}
           <button type="button" class="border rounded p-1 product-gallery-thumb{% if not product.image and forloop.first %} active{% endif %}" data-src="{{ img.image.url }}" style="width: 56px; height: 56px; overflow: hidden; flex-shrink: 0;">
-            <img src="{{ img.image.url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="{{ img.image.url }}" alt="" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
           </button>
           {% endfor %}
         </div>

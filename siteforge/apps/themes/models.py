@@ -1,5 +1,6 @@
 from django.db import models
 
+from apps.core.storage_cleanup import clear_missing_file_fields
 from apps.core.validators import validate_image_upload_size
 
 
@@ -20,6 +21,10 @@ class Theme(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        super().clean()
+        clear_missing_file_fields(self, "preview_image")
 
     def save(self, *args, **kwargs):
         self.full_clean()

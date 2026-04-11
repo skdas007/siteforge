@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160" viewBox="0 0 240 160" role="img" aria-label="No image">
+  <rect width="240" height="160" fill="#e9ecef"/>
+  <rect x="1" y="1" width="238" height="158" fill="none" stroke="#dee2e6" stroke-width="2"/>
+  <text x="120" y="88" text-anchor="middle" fill="#6c757d" font-family="system-ui,-apple-system,sans-serif" font-size="14">No image</text>
+</svg>

@@ -1,4 +1,6 @@
 {% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+{% static 'img/no-image.svg' as no_image_url %}
 {% block title %}{{ form_title|default:"Product" }}{% endblock %}
 {% block dashboard_content %}
 <div class="card dashboard-card">
@@ -37,7 +39,7 @@
         <p class="form-text small text-muted mb-1">{{ form.seo_image.help_text }}</p>
         {% if product.seo_image %}
         <div class="dashboard-image-preview-box">
-          <img src="{{ product.seo_image }}" alt="">
+          <img src="{{ product.seo_image }}" alt="" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
           <div class="form-check mb-0">
             <input type="checkbox" name="remove_product_seo_image" id="id_remove_product_seo_image" value="1" class="form-check-input">
             <label class="form-check-label small" for="id_remove_product_seo_image">Remove current SEO image</label>
@@ -72,7 +74,7 @@
           <p class="upload-rec-size mb-1">Main image on product list and detail. {{ form.image.help_text }}</p>
           {% if product.image %}
           <div class="dashboard-image-preview-box">
-            <img src="{{ product.image }}" alt="">
+            <img src="{{ product.image }}" alt="" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
             <div class="form-check mb-0">
               <input type="checkbox" name="remove_product_image" id="id_remove_product_image" value="1" class="form-check-input">
               <label class="form-check-label small" for="id_remove_product_image">Remove current image</label>
@@ -88,7 +90,7 @@
           <div class="dashboard-gallery-grid">
             {% for img in product.extra_images %}
             <div class="dashboard-gallery-item">
-              <img src="{{ img.url }}" alt="">
+              <img src="{{ img.url }}" alt="" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
               <input type="checkbox" name="remove_extra_image" value="{{ img.id }}" id="remove_extra_{{ img.id }}" class="visually-hidden">
               <label for="remove_extra_{{ img.id }}" class="btn-remove-overlay mb-0 text-center">Remove</label>
             </div>

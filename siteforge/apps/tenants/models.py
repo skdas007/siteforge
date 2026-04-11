@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 
+from apps.core.storage_cleanup import clear_missing_file_fields
 from apps.core.validators import validate_image_upload_size, validate_video_upload_size
 
 
@@ -77,6 +78,16 @@ class Client(models.Model):
     def __str__(self):
         return f"{self.business_name} ({self.domain})"
 
+    def clean(self):
+        super().clean()
+        clear_missing_file_fields(
+            self,
+            "banner_image",
+            "hero_image",
+            "logo",
+            "seo_image",
+        )
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -115,6 +126,10 @@ class CarouselSlide(models.Model):
 
     def __str__(self):
         return f"Slide {self.order} ({self.client.business_name})"
+
+    def clean(self):
+        super().clean()
+        clear_missing_file_fields(self, "image", "video")
 
     def save(self, *args, **kwargs):
         self.full_clean()

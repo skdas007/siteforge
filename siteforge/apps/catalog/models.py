@@ -4,6 +4,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from apps.core.storage_cleanup import clear_missing_file_fields
 from apps.core.validators import validate_image_upload_size
 
 
@@ -121,6 +122,7 @@ class Product(models.Model):
         return min(99, n)
 
     def clean(self):
+        clear_missing_file_fields(self, "image", "seo_image")
         super().clean()
         if self.compare_at_price is not None and self.compare_at_price < self.price:
             raise ValidationError(

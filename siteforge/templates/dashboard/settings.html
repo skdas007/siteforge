@@ -1,5 +1,6 @@
 {% extends "dashboard/base_dashboard.html" %}
 {% load static %}
+{% static 'img/no-image.svg' as no_image_url %}
 {% block title %}Site settings{% endblock %}
 {% block extra_css %}
 <style>
@@ -35,7 +36,7 @@
                 <label class="form-label mb-1">Media file</label>
                 <p class="form-text small mb-2">Image or MP4 video</p>
                 <input type="file" name="carousel_image_{{ forloop.counter0 }}" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4">
-                {% if slide.image_url %}<div class="mt-2"><img src="{{ slide.image_url }}" alt="" class="img-thumbnail carousel-preview rounded-3 border" style="max-height: 72px;"></div>{% elif slide.is_video %}<div class="mt-2 text-muted small">Current: video (MP4)</div>{% endif %}
+                {% if slide.image_url %}<div class="mt-2"><img src="{{ slide.image_url }}" alt="" class="img-thumbnail carousel-preview rounded-3 border" style="max-height: 72px;" onerror="this.onerror=null;this.src='{{ no_image_url }}';"></div>{% elif slide.is_video %}<div class="mt-2 text-muted small">Current: video (MP4)</div>{% endif %}
               </div>
               <div class="col-12 col-lg-6 d-flex flex-column">
                 <label class="form-label mb-1" for="carousel_caption_{{ forloop.counter0 }}">Caption <span class="text-muted fw-normal">(optional)</span></label>
@@ -108,7 +109,7 @@
       <div class="mb-3">
         <label for="id_banner" class="form-label">Single banner (used if no carousel images)</label>
         {% if banner_image_url %}
-        <p class="small text-success mb-1">Current: <img src="{{ banner_image_url }}" alt="" class="img-thumbnail" style="max-height: 50px;"> Saved.</p>
+        <p class="small text-success mb-1">Current: <img src="{{ banner_image_url }}" alt="" class="img-thumbnail" style="max-height: 50px;" onerror="this.onerror=null;this.src='{{ no_image_url }}';"> Saved.</p>
         <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" name="remove_banner" id="id_remove_banner" value="1">
           <label class="form-check-label" for="id_remove_banner">Remove current banner (and delete from storage)</label>
@@ -133,7 +134,7 @@
       <div class="mb-3">
         <label for="id_hero_image" class="form-label">Upload welcome image</label>
         {% if hero_image_url %}
-        <p class="small text-success mb-1">Current: <img src="{{ hero_image_url }}" alt="" class="img-thumbnail" style="max-height: 50px;"> Saved.</p>
+        <p class="small text-success mb-1">Current: <img src="{{ hero_image_url }}" alt="" class="img-thumbnail" style="max-height: 50px;" onerror="this.onerror=null;this.src='{{ no_image_url }}';"> Saved.</p>
         <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" name="remove_hero_image" id="id_remove_hero_image" value="1">
           <label class="form-check-label" for="id_remove_hero_image">Remove current welcome image (and delete from storage)</label>
@@ -147,7 +148,7 @@
       <div class="mb-3">
         <label for="id_logo" class="form-label">Upload logo</label>
         {% if logo_url %}
-        <p class="small text-success mb-1">Current: <img src="{{ logo_url }}" alt="" class="img-thumbnail" style="max-height: 40px;"> Saved.</p>
+        <p class="small text-success mb-1">Current: <img src="{{ logo_url }}" alt="" class="img-thumbnail" style="max-height: 40px;" onerror="this.onerror=null;this.src='{{ no_image_url }}';"> Saved.</p>
         <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" name="remove_logo" id="id_remove_logo" value="1">
           <label class="form-check-label" for="id_remove_logo">Remove current logo (and delete from storage)</label>
@@ -202,7 +203,7 @@
       <div class="mb-3">
         <label for="id_seo_image" class="form-label">Default share image</label>
         {% if seo_image_url %}
-        <p class="small text-success mb-1">Current: <img src="{{ seo_image_url }}" alt="" class="img-thumbnail" style="max-height: 60px;"> Saved.</p>
+        <p class="small text-success mb-1">Current: <img src="{{ seo_image_url }}" alt="" class="img-thumbnail" style="max-height: 60px;" onerror="this.onerror=null;this.src='{{ no_image_url }}';"> Saved.</p>
         <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" name="remove_seo_image" id="id_remove_seo_image" value="1">
           <label class="form-check-label" for="id_remove_seo_image">Remove current SEO image</label>
