@@ -186,9 +186,10 @@
       </div>
       {% endfor %}
     </div>
-    {% if products %}
+    {% include "public/includes/home_product_pagination.html" %}
+    {% if home_products_total_count %}
     <div class="col-12 text-center mt-4" data-reveal="fade-up">
-      <a href="{% url 'product_list' %}" class="btn btn-outline-primary">View all products</a>
+      <a href="{% url 'product_list' %}{% if current_category_id %}?category={{ current_category_id }}{% endif %}" class="btn btn-outline-primary">View all products</a>
     </div>
     {% endif %}
   </div>
@@ -359,7 +360,7 @@
           <li class="mb-2"><a href="{% url 'home' %}">Home</a></li>
           <li class="mb-2"><a href="#products">Products</a></li>
           <li class="mb-2"><a href="#contact">Contact</a></li>
-          <li class="mb-2"><a href="{% url 'dashboard:home' %}">Dashboard</a></li>
+          {# <li class="mb-2"><a href="{% url 'dashboard:home' %}">Dashboard</a></li> #}
         </ul>
       </div>
     </div>

@@ -46,11 +46,12 @@
             <input type="search" name="q" class="form-control form-control-sm navbar-search-input border-0" placeholder="Search products…" aria-label="Search products" autocomplete="off" value="{{ request.GET.q|default:'' }}">
           </div>
         </form>
-        <ul class="navbar-nav align-items-lg-center ms-lg-2">
+        {% comment %}Dashboard link hidden from public nav; use /dashboard/ URL directly if needed.{% endcomment %}
+        {# <ul class="navbar-nav align-items-lg-center ms-lg-2">
           <li class="nav-item">
             <a class="nav-link nav-link-dashboard" href="{% url 'dashboard:home' %}">Dashboard</a>
           </li>
-        </ul>
+        </ul> #}
       </div>
     </div>
   </nav>

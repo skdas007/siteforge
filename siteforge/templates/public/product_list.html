@@ -127,29 +127,9 @@
         </div>
       </form>
     </div>
-    <div class="row g-4 reveal-stagger">
+    <div class="row g-4 reveal-stagger" id="product-list-rows">
       {% for product in products %}
-      <div class="col-sm-6 col-lg-4 card-3d-wrap" data-reveal="fade-up">
-        <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-dark">
-          <div class="card card-3d card-3d-tilt h-100 shadow-sm position-relative">
-            {% if product.has_discount and product.discount_percent %}
-            <span class="position-absolute top-0 start-0 m-2 badge bg-danger z-1">{{ product.discount_percent }}% OFF</span>
-            {% endif %}
-            {% if product.image %}
-            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 220px; object-fit: cover;">
-            {% else %}
-            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
-              <span class="text-muted">No image</span>
-            </div>
-            {% endif %}
-            <div class="card-body">
-              <h5 class="card-title">{{ product.name }}</h5>
-              <p class="card-text text-muted small">{{ product.description|default:""|truncatewords:15 }}</p>
-              {% include "public/includes/product_price.html" with product=product %}
-            </div>
-          </div>
-        </a>
-      </div>
+      {% include "public/includes/product_list_item_col.html" %}
       {% empty %}
       <div class="col-12 text-center text-muted py-5" data-reveal="fade">
         <p>No products yet.</p>
@@ -157,7 +137,83 @@
       </div>
       {% endfor %}
     </div>
-    {% if page_obj.paginator.num_pages > 1 %}
+    {% if page_obj.paginator.count > 0 and page_obj.paginator.num_pages > 1 %}
+    <div id="product-infinite-status" class="text-center small text-muted py-3 d-none" aria-live="polite">Loading more products…</div>
+    <div id="product-infinite-end" class="text-center small text-muted py-3 d-none">You’ve reached the end.</div>
+    <div id="product-infinite-sentinel" class="py-1" aria-hidden="true"></div>
+    <script>
+    (function () {
+      var rows = document.getElementById("product-list-rows");
+      var sentinel = document.getElementById("product-infinite-sentinel");
+      var statusEl = document.getElementById("product-infinite-status");
+      var endEl = document.getElementById("product-infinite-end");
+      if (!rows || !sentinel || !{{ page_obj.has_next|yesno:"true,false" }}) return;
+
+      var nextPage = {{ page_obj.next_page_number }};
+      var loading = false;
+      var done = false;
+
+      function showStatus(on) {
+        if (statusEl) statusEl.classList.toggle("d-none", !on);
+      }
+      function showEnd() {
+        done = true;
+        if (endEl) endEl.classList.remove("d-none");
+        if (statusEl) statusEl.classList.add("d-none");
+      }
+
+      function loadMore() {
+        if (loading || done || nextPage == null) return;
+        loading = true;
+        showStatus(true);
+        var url = new URL(window.location.href);
+        url.searchParams.set("page", String(nextPage));
+        url.searchParams.set("partial", "1");
+        fetch(url.toString(), { headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" })
+          .then(function (res) {
+            var more = res.headers.get("X-Has-More") === "1";
+            return res.text().then(function (html) {
+              return { html: html, more: more };
+            });
+          })
+          .then(function (data) {
+            if (data.html.trim()) {
+              var wrap = document.createElement("div");
+              wrap.innerHTML = data.html.trim();
+              while (wrap.firstChild) {
+                rows.appendChild(wrap.firstChild);
+              }
+              if (typeof window.initCard3dTilt === "function") {
+                window.initCard3dTilt(rows);
+              }
+            }
+            if (!data.more) {
+              showEnd();
+            } else {
+              nextPage += 1;
+            }
+          })
+          .catch(function () {
+            showEnd();
+          })
+          .then(function () {
+            loading = false;
+            showStatus(false);
+          });
+      }
+
+      var io = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting && !done && !loading) loadMore();
+          });
+        },
+        { root: null, rootMargin: "200px", threshold: 0 }
+      );
+      io.observe(sentinel);
+    })();
+    </script>
+    <noscript>
     <nav class="mt-4 d-flex justify-content-center">
       <ul class="pagination mb-0">
         {% if page_obj.has_previous %}
@@ -169,6 +225,7 @@
         {% endif %}
       </ul>
     </nav>
+    </noscript>
     {% endif %}
   </div>
 </section>

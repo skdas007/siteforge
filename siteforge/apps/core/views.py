@@ -1,6 +1,10 @@
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, FormView, ListView, TemplateView
+
+HOME_PRODUCTS_PER_PAGE = 6
+PRODUCT_LIST_PER_PAGE = 9
 
 from .forms import ContactForm
 
@@ -54,6 +58,9 @@ class IndexView(TemplateView):
         q = self.request.GET.get("theme")
         if q in ("default", "minimal", "clarity"):
             context["theme_slug"] = q
+            _empty = Paginator([], HOME_PRODUCTS_PER_PAGE)
+            context["products"] = _empty.page(1)
+            context["home_products_total_count"] = 0
         elif getattr(self.request, "client", None):
             from apps.catalog.models import Category
 
@@ -67,6 +74,16 @@ class IndexView(TemplateView):
                 context["current_category_id"] = None
             if context.get("current_category_id"):
                 context["products"] = context["products"].filter(category_id=context["current_category_id"])
+            products_qs = context["products"]
+            context["home_products_total_count"] = products_qs.count()
+            paginator = Paginator(products_qs, HOME_PRODUCTS_PER_PAGE)
+            raw_page = self.request.GET.get("page") or 1
+            try:
+                context["products"] = paginator.page(raw_page)
+            except PageNotAnInteger:
+                context["products"] = paginator.page(1)
+            except EmptyPage:
+                context["products"] = paginator.page(paginator.num_pages)
         else:
             context.setdefault("theme_slug", "default")
             context.setdefault("business_name", "SiteForge")
@@ -77,10 +94,12 @@ class IndexView(TemplateView):
             context.setdefault("hero_title", "Welcome")
             context.setdefault("hero_subtitle", "Your tagline or short description goes here.")
             context.setdefault("main_product", None)
-            context.setdefault("products", [])
             context.setdefault("categories", [])
             context.setdefault("current_category_id", None)
             context.setdefault("map_embed_url", None)
+            _empty = Paginator([], HOME_PRODUCTS_PER_PAGE)
+            context["products"] = _empty.page(1)
+            context["home_products_total_count"] = 0
         return context
 
 
@@ -131,7 +150,20 @@ class ProductListView(ListView):
     """Public product list for current client. 404 if no client."""
     template_name = "public/product_list.html"
     context_object_name = "products"
-    paginate_by = 12
+    paginate_by = PRODUCT_LIST_PER_PAGE
+
+    def get_template_names(self):
+        if self.request.GET.get("partial") == "1":
+            return ["public/product_list_partial.html"]
+        return [self.template_name]
+
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        if self.request.GET.get("partial") == "1":
+            page_obj = context.get("page_obj")
+            if page_obj is not None:
+                response["X-Has-More"] = "1" if page_obj.has_next() else "0"
+        return response
 
     def get_queryset(self):
         from django.db.models import Q

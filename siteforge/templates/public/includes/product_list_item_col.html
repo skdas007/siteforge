@@ -1,0 +1,22 @@
+{# One product card column for product list / infinite scroll #}
+<div class="col-sm-6 col-lg-4 card-3d-wrap" data-reveal="fade-up">
+  <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-dark">
+    <div class="card card-3d card-3d-tilt h-100 shadow-sm position-relative">
+      {% if product.has_discount and product.discount_percent %}
+      <span class="position-absolute top-0 start-0 m-2 badge bg-danger z-1">{{ product.discount_percent }}% OFF</span>
+      {% endif %}
+      {% if product.image %}
+      <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 220px; object-fit: cover;" loading="lazy">
+      {% else %}
+      <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+        <span class="text-muted">No image</span>
+      </div>
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ product.name }}</h5>
+        <p class="card-text text-muted small">{{ product.description|default:""|truncatewords:15 }}</p>
+        {% include "public/includes/product_price.html" with product=product %}
+      </div>
+    </div>
+  </a>
+</div>
