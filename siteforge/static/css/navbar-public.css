@@ -124,16 +124,55 @@
   }
 }
 
-/* ---- Nav links ---- */
+/* ---- Nav links (larger type + entrance + hover motion) ---- */
+@keyframes nav-link-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navbar-public .navbar-nav .nav-item .nav-link-nav {
+  animation: nav-link-text-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.navbar-public .navbar-nav .nav-item:nth-child(1) .nav-link-nav {
+  animation-delay: 0.05s;
+}
+.navbar-public .navbar-nav .nav-item:nth-child(2) .nav-link-nav {
+  animation-delay: 0.11s;
+}
+.navbar-public .navbar-nav .nav-item:nth-child(3) .nav-link-nav {
+  animation-delay: 0.17s;
+}
+.navbar-public .navbar-nav .nav-item:nth-child(4) .nav-link-nav {
+  animation-delay: 0.23s;
+}
+.navbar-public .navbar-nav .nav-item:nth-child(5) .nav-link-nav {
+  animation-delay: 0.29s;
+}
+.navbar-public .navbar-nav .nav-item:nth-child(6) .nav-link-nav {
+  animation-delay: 0.35s;
+}
+
 .navbar-public .nav-link-nav {
   position: relative;
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
   color: #334155 !important;
   padding: 0.5rem 0.85rem !important;
   margin: 0 0.05rem;
   border-radius: 0.45rem;
-  transition: color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  letter-spacing: 0.01em;
+  transition:
+    color 0.22s ease,
+    transform 0.22s ease,
+    background 0.22s ease,
+    letter-spacing 0.25s ease;
 }
 
 .navbar-public .nav-link-nav::after {
@@ -151,7 +190,8 @@
 .navbar-public .nav-link-nav:hover {
   color: #0f172a !important;
   background: rgba(37, 99, 235, 0.06);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  letter-spacing: 0.03em;
 }
 
 .navbar-public .nav-link-nav:hover::after {
@@ -337,6 +377,15 @@
 @media (prefers-reduced-motion: reduce) {
   .navbar-public {
     animation: none;
+  }
+
+  .navbar-public .navbar-nav .nav-item .nav-link-nav {
+    animation: none;
+  }
+
+  .navbar-public .nav-link-nav:hover {
+    transform: none;
+    letter-spacing: 0.01em;
   }
 }
 
