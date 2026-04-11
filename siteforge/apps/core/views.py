@@ -1,6 +1,6 @@
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404, JsonResponse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from apps.core.seo_utils import add_seo_context
@@ -9,6 +9,35 @@ HOME_PRODUCTS_PER_PAGE = 6
 PRODUCT_LIST_PER_PAGE = 9
 
 from .forms import ContactForm
+
+
+def _whatsapp_product_inquiry_message(request, product):
+    """
+    Pre-filled WhatsApp message so the seller sees product name, price, public URL, and ID.
+    """
+    product_url = request.build_absolute_uri(reverse("product_detail", kwargs={"pk": product.pk}))
+    name = str(product.name).replace("\r", " ").replace("\n", " ").strip()
+    lines = [
+        "Hi! I'm interested in this product from your website:",
+        "",
+        f"Product: {name}",
+    ]
+    price = getattr(product, "price", None)
+    if price is not None:
+        lines.append(f"Price: {price}")
+    cat = getattr(product, "category", None)
+    if cat is not None:
+        lines.append(f"Category: {cat.name}")
+    lines.extend(
+        [
+            "",
+            f"Product page: {product_url}",
+            f"Product ID: {product.pk}",
+            "",
+            "Please let me know availability and how to order. Thank you!",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def _client_context(request):
@@ -277,7 +306,11 @@ class ProductDetailView(DetailView):
         client = getattr(self.request, "client", None)
         if not client:
             return Product.objects.none()
-        return Product.objects.filter(client=client, is_active=True).prefetch_related("extra_images")
+        return (
+            Product.objects.filter(client=client, is_active=True)
+            .select_related("category")
+            .prefetch_related("extra_images")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -288,7 +321,7 @@ class ProductDetailView(DetailView):
                     context.setdefault(k, v)
         product = context.get("product")
         if product:
-            context["whatsapp_message"] = "Hi, I'm interested in: " + str(product.name)
+            context["whatsapp_message"] = _whatsapp_product_inquiry_message(self.request, product)
             biz = context.get("business_name") or "SiteForge"
             c = getattr(self.request, "client", None)
             title = (getattr(product, "seo_title", "") or "").strip() or f"{product.name} — {biz}"

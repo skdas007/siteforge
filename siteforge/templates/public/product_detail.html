@@ -134,7 +134,7 @@
         <div class="text-muted mb-4">{{ product.description|linebreaks }}</div>
         {% endif %}
         {% if whatsapp_digits %}
-        <a href="https://wa.me/{{ whatsapp_digits }}?text={{ whatsapp_message|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-success">Buy in WhatsApp</a>
+        <a href="https://wa.me/{{ whatsapp_digits }}?text={{ whatsapp_message|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-success" title="Opens WhatsApp with your product name, price, link, and ID filled in for the seller">Buy in WhatsApp</a>
         {% endif %}
         <a href="{% url 'product_list' %}" class="btn btn-outline-secondary ms-2">View all products</a>
       </div>
