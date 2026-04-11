@@ -1,5 +1,9 @@
 from django import forms
 
+from apps.core.validators import validate_image_upload_size
+
+_IMAGE_HELP = "Maximum file size: 3 MB."
+
 
 class SiteSettingsForm(forms.Form):
     """Dashboard site settings; saves to Client."""
@@ -13,9 +17,22 @@ class SiteSettingsForm(forms.Form):
         label="WhatsApp number",
         help_text="With country code, no + or spaces (e.g. 919876543210). Used for 'Buy in WhatsApp' on product pages.",
     )
-    banner_image = forms.ImageField(required=False)
-    hero_image = forms.ImageField(required=False, label="Welcome image")
-    logo = forms.ImageField(required=False)
+    banner_image = forms.ImageField(
+        required=False,
+        validators=[validate_image_upload_size],
+        help_text=_IMAGE_HELP,
+    )
+    hero_image = forms.ImageField(
+        required=False,
+        label="Welcome image",
+        validators=[validate_image_upload_size],
+        help_text=_IMAGE_HELP,
+    )
+    logo = forms.ImageField(
+        required=False,
+        validators=[validate_image_upload_size],
+        help_text=_IMAGE_HELP,
+    )
 
     def __init__(self, theme_choices=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,6 +41,25 @@ class SiteSettingsForm(forms.Form):
             ("minimal", "Minimal"),
             ("clarity", "Clarity (agency style + animations)"),
         ]
+
+
+class CategoryForm(forms.Form):
+    """Dashboard: add product category (client-scoped in view)."""
+    name = forms.CharField(
+        label="Name",
+        max_length=100,
+        required=True,
+        strip=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "e.g. Electronics",
+                "maxlength": 100,
+                "id": "id_name",
+            }
+        ),
+        error_messages={"required": "Category name is required."},
+    )
 
 
 class ProductForm(forms.Form):
@@ -39,7 +75,11 @@ class ProductForm(forms.Form):
         help_text="Optional. Use categories to filter products on your site.",
         widget=forms.Select(attrs={"class": "form-control"}),
     )
-    image = forms.ImageField(required=False)
+    image = forms.ImageField(
+        required=False,
+        validators=[validate_image_upload_size],
+        help_text=_IMAGE_HELP,
+    )
     is_active = forms.BooleanField(required=False, initial=True)
     is_main = forms.BooleanField(
         required=False,

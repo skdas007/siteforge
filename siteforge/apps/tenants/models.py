@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+from apps.core.validators import validate_image_upload_size, validate_video_upload_size
+
 
 class Client(models.Model):
     """Tenant: one per site; resolved by domain in middleware."""
@@ -22,7 +24,12 @@ class Client(models.Model):
         null=True,
         blank=True,
     )
-    banner_image = models.ImageField(upload_to="tenants/banners/", blank=True, null=True)
+    banner_image = models.ImageField(
+        upload_to="tenants/banners/",
+        blank=True,
+        null=True,
+        validators=[validate_image_upload_size],
+    )
     hero_title = models.CharField(max_length=300, blank=True)
     hero_subtitle = models.TextField(blank=True)
     hero_image = models.ImageField(
@@ -30,8 +37,14 @@ class Client(models.Model):
         blank=True,
         null=True,
         help_text="Image shown on the right in the welcome/hero section below the carousel.",
+        validators=[validate_image_upload_size],
     )
-    logo = models.ImageField(upload_to="tenants/logos/", blank=True, null=True)
+    logo = models.ImageField(
+        upload_to="tenants/logos/",
+        blank=True,
+        null=True,
+        validators=[validate_image_upload_size],
+    )
     contact_email = models.EmailField(blank=True)
     whatsapp_number = models.CharField(
         max_length=20,
@@ -48,6 +61,10 @@ class Client(models.Model):
     def __str__(self):
         return f"{self.business_name} ({self.domain})"
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     @property
     def theme_slug(self):
         if self.theme_id:
@@ -62,8 +79,18 @@ class CarouselSlide(models.Model):
         on_delete=models.CASCADE,
         related_name="carousel_slides",
     )
-    image = models.ImageField(upload_to="tenants/carousel/", blank=True, null=True)
-    video = models.FileField(upload_to="tenants/carousel/", blank=True, null=True)
+    image = models.ImageField(
+        upload_to="tenants/carousel/",
+        blank=True,
+        null=True,
+        validators=[validate_image_upload_size],
+    )
+    video = models.FileField(
+        upload_to="tenants/carousel/",
+        blank=True,
+        null=True,
+        validators=[validate_video_upload_size],
+    )
     caption = models.CharField(max_length=200, blank=True)
     order = models.PositiveIntegerField(default=0)
 
@@ -72,3 +99,7 @@ class CarouselSlide(models.Model):
 
     def __str__(self):
         return f"Slide {self.order} ({self.client.business_name})"
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

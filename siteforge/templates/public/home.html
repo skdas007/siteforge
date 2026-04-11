@@ -211,27 +211,32 @@
       <div class="col-lg-6 order-1 order-lg-2">
         <div class="card shadow-sm h-100 border-0 rounded-3 p-4">
           <h3 class="h5 fw-bold mb-4">Send a message</h3>
+          <div id="contact-form-general-error" class="alert alert-danger d-none" role="alert"></div>
           <div id="contact-form-success" class="alert alert-success d-none" role="alert"></div>
+          {% if form and form.errors %}
+          {% include "includes/form_errors_alert.html" with form=form error_heading="Please correct your message and try again." %}
+          {% endif %}
           <form id="contact-form" method="post" action="{% url 'contact_submit' %}" novalidate>
             {% csrf_token %}
             <div class="row g-3">
               <div class="col-12">
                 <label for="id_name" class="form-label">Name</label>
-                <input type="text" name="name" id="id_name" class="form-control input-lift" required minlength="2" maxlength="200" placeholder="Your name" aria-describedby="id_name_error">
+                <input type="text" name="name" id="id_name" class="form-control input-lift" required minlength="2" maxlength="200" placeholder="Your name" value="{% if form %}{{ form.name.value|default:'' }}{% endif %}" aria-describedby="id_name_error">
                 <div id="id_name_error" class="invalid-feedback"></div>
               </div>
               <div class="col-12 col-sm-6">
                 <label for="id_email" class="form-label">Email</label>
-                <input type="email" name="email" id="id_email" class="form-control input-lift" required placeholder="you@example.com" aria-describedby="id_email_error">
+                <input type="email" name="email" id="id_email" class="form-control input-lift" required placeholder="you@example.com" value="{% if form %}{{ form.email.value|default:'' }}{% endif %}" aria-describedby="id_email_error">
                 <div id="id_email_error" class="invalid-feedback"></div>
               </div>
               <div class="col-12 col-sm-6">
                 <label for="id_phone" class="form-label">Phone (optional)</label>
-                <input type="text" name="phone" id="id_phone" class="form-control input-lift" maxlength="50" placeholder="+1 234 567 8900">
+                <input type="text" name="phone" id="id_phone" class="form-control input-lift" maxlength="50" placeholder="+1 234 567 8900" value="{% if form %}{{ form.phone.value|default:'' }}{% endif %}" aria-describedby="id_phone_error">
+                <div id="id_phone_error" class="invalid-feedback"></div>
               </div>
               <div class="col-12">
                 <label for="id_message" class="form-label">Message</label>
-                <textarea name="message" id="id_message" class="form-control input-lift" rows="4" required minlength="10" placeholder="Your message" aria-describedby="id_message_error"></textarea>
+                <textarea name="message" id="id_message" class="form-control input-lift" rows="4" required minlength="10" placeholder="Your message" aria-describedby="id_message_error">{% if form %}{{ form.message.value|default:'' }}{% endif %}</textarea>
                 <div id="id_message_error" class="invalid-feedback"></div>
               </div>
               <div class="col-12">
@@ -250,10 +255,15 @@
   var form = document.getElementById('contact-form');
   if (!form) return;
   var successEl = document.getElementById('contact-form-success');
+  var generalErrEl = document.getElementById('contact-form-general-error');
   var submitBtn = document.getElementById('contact-form-submit');
-  var fieldIds = ['name', 'email', 'message'];
+  var fieldIds = ['name', 'email', 'phone', 'message'];
 
   function clearErrors() {
+    if (generalErrEl) {
+      generalErrEl.classList.add('d-none');
+      generalErrEl.textContent = '';
+    }
     successEl.classList.add('d-none');
     successEl.classList.remove('alert-danger');
     successEl.classList.add('alert-success');
@@ -267,6 +277,11 @@
   }
 
   function showErrors(errors) {
+    if (!errors) return;
+    if (generalErrEl && errors.__all__ && errors.__all__.length) {
+      generalErrEl.textContent = errors.__all__.join(' ');
+      generalErrEl.classList.remove('d-none');
+    }
     fieldIds.forEach(function(name) {
       var msgs = errors[name];
       var errEl = document.getElementById('id_' + name + '_error');
@@ -321,6 +336,11 @@
   });
 })();
 </script>
+{% if form and form.errors %}
+<script>
+  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
+</script>
+{% endif %}
 
 {# Footer — Clarity-style #}
 <footer class="mt-auto py-4 bg-dark text-white">

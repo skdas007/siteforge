@@ -152,3 +152,7 @@ else:
     MEDIA_ROOT = os.environ.get("MEDIA_ROOT", str(BASE_DIR / "media"))
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Large enough that uploads reach validation (images max 3 MB, carousel MP4 max 15 MB).
+FILE_UPLOAD_MAX_MEMORY_SIZE = 16 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 18 * 1024 * 1024

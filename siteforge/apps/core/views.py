@@ -87,8 +87,18 @@ class IndexView(TemplateView):
 class ContactSubmitView(FormView):
     """Contact form POST. Saves to ContactSubmission; returns JSON for AJAX (no reload)."""
     form_class = ContactForm
+    template_name = "public/home.html"
     success_url = reverse_lazy("home")
     http_method_names = ["post"]
+
+    def get_context_data(self, **kwargs):
+        """Merge home page context so non-AJAX validation errors render the full page."""
+        context = super().get_context_data(**kwargs)
+        index_view = IndexView()
+        index_view.setup(self.request, *self.args, **self.kwargs)
+        for key, value in index_view.get_context_data().items():
+            context.setdefault(key, value)
+        return context
 
     def _is_ajax(self):
         return self.request.headers.get("X-Requested-With") == "XMLHttpRequest"

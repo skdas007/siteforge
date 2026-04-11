@@ -9,9 +9,10 @@
   <div class="card-body">
     <form method="post" action="{% url 'dashboard:category_add' %}">
       {% csrf_token %}
+      {% include "includes/form_errors_alert.html" with form=form %}
       <div class="mb-3">
         <label for="id_name" class="form-label">Name</label>
-        <input type="text" name="name" id="id_name" class="form-control" required maxlength="100" placeholder="e.g. Electronics">
+        {{ form.name }}
       </div>
       <button type="submit" class="btn btn-primary">Add category</button>
     </form>

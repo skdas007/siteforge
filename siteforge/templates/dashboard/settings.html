@@ -15,15 +15,9 @@
   <div class="card-body">
     <form method="post" enctype="multipart/form-data" action="{% url 'dashboard:settings' %}">
       {% csrf_token %}
-      {% if form.errors %}
-      <div class="alert alert-danger mb-3">
-        <strong>Please fix the errors below.</strong>
-        {% if form.non_field_errors %}<ul class="mb-0 mt-1">{% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>{% endif %}
-        {% for field in form %}{% if field.errors %}<div class="mt-1"><strong>{{ field.label }}:</strong> {{ field.errors|striptags }}</div>{% endif %}{% endfor %}
-      </div>
-      {% endif %}
+      {% include "includes/form_errors_alert.html" with form=form %}
       <h3 class="h6 mt-3">Carousel / Slider</h3>
-      <p class="form-text text-muted small">Images or MP4 videos appear in the auto-scroll slider on your homepage. Add as many slides as you need (max 100). Order is top to bottom. Wide images or landscape videos work best.</p>
+      <p class="form-text text-muted small">Images or MP4 videos appear in the auto-scroll slider on your homepage. Add as many slides as you need (max 100). Order is top to bottom. Wide images or landscape videos work best. <strong>Images:</strong> max 3 MB each. <strong>MP4:</strong> max 15 MB each.</p>
       <div id="carousel-slides-container" class="mb-3" data-reorder-url="{% url 'dashboard:carousel_reorder' %}">
         {% for slide in existing_slides %}
         <div class="card mb-2 carousel-slide-row" data-slide-index="{{ forloop.counter0 }}" data-slide-id="{{ slide.id }}">

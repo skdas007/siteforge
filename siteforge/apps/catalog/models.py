@@ -3,6 +3,8 @@ from decimal import Decimal
 
 from django.db import models
 
+from apps.core.validators import validate_image_upload_size
+
 
 class Category(models.Model):
     """Category for products; each client has their own categories."""
@@ -46,7 +48,12 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0"), blank=True)
-    image = models.ImageField(upload_to="catalog/products/", blank=True, null=True)
+    image = models.ImageField(
+        upload_to="catalog/products/",
+        blank=True,
+        null=True,
+        validators=[validate_image_upload_size],
+    )
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_main = models.BooleanField(
@@ -63,6 +70,7 @@ class Product(models.Model):
         return f"{self.name} ({self.client.business_name})"
 
     def save(self, *args, **kwargs):
+        self.full_clean()
         if self.is_main:
             Product.objects.filter(client=self.client).exclude(pk=self.pk).update(is_main=False)
         super().save(*args, **kwargs)
@@ -75,8 +83,15 @@ class ProductImage(models.Model):
         on_delete=models.CASCADE,
         related_name="extra_images",
     )
-    image = models.ImageField(upload_to="catalog/product_images/")
+    image = models.ImageField(
+        upload_to="catalog/product_images/",
+        validators=[validate_image_upload_size],
+    )
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ["order", "pk"]
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

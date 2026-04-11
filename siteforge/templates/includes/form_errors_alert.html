@@ -1,0 +1,14 @@
+{# Expects `form` in context. Optional: error_heading (default: "Please fix the errors below.") #}
+{% if form and form.errors %}
+<div class="alert alert-danger mb-3" role="alert">
+  <strong>{{ error_heading|default:"Please fix the errors below." }}</strong>
+  {% if form.non_field_errors %}
+  <ul class="mb-0 mt-2">{% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% for field in form %}
+    {% if field.errors %}
+    <div class="mt-2"><strong>{{ field.label }}:</strong> {{ field.errors|striptags }}</div>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %}

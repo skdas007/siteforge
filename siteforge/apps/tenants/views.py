@@ -11,14 +11,60 @@ from django.views.generic import FormView, ListView, TemplateView
 from django.views.generic.edit import DeleteView
 
 from apps.catalog.models import Category, Product
+from apps.core.validators import MAX_IMAGE_UPLOAD_BYTES, MAX_VIDEO_UPLOAD_BYTES
 
-from .forms import ProductForm, SiteSettingsForm
+from .forms import CategoryForm, ProductForm, SiteSettingsForm
 from .mixins import DashboardClientMixin
 from .models import CarouselSlide
 
 
 class DashboardHomeView(DashboardClientMixin, TemplateView):
     template_name = "dashboard/home.html"
+
+
+def _upload_is_video(f):
+    if not f:
+        return False
+    ct = getattr(f, "content_type", "") or ""
+    name = (getattr(f, "name", "") or "").lower()
+    return ct.startswith("video/") or name.endswith(".mp4")
+
+
+def _validate_carousel_uploads(request):
+    """Return a list of error messages for oversized or invalid carousel files."""
+    errors = []
+    slides = _get_carousel_slides_from_request(request)
+    for i, (f, _caption) in enumerate(slides):
+        if not f:
+            continue
+        if _upload_is_video(f):
+            if f.size > MAX_VIDEO_UPLOAD_BYTES:
+                errors.append(
+                    f"Carousel slide {i + 1}: video must be at most {MAX_VIDEO_UPLOAD_BYTES // (1024 * 1024)} MB."
+                )
+        else:
+            if not (getattr(f, "content_type", "") or "").startswith("image/"):
+                errors.append(
+                    f"Carousel slide {i + 1}: upload an image or MP4 video only."
+                )
+                continue
+            if f.size > MAX_IMAGE_UPLOAD_BYTES:
+                errors.append(f"Carousel slide {i + 1}: image must be at most 3 MB.")
+    return errors
+
+
+def _validate_extra_product_images(request):
+    """Return a list of error messages for additional product gallery uploads."""
+    errors = []
+    for i, f in enumerate(request.FILES.getlist("extra_images") or []):
+        if not f:
+            continue
+        if not (getattr(f, "content_type", "") or "").startswith("image/"):
+            errors.append(f"Additional image {i + 1}: upload an image file only.")
+            continue
+        if f.size > MAX_IMAGE_UPLOAD_BYTES:
+            errors.append(f"Additional image {i + 1}: must be at most 3 MB.")
+    return errors
 
 
 def _get_carousel_slides_from_request(request):
@@ -47,6 +93,17 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
     form_class = SiteSettingsForm
     template_name = "dashboard/settings.html"
     success_url = reverse_lazy("dashboard:settings")
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if not form.is_valid():
+            return self.form_invalid(form)
+        carousel_errors = _validate_carousel_uploads(request)
+        if carousel_errors:
+            for msg in carousel_errors:
+                form.add_error(None, msg)
+            return self.form_invalid(form)
+        return self.form_valid(form)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -143,13 +200,6 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         client.save()
 
         # Save carousel: update kept slides in place; add new; delete removed (post_delete deletes file from S3)
-        def _is_video(f):
-            if not f:
-                return False
-            ct = getattr(f, "content_type", "") or ""
-            name = (getattr(f, "name", "") or "").lower()
-            return ct.startswith("video/") or name.endswith(".mp4")
-
         slides_from_request = _get_carousel_slides_from_request(self.request)
         existing = list(CarouselSlide.objects.filter(client=client).order_by("order"))
         for i, (new_file, caption) in enumerate(slides_from_request):
@@ -157,7 +207,7 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
             if new_file:
                 if i < len(existing):
                     existing[i].delete()  # signal deletes image/video from storage
-                if _is_video(new_file):
+                if _upload_is_video(new_file):
                     CarouselSlide.objects.create(client=client, video=new_file, caption=cap, order=i)
                 else:
                     CarouselSlide.objects.create(client=client, image=new_file, caption=cap, order=i)
@@ -225,6 +275,17 @@ class ProductAddView(DashboardClientMixin, FormView):
     template_name = "dashboard/product_form.html"
     success_url = reverse_lazy("dashboard:product_list")
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if not form.is_valid():
+            return self.form_invalid(form)
+        extra_errors = _validate_extra_product_images(request)
+        if extra_errors:
+            for msg in extra_errors:
+                form.add_error(None, msg)
+            return self.form_invalid(form)
+        return self.form_valid(form)
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs.setdefault("category_queryset", _get_category_queryset(self.request))
@@ -265,6 +326,17 @@ class ProductEditView(DashboardClientMixin, FormView):
     form_class = ProductForm
     template_name = "dashboard/product_form.html"
     success_url = reverse_lazy("dashboard:product_list")
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if not form.is_valid():
+            return self.form_invalid(form)
+        extra_errors = _validate_extra_product_images(request)
+        if extra_errors:
+            for msg in extra_errors:
+                form.add_error(None, msg)
+            return self.form_invalid(form)
+        return self.form_valid(form)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -394,21 +466,20 @@ class CategoryListView(DashboardClientMixin, ListView):
         return _get_category_queryset(self.request)
 
 
-class CategoryCreateView(DashboardClientMixin, TemplateView):
+class CategoryCreateView(DashboardClientMixin, FormView):
+    form_class = CategoryForm
     template_name = "dashboard/category_form.html"
+    success_url = reverse_lazy("dashboard:category_list")
 
-    def post(self, request, *args, **kwargs):
-        name = (request.POST.get("name") or "").strip()
-        if not name:
-            messages.error(request, "Category name is required.")
-            return redirect("dashboard:category_add")
-        if Category.objects.filter(client=request.user.client, name__iexact=name).exists():
-            messages.warning(request, "A category with that name already exists.")
-            return redirect("dashboard:category_add")
-        order = _get_category_queryset(request).count()
-        Category.objects.create(client=request.user.client, name=name, order=order)
-        messages.success(request, "Category added.")
-        return redirect("dashboard:category_list")
+    def form_valid(self, form):
+        name = form.cleaned_data["name"].strip()
+        if Category.objects.filter(client=self.request.user.client, name__iexact=name).exists():
+            form.add_error("name", "A category with that name already exists.")
+            return self.form_invalid(form)
+        order = _get_category_queryset(self.request).count()
+        Category.objects.create(client=self.request.user.client, name=name, order=order)
+        messages.success(self.request, "Category added.")
+        return redirect(self.success_url)
 
 
 class CategoryDeleteView(DashboardClientMixin, View):

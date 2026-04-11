@@ -8,9 +8,7 @@
       <div class="card shadow-sm">
         <div class="card-body p-4">
           <h2 class="h4 mb-4">Dashboard login</h2>
-          {% if form.errors %}
-          <div class="alert alert-danger">Invalid username or password. Please try again.</div>
-          {% endif %}
+          {% include "includes/form_errors_alert.html" with form=form error_heading="We could not log you in. Please check the fields below." %}
           <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next|default:'/dashboard/' }}">
