@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django import forms
 
-from apps.core.validators import validate_image_upload_size
+from apps.core.validators import validate_favicon_upload, validate_image_upload_size
 
 _IMAGE_HELP = "Maximum file size: 3 MB."
 
@@ -37,6 +37,12 @@ class SiteSettingsForm(forms.Form):
         required=False,
         validators=[validate_image_upload_size],
         help_text=_IMAGE_HELP,
+    )
+    favicon = forms.FileField(
+        required=False,
+        validators=[validate_favicon_upload],
+        label="Favicon (browser tab icon)",
+        help_text="Use .ico, PNG, or SVG. Max 512 KB. Typical size 32×32 or 48×48 px.",
     )
     seo_title = forms.CharField(
         max_length=200,

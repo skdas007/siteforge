@@ -18,7 +18,7 @@ class ClientAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
     fieldsets = (
         (None, {"fields": ("user", "business_name", "slug", "domain", "theme", "is_active")}),
-        ("Content", {"fields": ("hero_title", "hero_subtitle", "banner_image", "hero_image", "logo", "contact_email", "whatsapp_number")}),
+        ("Content", {"fields": ("hero_title", "hero_subtitle", "banner_image", "hero_image", "logo", "favicon", "contact_email", "whatsapp_number")}),
         ("SEO & social previews", {"fields": ("seo_title", "seo_description", "seo_image"), "classes": ("collapse",)}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
     )

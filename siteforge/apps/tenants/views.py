@@ -155,6 +155,7 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         context["banner_image_url"] = client.banner_image.url if client.banner_image else None
         context["hero_image_url"] = client.hero_image.url if client.hero_image else None
         context["logo_url"] = client.logo.url if client.logo else None
+        context["favicon_url_settings"] = client.favicon.url if client.favicon else None
         if self.request.method == "POST":
             context["seo_title"] = post.get("seo_title", "")
             context["seo_description"] = post.get("seo_description", "")
@@ -196,6 +197,13 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         elif self.request.POST.get("remove_logo"):
             delete_stored_file(client.logo)
             client.logo = None
+
+        if form.cleaned_data.get("favicon"):
+            delete_stored_file(getattr(client, "favicon", None))
+            client.favicon = form.cleaned_data["favicon"]
+        elif self.request.POST.get("remove_favicon"):
+            delete_stored_file(getattr(client, "favicon", None))
+            client.favicon = None
 
         client.seo_title = (form.cleaned_data.get("seo_title", "") or "")[:200]
         client.seo_description = form.cleaned_data.get("seo_description", "") or ""

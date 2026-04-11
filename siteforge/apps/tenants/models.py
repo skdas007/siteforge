@@ -2,7 +2,11 @@ from django.conf import settings
 from django.db import models
 
 from apps.core.storage_cleanup import clear_missing_file_fields
-from apps.core.validators import validate_image_upload_size, validate_video_upload_size
+from apps.core.validators import (
+    validate_favicon_upload,
+    validate_image_upload_size,
+    validate_video_upload_size,
+)
 
 
 class Client(models.Model):
@@ -46,6 +50,13 @@ class Client(models.Model):
         null=True,
         validators=[validate_image_upload_size],
     )
+    favicon = models.FileField(
+        upload_to="tenants/favicons/",
+        blank=True,
+        null=True,
+        validators=[validate_favicon_upload],
+        help_text="Browser tab icon (.ico, PNG, or SVG). Max 512 KB.",
+    )
     contact_email = models.EmailField(blank=True)
     whatsapp_number = models.CharField(
         max_length=20,
@@ -85,6 +96,7 @@ class Client(models.Model):
             "banner_image",
             "hero_image",
             "logo",
+            "favicon",
             "seo_image",
         )
 
