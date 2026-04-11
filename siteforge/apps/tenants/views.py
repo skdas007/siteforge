@@ -3,6 +3,7 @@ import json
 import re
 
 from django.contrib import messages
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -261,14 +262,14 @@ class CarouselReorderView(DashboardClientMixin, View):
         given_ids = set(int(x) for x in order_ids if isinstance(x, (int, str)) and str(x).isdigit())
         if given_ids != valid_ids:
             return JsonResponse({"error": "Order must contain exactly your slide IDs"}, status=400)
-        for i, pk in enumerate(order_ids):
-            try:
-                slide = qs.filter(pk=int(pk)).first()
-                if slide and slide.order != i:
-                    slide.order = i
-                    slide.save(update_fields=["order"])
-            except (ValueError, TypeError):
-                pass
+        # QuerySet.update avoids model save()/full_clean() — file fields must not hit storage on reorder.
+        with transaction.atomic():
+            for new_order, raw_id in enumerate(order_ids):
+                try:
+                    pk = int(raw_id)
+                except (ValueError, TypeError):
+                    continue
+                qs.filter(pk=pk).update(order=new_order)
         return JsonResponse({"ok": True})
 
 
@@ -500,12 +501,14 @@ class ProductReorderView(DashboardClientMixin, View):
         given_ids = set(int(x) for x in order_ids if isinstance(x, (int, str)) and str(x).isdigit())
         if given_ids != valid_ids:
             return JsonResponse({"error": "Order must contain exactly your product IDs"}, status=400)
-        id_to_index = {int(pk): i for i, pk in enumerate(order_ids)}
-        for product in qs:
-            new_order = id_to_index.get(product.pk)
-            if new_order is not None and product.order != new_order:
-                product.order = new_order
-                product.save(update_fields=["order"])
+        # QuerySet.update avoids Product.save() → full_clean(); missing S3 objects would 500 on ImageField.size.
+        with transaction.atomic():
+            for new_order, raw_id in enumerate(order_ids):
+                try:
+                    pk = int(raw_id)
+                except (ValueError, TypeError):
+                    continue
+                qs.filter(pk=pk).update(order=new_order)
         return JsonResponse({"ok": True})
 
 

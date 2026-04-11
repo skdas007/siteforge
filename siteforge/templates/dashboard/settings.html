@@ -8,58 +8,64 @@
 </style>
 {% endblock %}
 {% block dashboard_content %}
-<div class="card shadow-sm">
+<div class="card dashboard-card">
   <div class="card-header">
     <h2 class="h5 mb-0">Site settings</h2>
   </div>
   <div class="card-body">
-    <form method="post" enctype="multipart/form-data" action="{% url 'dashboard:settings' %}">
+    <form method="post" enctype="multipart/form-data" action="{% url 'dashboard:settings' %}" class="dashboard-form dashboard-form--wide">
       {% csrf_token %}
       {% include "includes/form_errors_alert.html" with form=form %}
-      <h3 class="h6 mt-3">Carousel / Slider</h3>
-      <p class="form-text text-muted small">Images or MP4 videos appear in the auto-scroll slider on your homepage. Add as many slides as you need (max 100). Order is top to bottom. Wide images or landscape videos work best. <strong>Images:</strong> max 3 MB each. <strong>MP4:</strong> max 15 MB each.</p>
+      <p class="dashboard-form-section-title">Carousel / slider</p>
+      <div class="dashboard-callout mb-3">
+        <p class="mb-0 small">Slides appear full-width on your homepage (max <strong>100</strong>). <strong>Images:</strong> max 3 MB — <span class="upload-rec-size-dim">1920×1080</span> or <span class="upload-rec-size-dim">1600×900</span> landscape, width ≥ <span class="upload-rec-size-dim">1200 px</span>. <strong>Video:</strong> max 15 MB — <span class="upload-rec-size-dim">1280×720</span> MP4.</p>
+      </div>
       <div id="carousel-slides-container" class="mb-3" data-reorder-url="{% url 'dashboard:carousel_reorder' %}">
         {% for slide in existing_slides %}
-        <div class="card mb-2 carousel-slide-row" data-slide-index="{{ forloop.counter0 }}" data-slide-id="{{ slide.id }}">
-          <div class="card-body py-2 py-sm-3 d-flex gap-2">
-            <div class="carousel-drag-handle align-self-start pt-1" draggable="true" title="Drag to reorder" aria-label="Drag to reorder" style="cursor: grab; user-select: none;">⋮⋮</div>
-            <div class="flex-grow-1">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h4 class="h6 text-muted mb-0">Slide <span class="slide-number">{{ forloop.counter }}</span></h4>
-              <button type="button" class="btn btn-sm btn-outline-danger carousel-remove-slide" aria-label="Remove slide">Remove</button>
+        <div class="card mb-3 carousel-slide-row" data-slide-index="{{ forloop.counter0 }}" data-slide-id="{{ slide.id }}">
+          <div class="card-body carousel-slide-inner d-flex flex-column flex-md-row gap-3 gap-md-2">
+            <div class="carousel-drag-handle flex-shrink-0" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</div>
+            <div class="flex-grow-1 min-w-0">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <span class="dashboard-slide-badge">Slide <span class="slide-number">{{ forloop.counter }}</span></span>
+              <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 carousel-remove-slide" aria-label="Remove slide">Remove</button>
             </div>
-            <div class="row g-2">
-              <div class="col-md-6">
-                <label class="form-label small">Image or video (MP4)</label>
-                <input type="file" name="carousel_image_{{ forloop.counter0 }}" class="form-control form-control-sm carousel-image-input" accept="image/*,video/mp4,.mp4">
-                {% if slide.image_url %}<div class="mt-1"><img src="{{ slide.image_url }}" alt="" class="img-thumbnail carousel-preview" style="max-height: 60px;"></div>{% elif slide.is_video %}<div class="mt-1 text-muted small">Video (MP4)</div>{% endif %}
+            <div class="row g-3">
+              <div class="col-12 col-lg-6">
+                <label class="form-label mb-1">Media file</label>
+                <p class="form-text small mb-2">Image or MP4 video</p>
+                <input type="file" name="carousel_image_{{ forloop.counter0 }}" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4">
+                {% if slide.image_url %}<div class="mt-2"><img src="{{ slide.image_url }}" alt="" class="img-thumbnail carousel-preview rounded-3 border" style="max-height: 72px;"></div>{% elif slide.is_video %}<div class="mt-2 text-muted small">Current: video (MP4)</div>{% endif %}
               </div>
-              <div class="col-md-6">
-                <label class="form-label small">Caption (optional)</label>
-                <input type="text" name="carousel_caption_{{ forloop.counter0 }}" class="form-control form-control-sm" value="{{ slide.caption|default:'' }}" placeholder="Caption" maxlength="200">
+              <div class="col-12 col-lg-6 d-flex flex-column">
+                <label class="form-label mb-1" for="carousel_caption_{{ forloop.counter0 }}">Caption <span class="text-muted fw-normal">(optional)</span></label>
+                <p class="form-text small mb-2">Short line under the slide on large screens</p>
+                <input type="text" name="carousel_caption_{{ forloop.counter0 }}" id="carousel_caption_{{ forloop.counter0 }}" class="form-control" value="{{ slide.caption|default:'' }}" placeholder="e.g. Summer collection" maxlength="200">
               </div>
             </div>
             </div>
           </div>
         </div>
         {% empty %}
-        <div class="card mb-2 carousel-slide-row" data-slide-index="0">
-          <div class="card-body py-2 py-sm-3 d-flex gap-2">
-            <div class="carousel-drag-handle align-self-start pt-1" draggable="true" title="Drag to reorder" aria-label="Drag to reorder" style="cursor: grab; user-select: none;">⋮⋮</div>
-            <div class="flex-grow-1">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h4 class="h6 text-muted mb-0">Slide <span class="slide-number">1</span></h4>
-              <button type="button" class="btn btn-sm btn-outline-danger carousel-remove-slide" aria-label="Remove slide">Remove</button>
+        <div class="card mb-3 carousel-slide-row" data-slide-index="0">
+          <div class="card-body carousel-slide-inner d-flex flex-column flex-md-row gap-3 gap-md-2">
+            <div class="carousel-drag-handle flex-shrink-0" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</div>
+            <div class="flex-grow-1 min-w-0">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <span class="dashboard-slide-badge">Slide <span class="slide-number">1</span></span>
+              <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 carousel-remove-slide" aria-label="Remove slide">Remove</button>
             </div>
-            <div class="row g-2">
-              <div class="col-md-6">
-                <label class="form-label small">Image or video (MP4)</label>
-                <input type="file" name="carousel_image_0" class="form-control form-control-sm carousel-image-input" accept="image/*,video/mp4,.mp4">
-                <div class="mt-1 carousel-preview-wrap" style="display: none;"><img src="" alt="" class="img-thumbnail carousel-preview" style="max-height: 60px;"></div>
+            <div class="row g-3">
+              <div class="col-12 col-lg-6">
+                <label class="form-label mb-1">Media file</label>
+                <p class="form-text small mb-2">Image or MP4 video</p>
+                <input type="file" name="carousel_image_0" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4">
+                <div class="mt-2 carousel-preview-wrap" style="display: none;"><img src="" alt="" class="img-thumbnail carousel-preview rounded-3 border" style="max-height: 72px;"></div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label small">Caption (optional)</label>
-                <input type="text" name="carousel_caption_0" class="form-control form-control-sm" value="" placeholder="Caption" maxlength="200">
+              <div class="col-12 col-lg-6 d-flex flex-column">
+                <label class="form-label mb-1" for="carousel_caption_0">Caption <span class="text-muted fw-normal">(optional)</span></label>
+                <p class="form-text small mb-2">Short line under the slide on large screens</p>
+                <input type="text" name="carousel_caption_0" id="carousel_caption_0" class="form-control" value="" placeholder="e.g. Summer collection" maxlength="200">
               </div>
             </div>
             </div>
@@ -67,28 +73,30 @@
         </div>
         {% endfor %}
       </div>
-      <div class="mb-3">
-        <button type="button" id="carousel-add-slide" class="btn btn-outline-primary btn-sm">+ Add slide</button>
-        <span id="carousel-slide-count" class="text-muted small ms-2"></span>
+      <div class="mb-4 d-flex flex-wrap align-items-center gap-2">
+        <button type="button" id="carousel-add-slide" class="btn btn-primary btn-sm rounded-pill px-3">+ Add slide</button>
+        <span id="carousel-slide-count" class="text-muted small"></span>
       </div>
       <template id="carousel-row-tpl">
-        <div class="card mb-2 carousel-slide-row" data-slide-index="">
-          <div class="card-body py-2 py-sm-3 d-flex gap-2">
-            <div class="carousel-drag-handle align-self-start pt-1" draggable="true" title="Drag to reorder" aria-label="Drag to reorder" style="cursor: grab; user-select: none;">⋮⋮</div>
-            <div class="flex-grow-1">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h4 class="h6 text-muted mb-0">Slide <span class="slide-number"></span></h4>
-              <button type="button" class="btn btn-sm btn-outline-danger carousel-remove-slide" aria-label="Remove slide">Remove</button>
+        <div class="card mb-3 carousel-slide-row" data-slide-index="">
+          <div class="card-body carousel-slide-inner d-flex flex-column flex-md-row gap-3 gap-md-2">
+            <div class="carousel-drag-handle flex-shrink-0" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</div>
+            <div class="flex-grow-1 min-w-0">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <span class="dashboard-slide-badge">Slide <span class="slide-number"></span></span>
+              <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 carousel-remove-slide" aria-label="Remove slide">Remove</button>
             </div>
-            <div class="row g-2">
-              <div class="col-md-6">
-                <label class="form-label small">Image or video (MP4)</label>
-                <input type="file" name="carousel_image_TMP" class="form-control form-control-sm carousel-image-input" accept="image/*,video/mp4,.mp4">
-                <div class="mt-1 carousel-preview-wrap" style="display: none;"><img src="" alt="" class="img-thumbnail carousel-preview" style="max-height: 60px;"></div>
+            <div class="row g-3">
+              <div class="col-12 col-lg-6">
+                <label class="form-label mb-1">Media file</label>
+                <p class="form-text small mb-2">Image or MP4 video</p>
+                <input type="file" name="carousel_image_TMP" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4">
+                <div class="mt-2 carousel-preview-wrap" style="display: none;"><img src="" alt="" class="img-thumbnail carousel-preview rounded-3 border" style="max-height: 72px;"></div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label small">Caption (optional)</label>
-                <input type="text" name="carousel_caption_TMP" class="form-control form-control-sm" value="" placeholder="Caption" maxlength="200">
+              <div class="col-12 col-lg-6 d-flex flex-column">
+                <label class="form-label mb-1">Caption <span class="text-muted fw-normal">(optional)</span></label>
+                <p class="form-text small mb-2">Short line under the slide on large screens</p>
+                <input type="text" name="carousel_caption_TMP" class="form-control" value="" placeholder="e.g. Summer collection" maxlength="200">
               </div>
             </div>
             </div>
@@ -96,7 +104,7 @@
         </div>
       </template>
 
-      <h3 class="h6 mt-4">Fallback banner image</h3>
+      <p class="dashboard-form-section-title">Fallback banner image</p>
       <div class="mb-3">
         <label for="id_banner" class="form-label">Single banner (used if no carousel images)</label>
         {% if banner_image_url %}
@@ -107,10 +115,10 @@
         </div>
         {% endif %}
         <input type="file" name="banner_image" id="id_banner" class="form-control" accept="image/*">
-        <div class="form-text">Optional. Choose an image and click Save settings.</div>
+        <p class="upload-rec-size">Recommended: <span class="upload-rec-size-dim">1920×720 px</span> or <span class="upload-rec-size-dim">1600×600 px</span> landscape (full-width fallback). <strong>Max 3 MB.</strong></p>
       </div>
 
-      <h3 class="h6 mt-4">Hero content</h3>
+      <p class="dashboard-form-section-title">Hero content</p>
       <div class="mb-3">
         <label for="id_hero_title" class="form-label">Hero title</label>
         <input type="text" name="hero_title" id="id_hero_title" class="form-control" value="{{ hero_title|default:'' }}" placeholder="Welcome to our site">
@@ -120,7 +128,7 @@
         <textarea name="hero_subtitle" id="id_hero_subtitle" class="form-control" rows="2" placeholder="Short tagline or description">{{ hero_subtitle|default:'' }}</textarea>
       </div>
 
-      <h3 class="h6 mt-4">Welcome image</h3>
+      <p class="dashboard-form-section-title">Welcome image</p>
       <p class="form-text text-muted small">Shown on the right in the welcome/hero section (below the carousel).</p>
       <div class="mb-3">
         <label for="id_hero_image" class="form-label">Upload welcome image</label>
@@ -132,10 +140,10 @@
         </div>
         {% endif %}
         <input type="file" name="hero_image" id="id_hero_image" class="form-control" accept="image/*">
-        <div class="form-text">Optional. Choose an image and click Save settings.</div>
+        <p class="upload-rec-size">Recommended: <span class="upload-rec-size-dim">800×800 px</span> square or <span class="upload-rec-size-dim">800×1000 px</span> portrait (welcome section beside text). <strong>Max 3 MB.</strong></p>
       </div>
 
-      <h3 class="h6 mt-4">Logo</h3>
+      <p class="dashboard-form-section-title">Logo</p>
       <div class="mb-3">
         <label for="id_logo" class="form-label">Upload logo</label>
         {% if logo_url %}
@@ -146,9 +154,10 @@
         </div>
         {% endif %}
         <input type="file" name="logo" id="id_logo" class="form-control" accept="image/*">
+        <p class="upload-rec-size">Recommended: <span class="upload-rec-size-dim">240×112 px</span> or wider, or square <span class="upload-rec-size-dim">240×240 px</span> — site header shows your logo up to about <span class="upload-rec-size-dim">200×56 px</span> (PNG or JPG with transparent or solid background). <strong>Max 3 MB.</strong></p>
       </div>
 
-      <h3 class="h6 mt-4">Theme</h3>
+      <p class="dashboard-form-section-title">Theme</p>
       <div class="mb-3">
         <label class="form-label">Select theme</label>
         <div class="d-flex flex-wrap gap-3">
@@ -167,7 +176,7 @@
         </div>
       </div>
 
-      <h3 class="h6 mt-4">Contact & WhatsApp</h3>
+      <p class="dashboard-form-section-title">Contact &amp; WhatsApp</p>
       <div class="mb-3">
         <label for="id_contact_email" class="form-label">Email for contact form notifications</label>
         <input type="email" name="contact_email" id="id_contact_email" class="form-control" value="{{ contact_email|default:'' }}" placeholder="you@example.com">
@@ -178,7 +187,7 @@
         <p class="form-text small text-muted">Country code + number, no spaces (e.g. 919876543210). Shown as &quot;Buy in WhatsApp&quot; on product pages.</p>
       </div>
 
-      <h3 class="h6 mt-4">SEO &amp; social previews</h3>
+      <p class="dashboard-form-section-title">SEO &amp; social previews</p>
       <p class="form-text text-muted small">Used for Google and when someone shares your site (WhatsApp, Facebook, LinkedIn). You can also set SEO per product on the product form.</p>
       <div class="mb-3">
         <label for="id_seo_title" class="form-label">Default page title (home)</label>
@@ -200,10 +209,12 @@
         </div>
         {% endif %}
         <input type="file" name="seo_image" id="id_seo_image" class="form-control" accept="image/*">
-        <p class="form-text small text-muted mb-0">Optional. Landscape ~1200×630 px works well. Max 3 MB.</p>
+        <p class="upload-rec-size">Recommended: <span class="upload-rec-size-dim">1200×630 px</span> (1.91∶1) for WhatsApp, Facebook, and Google link previews. <strong>Max 3 MB.</strong></p>
       </div>
 
-      <button type="submit" class="btn btn-primary mt-3">Save settings</button>
+      <div class="dashboard-form-actions">
+        <button type="submit" class="btn btn-primary">Save settings</button>
+      </div>
     </form>
   </div>
 </div>

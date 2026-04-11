@@ -1,64 +1,75 @@
 {% extends "dashboard/base_dashboard.html" %}
 {% block title %}Products{% endblock %}
 {% block dashboard_content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h2 class="h5 mb-0">Products</h2>
-  <a href="{% url 'dashboard:product_add' %}" class="btn btn-primary">Add product</a>
-</div>
-<div class="card shadow-sm">
+<div class="card dashboard-card">
+  <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <h2 class="h5 mb-0">Products</h2>
+      <p class="text-muted small mb-0 mt-1">{{ products|length }} product{{ products|length|pluralize }} · drag <span class="fw-semibold text-body">⋮⋮</span> to reorder</p>
+    </div>
+    <a href="{% url 'dashboard:product_add' %}" class="btn btn-primary btn-sm rounded-pill px-4">+ Add product</a>
+  </div>
   <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
+    <div class="table-responsive dashboard-table-wrap dashboard-products-table-host position-relative">
+      <table class="table table-hover mb-0 align-middle dashboard-table-products">
+        <thead>
           <tr>
-            <th style="width: 52px;" class="text-center" aria-label="Drag to reorder"></th>
-            <th style="width: 60px;">Order</th>
-            <th>Image</th>
+            <th style="width: 3.25rem;" class="text-center" aria-label="Drag to reorder"></th>
+            <th style="width: 3rem;" class="text-center">#</th>
+            <th style="width: 3.75rem;">Photo</th>
             <th>Name</th>
-            <th>Category</th>
+            <th class="d-none d-md-table-cell">Category</th>
             <th>Price</th>
-            <th>Main</th>
-            <th>Active</th>
-            <th style="width: 120px;">Actions</th>
+            <th class="text-center d-none d-lg-table-cell">Main</th>
+            <th class="text-center">On site</th>
+            <th style="min-width: 7.5rem;">Actions</th>
           </tr>
         </thead>
         <tbody id="product-list-body">
           {% for product in products %}
           <tr data-id="{{ product.id }}" class="product-row">
-            <td class="align-middle text-center product-drag-handle" draggable="true" style="cursor: grab;" title="Drag to reorder" aria-label="Drag to reorder">
-              <span class="text-muted" style="user-select: none;">⋮⋮</span>
+            <td class="text-center product-drag-handle p-2" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">
+              <span class="dashboard-table-drag-grip" aria-hidden="true">⋮⋮</span>
             </td>
-            <td class="align-middle order-num"><span class="text-muted">{{ product.order|default:forloop.counter }}</span></td>
-            <td class="align-middle">
+            <td class="text-center order-num"><span class="badge rounded-pill bg-light text-dark border fw-normal">{{ forloop.counter }}</span></td>
+            <td>
               {% if product.image %}
-              <img src="{{ product.image.url }}" alt="" style="height: 40px; width: 40px; object-fit: cover;" class="rounded">
+              <img src="{{ product.image.url }}" alt="" class="dashboard-product-thumb" width="44" height="44">
               {% else %}
-              <span class="text-muted">—</span>
+              <span class="text-muted small">—</span>
               {% endif %}
             </td>
-            <td class="align-middle">{{ product.name }}</td>
-            <td class="align-middle">{% if product.category %}{{ product.category.name }}{% else %}—{% endif %}</td>
-            <td class="align-middle">
+            <td class="fw-medium">{{ product.name }}</td>
+            <td class="d-none d-md-table-cell text-muted small">{% if product.category %}{{ product.category.name }}{% else %}—{% endif %}</td>
+            <td>
               {% if product.has_discount %}
                 <span class="fw-semibold text-success">{{ product.price }}</span>
-                <span class="text-muted text-decoration-line-through small ms-1">{{ product.compare_at_price }}</span>
+                <span class="text-muted text-decoration-line-through small ms-1 d-none d-sm-inline">{{ product.compare_at_price }}</span>
                 {% if product.discount_percent %}<span class="badge bg-danger ms-1">{{ product.discount_percent }}%</span>{% endif %}
               {% else %}
-                {{ product.price }}
+                <span class="fw-medium">{{ product.price }}</span>
               {% endif %}
             </td>
-            <td class="align-middle">{% if product.is_main %}<span class="badge bg-primary">Main</span>{% else %}—{% endif %}</td>
-            <td class="align-middle">
-              {% if product.is_active %}Yes{% else %}No{% endif %}
+            <td class="text-center d-none d-lg-table-cell">{% if product.is_main %}<span class="badge bg-primary rounded-pill">Main</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+            <td class="text-center">
+              {% if product.is_active %}<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Yes</span>{% else %}<span class="badge bg-secondary-subtle text-secondary border rounded-pill">No</span>{% endif %}
             </td>
-            <td class="align-middle">
-              <a href="{% url 'dashboard:product_edit' product.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
-              <a href="{% url 'dashboard:product_delete' product.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+            <td>
+              <div class="dashboard-product-actions">
+                <a href="{% url 'dashboard:product_edit' product.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-2 px-sm-3">Edit</a>
+                <a href="{% url 'dashboard:product_delete' product.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-2 px-sm-3">Delete</a>
+              </div>
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="9" class="text-center text-muted py-4">No products yet. <a href="{% url 'dashboard:product_add' %}">Add your first product</a>.</td>
+            <td colspan="9" class="p-0">
+              <div class="dashboard-callout m-3 text-center">
+                <p class="mb-2 fw-medium">No products yet</p>
+                <p class="small text-muted mb-3">Add a product to show it on your public site and enable WhatsApp checkout from the product page.</p>
+                <a href="{% url 'dashboard:product_add' %}" class="btn btn-primary btn-sm rounded-pill px-4">Add your first product</a>
+              </div>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
@@ -66,19 +77,142 @@
     </div>
   </div>
 </div>
-<p class="small text-muted mt-2">Drag the <span class="text-dark">⋮⋮</span> handle to reorder products. Order is saved automatically.</p>
+<p class="small text-muted mt-3 mb-0 d-none d-md-block">Order is saved automatically when you drop a row.</p>
+{% endblock %}
 {% block extra_js %}
 <script>
 (function() {
   const tbody = document.getElementById('product-list-body');
   if (!tbody) return;
   const rows = Array.from(tbody.querySelectorAll('tr.product-row'));
+
+  function playProductDragDemo(host, rowA, rowB) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    function relToHost(el) {
+      var hr = host.getBoundingClientRect();
+      var er = el.getBoundingClientRect();
+      return {
+        top: er.top - hr.top + host.scrollTop,
+        left: er.left - hr.left + host.scrollLeft,
+        width: er.width,
+        height: er.height
+      };
+    }
+    var r1 = relToHost(rowA);
+    var r2 = relToHost(rowB);
+    if (r1.width < 8 || r1.height < 8) return;
+    var dy = r2.top - r1.top;
+    var gripA = rowA.querySelector('.product-drag-handle');
+    var gripB = rowB.querySelector('.product-drag-handle');
+    if (!gripA || !gripB) return;
+    var g1 = relToHost(gripA);
+    var g2 = relToHost(gripB);
+    var handW = 48;
+    var handH = 56;
+    var hx0 = g1.left + g1.width / 2 - handW / 2;
+    var hy0 = g1.top + g1.height / 2 - handH * 0.72;
+    var hx1 = g2.left + g2.width / 2 - handW / 2;
+    var hy1 = g2.top + g2.height / 2 - handH * 0.72;
+    var dxHand = hx1 - hx0;
+    var dyHand = hy1 - hy0;
+
+    var nameCell = rowA.querySelector('td:nth-child(4)');
+    var name = (nameCell && nameCell.textContent) ? nameCell.textContent.trim() : 'Product';
+    if (name.length > 48) name = name.slice(0, 46) + '…';
+
+    var layer = document.createElement('div');
+    layer.className = 'dashboard-drag-demo-layer';
+    layer.setAttribute('aria-hidden', 'true');
+
+    var ghost = document.createElement('div');
+    ghost.className = 'dashboard-drag-demo-ghost';
+    ghost.style.width = r1.width + 'px';
+    ghost.style.height = r1.height + 'px';
+    ghost.style.left = r1.left + 'px';
+    ghost.style.top = r1.top + 'px';
+    ghost.innerHTML = '<div class="dashboard-drag-demo-ghost-inner">' +
+      '<span class="dashboard-drag-demo-ghost-grip" aria-hidden="true">⋮⋮</span>' +
+      '<span class="dashboard-drag-demo-ghost-name"></span></div>';
+    ghost.querySelector('.dashboard-drag-demo-ghost-name').textContent = name;
+
+    var hand = document.createElement('div');
+    hand.className = 'dashboard-drag-demo-hand';
+    hand.style.width = handW + 'px';
+    hand.style.height = handH + 'px';
+    hand.style.left = hx0 + 'px';
+    hand.style.top = hy0 + 'px';
+    hand.innerHTML =
+      '<div class="dashboard-drag-demo-hand-disk" aria-hidden="true"></div>' +
+      '<span class="dashboard-drag-demo-hand-emoji" aria-hidden="true">👆</span>';
+
+    layer.appendChild(ghost);
+    layer.appendChild(hand);
+    host.appendChild(layer);
+
+    rowA.classList.add('dashboard-drag-demo-source');
+    var cleaned = false;
+    function cleanup() {
+      if (cleaned) return;
+      cleaned = true;
+      rowA.classList.remove('dashboard-drag-demo-source');
+      rowB.classList.remove('dashboard-drag-demo-target');
+      if (layer.parentNode) layer.parentNode.removeChild(layer);
+    }
+
+    var duration = 3200;
+    var animG = ghost.animate(
+      [
+        { transform: 'translate(0,0) scale(1)', opacity: 0.9 },
+        { transform: 'translate(0,0) scale(1.02)', opacity: 1, offset: 0.11 },
+        { transform: 'translate(0,' + dy + 'px) scale(1.02)', opacity: 1, offset: 0.52 },
+        { transform: 'translate(0,' + dy + 'px) scale(1)', opacity: 1, offset: 0.68 },
+        { transform: 'translate(0,' + dy + 'px) scale(0.99)', opacity: 0, offset: 1 }
+      ],
+      { duration: duration, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }
+    );
+    var animH = hand.animate(
+      [
+        { transform: 'translate(0,0) rotate(-8deg)', opacity: 1 },
+        { transform: 'translate(0,6px) rotate(-4deg) scale(1.08)', opacity: 1, offset: 0.09 },
+        { transform: 'translate(' + (dxHand * 0.38) + 'px,' + (dyHand * 0.38 + 4) + 'px) rotate(0deg) scale(1.02)', opacity: 1, offset: 0.3 },
+        { transform: 'translate(' + dxHand + 'px,' + dyHand + 'px) rotate(0deg) scale(1)', opacity: 1, offset: 0.54 },
+        { transform: 'translate(' + dxHand + 'px,' + dyHand + 'px) scale(1)', opacity: 1, offset: 0.78 },
+        { transform: 'translate(' + dxHand + 'px,' + (dyHand + 10) + 'px) scale(0.94)', opacity: 1, offset: 0.9 },
+        { transform: 'translate(' + dxHand + 'px,' + (dyHand + 10) + 'px) scale(0.94)', opacity: 0, offset: 1 }
+      ],
+      { duration: duration, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }
+    );
+
+    window.setTimeout(function() { rowB.classList.add('dashboard-drag-demo-target'); }, Math.round(duration * 0.22));
+    window.setTimeout(function() { rowB.classList.remove('dashboard-drag-demo-target'); }, Math.round(duration * 0.72));
+
+    if (animG.finished && animH.finished) {
+      Promise.all([animG.finished, animH.finished]).then(cleanup).catch(cleanup);
+    } else {
+      window.setTimeout(cleanup, duration + 200);
+    }
+  }
+
+  /* Demo: ghost row + finger move from row 1 → row 2 (only when reorder is possible). */
+  if (rows.length >= 2) {
+    var host = tbody.closest('.dashboard-products-table-host');
+    if (host) {
+      window.requestAnimationFrame(function() {
+        window.setTimeout(function() {
+          playProductDragDemo(host, rows[0], rows[1]);
+        }, 80);
+      });
+    }
+  }
+
   if (rows.length < 2) return;
 
-  function getCookie(name) {
-    const parts = document.cookie.split('; ');
-    const found = parts.find(function(p) { return p.startsWith(name + '='); });
-    return found ? decodeURIComponent(found.split('=').slice(1).join('=')) : null;
+  /* Session-backed CSRF (CSRF_USE_SESSIONS): cookie may not match; use form token from base layout. */
+  function getCsrfToken() {
+    var el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    return el ? el.value : '';
   }
 
   function getOrder() {
@@ -86,18 +220,23 @@
     return Array.prototype.map.call(r, function(el) { return parseInt(el.getAttribute('data-id'), 10); });
   }
 
+  function renumberRows() {
+    var rows = tbody.querySelectorAll('tr.product-row');
+    for (var i = 0; i < rows.length; i++) {
+      var badge = rows[i].querySelector('.order-num .badge');
+      if (badge) badge.textContent = String(i + 1);
+    }
+  }
+
   function saveOrder(ids) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '{% url "dashboard:product_reorder" %}', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+    xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
-        var r = tbody.querySelectorAll('tr.product-row');
-        for (var i = 0; i < r.length; i++) {
-          var numCell = r[i].querySelector('.order-num span');
-          if (numCell) numCell.textContent = i + 1;
-        }
+        renumberRows();
       }
     };
     xhr.send(JSON.stringify({ order: ids }));
@@ -139,9 +278,9 @@
     if (draggedRow.parentNode === tbody) {
       tbody.insertBefore(draggedRow, row);
     }
+    renumberRows();
     saveOrder(getOrder());
   });
 })();
 </script>
-{% endblock %}
 {% endblock %}

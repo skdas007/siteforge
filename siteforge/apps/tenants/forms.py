@@ -6,6 +6,9 @@ from apps.core.validators import validate_image_upload_size
 
 _IMAGE_HELP = "Maximum file size: 3 MB."
 
+# Primary product image help_text; other sizes are in dashboard templates.
+_REC_PRODUCT_MAIN = "Recommended: at least 800×800 px, or 1000×1000 / 1200×900 px for sharp grids and zoom (list cards ~220 px tall)."
+
 
 class SiteSettingsForm(forms.Form):
     """Dashboard site settings; saves to Client."""
@@ -51,7 +54,7 @@ class SiteSettingsForm(forms.Form):
         required=False,
         validators=[validate_image_upload_size],
         label="SEO / share image (default)",
-        help_text="Optional. Image for link previews (~1200×630 px works well). " + _IMAGE_HELP,
+        help_text=_IMAGE_HELP,
     )
 
     def __init__(self, theme_choices=None, *args, **kwargs):
@@ -107,7 +110,7 @@ class ProductForm(forms.Form):
     image = forms.ImageField(
         required=False,
         validators=[validate_image_upload_size],
-        help_text=_IMAGE_HELP,
+        help_text=f"{_REC_PRODUCT_MAIN} {_IMAGE_HELP}",
     )
     is_active = forms.BooleanField(required=False, initial=True)
     is_main = forms.BooleanField(
@@ -132,7 +135,7 @@ class ProductForm(forms.Form):
         required=False,
         validators=[validate_image_upload_size],
         label="SEO / share image",
-        help_text="Optional. Image when this product link is shared. If empty, the primary product image is used. " + _IMAGE_HELP,
+        help_text=_IMAGE_HELP,
     )
 
     def __init__(self, category_queryset=None, *args, **kwargs):

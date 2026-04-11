@@ -1,15 +1,16 @@
 {% extends "dashboard/base_dashboard.html" %}
 {% block title %}{{ form_title|default:"Product" }}{% endblock %}
 {% block dashboard_content %}
-<div class="card shadow-sm">
-  <div class="card-header d-flex justify-content-between align-items-center">
+<div class="card dashboard-card">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <h2 class="h5 mb-0">{{ form_title|default:"Add product" }}</h2>
-    <a href="{% url 'dashboard:product_list' %}" class="btn btn-sm btn-outline-secondary">Back to list</a>
+    <a href="{% url 'dashboard:product_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">← Back to list</a>
   </div>
   <div class="card-body">
-    <form method="post" enctype="multipart/form-data" action="{{ form_action|default:'' }}">
+    <form method="post" enctype="multipart/form-data" action="{{ form_action|default:'' }}" class="dashboard-form dashboard-form-product">
       {% csrf_token %}
       {% include "includes/form_errors_alert.html" with form=form %}
+      <p class="dashboard-form-section-title">Product details</p>
       <div class="mb-3">
         <label for="id_name" class="form-label">Name</label>
         <input type="text" name="name" id="id_name" class="form-control" value="{% if form.is_bound %}{{ form.name.value|default:'' }}{% else %}{{ product.name|default:'' }}{% endif %}" required maxlength="200">
@@ -18,8 +19,10 @@
         <label for="id_description" class="form-label">Description</label>
         <textarea name="description" id="id_description" class="form-control" rows="3">{% if form.is_bound %}{{ form.description.value|default:'' }}{% else %}{{ product.description|default:'' }}{% endif %}</textarea>
       </div>
-      <h3 class="h6 mt-4">SEO &amp; social previews (optional)</h3>
-      <p class="form-text text-muted small">Override how this product appears in Google and when its link is shared. If you leave these empty, the product name, description, and primary image are used.</p>
+      <p class="dashboard-form-section-title">SEO and social previews <span class="fw-normal text-muted">(optional)</span></p>
+      <div class="dashboard-callout mb-3">
+        <p class="small mb-0">Override how this product appears in Google and when its link is shared. If you leave these empty, the product name, description, and primary image are used.</p>
+      </div>
       <div class="mb-3">
         <label for="id_seo_title" class="form-label">SEO title</label>
         <input type="text" name="seo_title" id="id_seo_title" class="form-control" maxlength="200" value="{% if form.is_bound %}{{ form.seo_title.value|default:'' }}{% else %}{{ product.seo_title|default:'' }}{% endif %}" placeholder="e.g. Blue cotton shirt — summer collection">
@@ -30,61 +33,72 @@
       </div>
       <div class="mb-3">
         <label for="id_seo_image" class="form-label">SEO / share image</label>
-        <p class="form-text small text-muted mb-1">Optional. If empty, the primary product image is used for link previews. Max 3 MB.</p>
+        <p class="upload-rec-size mb-1">Optional. If empty, the primary product image is used. <span class="upload-rec-size-dim">1200×630 px</span> ideal for chat/social previews.</p>
+        <p class="form-text small text-muted mb-1">{{ form.seo_image.help_text }}</p>
         {% if product.seo_image %}
-        <div class="mb-2"><img src="{{ product.seo_image }}" alt="" style="max-height: 60px;" class="rounded"></div>
-        <div class="form-check mb-2">
-          <input type="checkbox" name="remove_product_seo_image" id="id_remove_product_seo_image" value="1" class="form-check-input">
-          <label class="form-check-label" for="id_remove_product_seo_image">Remove current SEO image</label>
+        <div class="dashboard-image-preview-box">
+          <img src="{{ product.seo_image }}" alt="">
+          <div class="form-check mb-0">
+            <input type="checkbox" name="remove_product_seo_image" id="id_remove_product_seo_image" value="1" class="form-check-input">
+            <label class="form-check-label small" for="id_remove_product_seo_image">Remove current SEO image</label>
+          </div>
         </div>
         {% endif %}
         <input type="file" name="seo_image" id="id_seo_image" class="form-control" accept="image/*">
       </div>
-      <div class="mb-3">
-        <label for="id_price" class="form-label">Sale price</label>
-        <input type="text" name="price" id="id_price" class="form-control" value="{% if form.is_bound %}{{ form.price.value|default:'' }}{% else %}{{ product.price|default:'' }}{% endif %}" placeholder="0.00" inputmode="decimal">
-        <p class="form-text small text-muted mb-0">What the customer pays (shown prominently on the site).</p>
+      <p class="dashboard-form-section-title">Pricing</p>
+      <div class="row g-3 mb-1">
+        <div class="col-md-6">
+          <label for="id_price" class="form-label">Sale price</label>
+          <input type="text" name="price" id="id_price" class="form-control" value="{% if form.is_bound %}{{ form.price.value|default:'' }}{% else %}{{ product.price|default:'' }}{% endif %}" placeholder="0.00" inputmode="decimal">
+          <p class="form-text small text-muted mb-0">What the customer pays (shown prominently on the site).</p>
+        </div>
+        <div class="col-md-6">
+          <label for="id_compare_at_price" class="form-label">Original price (MRP)</label>
+          <input type="text" name="compare_at_price" id="id_compare_at_price" class="form-control" value="{% if form.is_bound %}{{ form.compare_at_price.value|default:'' }}{% else %}{% if product.compare_at_price %}{{ product.compare_at_price }}{% endif %}{% endif %}" placeholder="Leave empty if no discount" inputmode="decimal">
+          <p class="form-text small text-muted mb-0">Optional. Must be higher than sale price to show discount (strikethrough and percent off).</p>
+        </div>
       </div>
-      <div class="mb-3">
-        <label for="id_compare_at_price" class="form-label">Original price (MRP)</label>
-        <input type="text" name="compare_at_price" id="id_compare_at_price" class="form-control" value="{% if form.is_bound %}{{ form.compare_at_price.value|default:'' }}{% else %}{% if product.compare_at_price %}{{ product.compare_at_price }}{% endif %}{% endif %}" placeholder="Leave empty if no discount" inputmode="decimal">
-        <p class="form-text small text-muted mb-0">Optional. Must be higher than sale price to show discount (strikethrough + % off), like Flipkart/Amazon.</p>
-      </div>
+      <p class="dashboard-form-section-title">Organization</p>
       <div class="mb-3">
         <label for="id_category" class="form-label">Category</label>
         {{ form.category }}
         <p class="form-text small text-muted">Optional. <a href="{% url 'dashboard:category_list' %}">Manage categories</a> to filter products on your site.</p>
       </div>
-      <div class="mb-3">
-        <label for="id_image" class="form-label">Primary image</label>
-        <p class="form-text small text-muted mb-1">Main image shown on product list and detail (one file). Maximum file size: 3 MB.</p>
-        {% if product.image %}
-        <div class="mb-2"><img src="{{ product.image }}" alt="" style="max-height: 60px;" class="rounded"></div>
-        <div class="form-check mb-2">
-          <input type="checkbox" name="remove_product_image" id="id_remove_product_image" value="1" class="form-check-input">
-          <label class="form-check-label" for="id_remove_product_image">Remove current image</label>
-        </div>
-        {% endif %}
-        <input type="file" name="image" id="id_image" class="form-control" accept="image/*">
-      </div>
-      <div class="mb-3">
-        <label for="id_extra_images" class="form-label">Additional images</label>
-        <p class="form-text small text-muted mb-1">Optional extra images for the product detail page (multiple files). Each image must be at most 3 MB.</p>
-        {% if product.extra_images %}
-        <div class="d-flex flex-wrap gap-2 mb-2">
-          {% for img in product.extra_images %}
-          <div class="position-relative">
-            <img src="{{ img.url }}" alt="" style="max-height: 50px; width: auto;" class="rounded border">
-            <div class="form-check position-absolute" style="top: 2px; left: 2px;">
-              <input type="checkbox" name="remove_extra_image" value="{{ img.id }}" id="remove_extra_{{ img.id }}" class="form-check-input">
-              <label class="form-check-label small text-white text-shadow" for="remove_extra_{{ img.id }}">Remove</label>
+      <p class="dashboard-form-section-title">Images</p>
+      <div class="row g-3 mb-1">
+        <div class="col-lg-6">
+          <label for="id_image" class="form-label">Primary image</label>
+          <p class="upload-rec-size mb-1">Main image on product list and detail. {{ form.image.help_text }}</p>
+          {% if product.image %}
+          <div class="dashboard-image-preview-box">
+            <img src="{{ product.image }}" alt="">
+            <div class="form-check mb-0">
+              <input type="checkbox" name="remove_product_image" id="id_remove_product_image" value="1" class="form-check-input">
+              <label class="form-check-label small" for="id_remove_product_image">Remove current image</label>
             </div>
           </div>
-          {% endfor %}
+          {% endif %}
+          <input type="file" name="image" id="id_image" class="form-control" accept="image/*">
         </div>
-        {% endif %}
-        <input type="file" name="extra_images" id="id_extra_images" class="form-control" accept="image/*" multiple>
+        <div class="col-lg-6">
+          <label for="id_extra_images" class="form-label">Additional images</label>
+          <p class="upload-rec-size mb-1">Gallery on the product page. Recommended: <span class="upload-rec-size-dim">1000×1000 px</span> or larger square. <strong>Max 3 MB</strong> per file.</p>
+          {% if product.extra_images %}
+          <div class="dashboard-gallery-grid">
+            {% for img in product.extra_images %}
+            <div class="dashboard-gallery-item">
+              <img src="{{ img.url }}" alt="">
+              <input type="checkbox" name="remove_extra_image" value="{{ img.id }}" id="remove_extra_{{ img.id }}" class="visually-hidden">
+              <label for="remove_extra_{{ img.id }}" class="btn-remove-overlay mb-0 text-center">Remove</label>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <input type="file" name="extra_images" id="id_extra_images" class="form-control" accept="image/*" multiple>
+        </div>
       </div>
+      <p class="dashboard-form-section-title">Visibility</p>
       <div class="mb-3 form-check">
         <input type="checkbox" name="is_main" id="id_is_main" class="form-check-input" {% if form.is_bound %}{% if form.is_main.value %}checked{% endif %}{% elif product.is_main %}checked{% endif %}>
         <label class="form-check-label" for="id_is_main">Main product (show on home page)</label>
@@ -94,7 +108,9 @@
         <input type="checkbox" name="is_active" id="id_is_active" class="form-check-input" {% if form.is_bound %}{% if form.is_active.value %}checked{% endif %}{% elif product.is_active != False %}checked{% endif %}>
         <label class="form-check-label" for="id_is_active">Active (show on site)</label>
       </div>
-      <button type="submit" class="btn btn-primary">Save product</button>
+      <div class="dashboard-form-actions">
+        <button type="submit" class="btn btn-primary rounded-pill px-4">Save product</button>
+      </div>
     </form>
   </div>
 </div>

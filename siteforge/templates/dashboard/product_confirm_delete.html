@@ -1,16 +1,16 @@
 {% extends "dashboard/base_dashboard.html" %}
 {% block title %}Delete product{% endblock %}
 {% block dashboard_content %}
-<div class="card shadow-sm">
+<div class="card dashboard-card dashboard-form-max">
   <div class="card-header">
     <h2 class="h5 mb-0">Delete product</h2>
   </div>
   <div class="card-body">
-    <p>Are you sure you want to delete <strong>{{ product.name }}</strong>? This cannot be undone.</p>
-    <form method="post" action="{% url 'dashboard:product_delete' product.pk %}">
+    <p class="mb-4">Are you sure you want to delete <strong>{{ product.name }}</strong>? This cannot be undone.</p>
+    <form method="post" action="{% url 'dashboard:product_delete' product.pk %}" class="d-flex flex-wrap gap-2">
       {% csrf_token %}
-      <button type="submit" class="btn btn-danger">Delete</button>
-      <a href="{% url 'dashboard:product_list' %}" class="btn btn-outline-secondary">Cancel</a>
+      <button type="submit" class="btn btn-danger rounded-pill px-4">Delete permanently</button>
+      <a href="{% url 'dashboard:product_list' %}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
     </form>
   </div>
 </div>
