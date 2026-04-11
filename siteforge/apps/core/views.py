@@ -383,4 +383,19 @@ class ProductDetailView(DetailView):
                 description=desc,
                 image_url=img,
             )
+            from apps.catalog.models import Product
+
+            if product.category_id:
+                context["related_products"] = list(
+                    Product.objects.filter(
+                        client=product.client,
+                        category_id=product.category_id,
+                        is_active=True,
+                    )
+                    .exclude(pk=product.pk)
+                    .select_related("category")
+                    .order_by("order", "name")[:6]
+                )
+            else:
+                context["related_products"] = []
         return context

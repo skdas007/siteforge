@@ -162,6 +162,87 @@
         <a href="{% url 'product_list' %}" class="btn btn-outline-secondary ms-2">View all products</a>
       </div>
     </div>
+
+    {% if related_products %}
+    <div class="row mt-5 pt-4 border-top">
+      <div class="col-12" data-reveal="fade-up">
+        <h2 class="h5 fw-bold mb-3">More in {{ product.category.name }}</h2>
+        <p class="text-muted small mb-3">Swipe or use the arrows to browse other products in this category.</p>
+        <div class="product-related-carousel position-relative">
+          <button type="button" class="product-related-nav product-related-nav--prev btn btn-light border shadow-sm" id="product-related-prev" aria-label="Show previous products">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="product-related-nav product-related-nav--next btn btn-light border shadow-sm" id="product-related-next" aria-label="Show next products">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+          <div class="product-related-strip" id="product-related-strip" tabindex="0" role="region" aria-label="Related products in {{ product.category.name }}">
+            {% for rp in related_products %}
+            <div class="product-related-card-wrap">
+              <a href="{% url 'product_detail' rp.pk %}" class="text-decoration-none text-dark h-100 d-block">
+                <div class="card card-3d card-3d-tilt h-100 shadow-sm position-relative">
+                  {% if rp.has_discount and rp.discount_percent %}
+                  <span class="position-absolute top-0 start-0 m-2 badge bg-danger z-1">{{ rp.discount_percent }}% OFF</span>
+                  {% endif %}
+                  {% if rp.image %}
+                  <img src="{{ rp.image.url }}" class="card-img-top" alt="{{ rp.name }}" style="height: 200px; object-fit: cover;" loading="lazy" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
+                  {% else %}
+                  <img src="{{ no_image_url }}" class="card-img-top" alt="" style="height: 200px; object-fit: contain; background: #e9ecef;" loading="lazy">
+                  {% endif %}
+                  <div class="card-body">
+                    <h3 class="h6 card-title">{{ rp.name }}</h3>
+                    <p class="card-text text-muted small mb-2">{{ rp.description|default:""|truncatewords:12 }}</p>
+                    {% include "public/includes/product_price.html" with product=rp %}
+                  </div>
+                </div>
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    (function(){
+      var strip = document.getElementById('product-related-strip');
+      var prevBtn = document.getElementById('product-related-prev');
+      var nextBtn = document.getElementById('product-related-next');
+      if (!strip || !prevBtn || !nextBtn) return;
+
+      function step() {
+        var el = strip.querySelector('.product-related-card-wrap');
+        if (!el) return Math.max(240, strip.clientWidth * 0.85);
+        var gap = 16;
+        try {
+          var cs = window.getComputedStyle(strip);
+          var g = cs.gap || cs.columnGap;
+          if (g && g.endsWith('px')) gap = parseFloat(g) || gap;
+        } catch (e) {}
+        return el.getBoundingClientRect().width + gap;
+      }
+
+      function updateNav() {
+        var maxScroll = strip.scrollWidth - strip.clientWidth - 2;
+        if (maxScroll <= 0) {
+          prevBtn.hidden = true;
+          nextBtn.hidden = true;
+          return;
+        }
+        prevBtn.hidden = strip.scrollLeft <= 4;
+        nextBtn.hidden = strip.scrollLeft >= maxScroll - 4;
+      }
+
+      prevBtn.addEventListener('click', function() {
+        strip.scrollBy({ left: -step(), behavior: 'smooth' });
+      });
+      nextBtn.addEventListener('click', function() {
+        strip.scrollBy({ left: step(), behavior: 'smooth' });
+      });
+      strip.addEventListener('scroll', function() { window.requestAnimationFrame(updateNav); }, { passive: true });
+      window.addEventListener('resize', function() { window.requestAnimationFrame(updateNav); });
+      updateNav();
+    })();
+    </script>
+    {% endif %}
   </div>
 </section>
 {% endblock %}
