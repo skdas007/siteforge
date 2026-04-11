@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import forms
 
 from apps.core.validators import validate_image_upload_size
@@ -66,7 +68,16 @@ class ProductForm(forms.Form):
     """Dashboard product add/edit; saves to catalog.Product."""
     name = forms.CharField(max_length=200, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False)
-    price = forms.DecimalField(required=False)
+    price = forms.DecimalField(
+        required=False,
+        label="Sale price",
+        help_text="What the customer pays (shown prominently).",
+    )
+    compare_at_price = forms.DecimalField(
+        required=False,
+        label="Original price (MRP)",
+        help_text="Optional. If higher than sale price, the site shows strikethrough MRP and discount like Flipkart/Amazon.",
+    )
     category = forms.ModelChoiceField(
         queryset=None,
         required=False,
@@ -92,3 +103,16 @@ class ProductForm(forms.Form):
         super().__init__(*args, **kwargs)
         if category_queryset is not None:
             self.fields["category"].queryset = category_queryset
+
+    def clean(self):
+        cleaned = super().clean()
+        sale = cleaned.get("price")
+        mrp = cleaned.get("compare_at_price")
+        if sale is None:
+            sale = Decimal("0")
+        if mrp is not None and mrp < sale:
+            self.add_error(
+                "compare_at_price",
+                "Original price (MRP) must be greater than or equal to the sale price.",
+            )
+        return cleaned

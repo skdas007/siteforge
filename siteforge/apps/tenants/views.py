@@ -309,6 +309,7 @@ class ProductAddView(DashboardClientMixin, FormView):
             name=form.cleaned_data["name"],
             description=form.cleaned_data.get("description", "") or "",
             price=form.cleaned_data.get("price") or 0,
+            compare_at_price=form.cleaned_data.get("compare_at_price"),
             category=form.cleaned_data.get("category") or None,
             image=form.cleaned_data.get("image") or None,
             is_active=form.cleaned_data.get("is_active", True),
@@ -359,6 +360,7 @@ class ProductEditView(DashboardClientMixin, FormView):
             "name": product.name,
             "description": product.description or "",
             "price": product.price,
+            "compare_at_price": product.compare_at_price,
             "image": product.image.url if product.image else None,
             "is_active": product.is_active,
             "is_main": product.is_main,
@@ -372,6 +374,7 @@ class ProductEditView(DashboardClientMixin, FormView):
             "name": product.name,
             "description": product.description or "",
             "price": product.price,
+            "compare_at_price": product.compare_at_price,
             "category": product.category,
             "is_active": product.is_active,
             "is_main": product.is_main,
@@ -409,6 +412,7 @@ class ProductEditView(DashboardClientMixin, FormView):
         product.name = form.cleaned_data["name"]
         product.description = form.cleaned_data.get("description", "") or ""
         product.price = form.cleaned_data.get("price") or 0
+        product.compare_at_price = form.cleaned_data.get("compare_at_price")
         product.category = form.cleaned_data.get("category") or None
         product.is_active = form.cleaned_data.get("is_active", True)
         product.is_main = form.cleaned_data.get("is_main", False)

@@ -19,8 +19,14 @@
         <textarea name="description" id="id_description" class="form-control" rows="3">{% if form.is_bound %}{{ form.description.value|default:'' }}{% else %}{{ product.description|default:'' }}{% endif %}</textarea>
       </div>
       <div class="mb-3">
-        <label for="id_price" class="form-label">Price</label>
-        <input type="text" name="price" id="id_price" class="form-control" value="{% if form.is_bound %}{{ form.price.value|default:'' }}{% else %}{{ product.price|default:'' }}{% endif %}" placeholder="0.00">
+        <label for="id_price" class="form-label">Sale price</label>
+        <input type="text" name="price" id="id_price" class="form-control" value="{% if form.is_bound %}{{ form.price.value|default:'' }}{% else %}{{ product.price|default:'' }}{% endif %}" placeholder="0.00" inputmode="decimal">
+        <p class="form-text small text-muted mb-0">What the customer pays (shown prominently on the site).</p>
+      </div>
+      <div class="mb-3">
+        <label for="id_compare_at_price" class="form-label">Original price (MRP)</label>
+        <input type="text" name="compare_at_price" id="id_compare_at_price" class="form-control" value="{% if form.is_bound %}{{ form.compare_at_price.value|default:'' }}{% else %}{% if product.compare_at_price %}{{ product.compare_at_price }}{% endif %}{% endif %}" placeholder="Leave empty if no discount" inputmode="decimal">
+        <p class="form-text small text-muted mb-0">Optional. Must be higher than sale price to show discount (strikethrough + % off), like Flipkart/Amazon.</p>
       </div>
       <div class="mb-3">
         <label for="id_category" class="form-label">Category</label>

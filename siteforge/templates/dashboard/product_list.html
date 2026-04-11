@@ -38,7 +38,15 @@
             </td>
             <td class="align-middle">{{ product.name }}</td>
             <td class="align-middle">{% if product.category %}{{ product.category.name }}{% else %}—{% endif %}</td>
-            <td class="align-middle">{{ product.price }}</td>
+            <td class="align-middle">
+              {% if product.has_discount %}
+                <span class="fw-semibold text-success">{{ product.price }}</span>
+                <span class="text-muted text-decoration-line-through small ms-1">{{ product.compare_at_price }}</span>
+                {% if product.discount_percent %}<span class="badge bg-danger ms-1">{{ product.discount_percent }}%</span>{% endif %}
+              {% else %}
+                {{ product.price }}
+              {% endif %}
+            </td>
             <td class="align-middle">{% if product.is_main %}<span class="badge bg-primary">Main</span>{% else %}—{% endif %}</td>
             <td class="align-middle">
               {% if product.is_active %}Yes{% else %}No{% endif %}

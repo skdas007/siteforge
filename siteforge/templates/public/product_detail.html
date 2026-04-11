@@ -127,7 +127,9 @@
       </div>
       <div class="col-md-7 col-lg-8" data-reveal="fade-left">
         <h1 class="h2 fw-bold mb-3">{{ product.name }}</h1>
-        <p class="lead text-primary fw-bold mb-4">{{ product.price }}</p>
+        <div class="mb-4">
+          {% include "public/includes/product_price.html" with product=product price_large=True %}
+        </div>
         {% if product.description %}
         <div class="text-muted mb-4">{{ product.description|linebreaks }}</div>
         {% endif %}
