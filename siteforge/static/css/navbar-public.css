@@ -1,6 +1,16 @@
 /* Public site navbar: layout, logo frame, search + autocomplete */
 
 .navbar-public {
+  /*
+   * Logo “size” in two knobs:
+   *   --sf-nav-logo-h     = layout slot (with padding, sets how tall the bar’s content row is)
+   *   --sf-nav-logo-scale = visual multiplier; does NOT change flex/navbar height (draws larger via transform)
+   * Raise only --sf-nav-logo-scale (e.g. 1.12 → 1.2) for a bigger logo without a taller navbar.
+   */
+  --sf-nav-logo-h: 3.5rem;
+  --sf-nav-logo-scale: 1.12;
+  /* Optional: nudge logo from container left edge */
+  --sf-nav-logo-inset-left: 0;
   background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
@@ -9,6 +19,12 @@
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   /* Bar fades in; motion is on children (left → right) */
   animation: nav-shell-fade 0.3s ease both;
+}
+
+@media (min-width: 576px) {
+  .navbar-public {
+    --sf-nav-logo-h: 3.75rem;
+  }
 }
 
 /* Accent line grows left → right after nav items */
@@ -107,15 +123,18 @@
   }
 }
 
-/* ---- Brand + logo (crisp containment, no forced stretch) ---- */
+/* ---- Brand + logo: left side of the bar (normal flow) ---- */
 .navbar-public .navbar-brand.navbar-brand-logo {
   padding: 0.2rem 0;
   margin-right: 0;
+  margin-left: var(--sf-nav-logo-inset-left);
   font-weight: 700;
   letter-spacing: -0.02em;
   text-decoration: none;
   transition: opacity 0.2s ease;
   animation: nav-reveal-ltr 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0s both;
+  overflow: visible;
+  z-index: 1;
 }
 
 .navbar-public .navbar-brand-logo:hover {
@@ -130,37 +149,31 @@
   color: transparent;
 }
 
-/* Framed logo: padding + light surface so small / diamond marks read clearly */
+/* Logo: layout size = --sf-nav-logo-h; visual boost = --sf-nav-logo-scale (no extra navbar height) */
 .navbar-public .navbar-logo-frame {
-  padding: 0.35rem 0.65rem;
-  border-radius: 0.6rem;
-  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-  max-height: 3.45rem;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+  transform: scale(var(--sf-nav-logo-scale));
+  transform-origin: left center;
+  transition: transform 0.25s ease;
 }
 
 .navbar-public .navbar-brand-logo:hover .navbar-logo-frame {
-  border-color: rgba(37, 99, 235, 0.25);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12);
-  transform: translateY(-1px);
+  transform: scale(var(--sf-nav-logo-scale)) translateY(-1px);
 }
 
 .navbar-public .navbar-logo-img {
   display: block;
-  height: 3.5 rem;
+  height: var(--sf-nav-logo-h);
+  max-height: var(--sf-nav-logo-h);
   width: auto;
-  max-width: 10rem;
+  max-width: min(11.5rem, 40vw);
   object-fit: contain;
   object-position: left center;
-}
-
-@media (min-width: 576px) {
-  .navbar-public .navbar-logo-img {
-    height: 4.65rem;
-    max-width: 11.5rem;
-  }
 }
 
 /* ---- Collapse: full-width row; nav after logo; search grows into remaining space (no dead zone on the right) ---- */

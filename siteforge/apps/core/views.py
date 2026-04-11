@@ -1,3 +1,4 @@
+from django.contrib.sitemaps.views import sitemap as sitemap_index_view
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404, JsonResponse
 from django.templatetags.static import static
@@ -6,6 +7,7 @@ from django.views import View
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from apps.core.seo_utils import add_seo_context, client_site_og_image_url, product_og_image_url
+from apps.core.sitemaps import TenantPublicSitemap
 
 HOME_PRODUCTS_PER_PAGE = 6
 PRODUCT_LIST_PER_PAGE = 9
@@ -399,3 +401,11 @@ class ProductDetailView(DetailView):
             else:
                 context["related_products"] = []
         return context
+
+
+def tenant_public_sitemap(request):
+    """XML sitemap for the tenant resolved from the Host header (not for admin/dashboard hosts)."""
+    client = getattr(request, "client", None)
+    if not client:
+        raise Http404("No site is configured for this host.")
+    return sitemap_index_view(request, {"public": TenantPublicSitemap(client)})
