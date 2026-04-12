@@ -1,0 +1,164 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Contact messages{% endblock %}
+{% block dashboard_content %}
+<div class="dashboard-page-head d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+  <div>
+    <h2 class="h4 mb-1">Contact messages</h2>
+    <p class="text-muted small mb-0">Submissions from your site’s contact form.</p>
+  </div>
+</div>
+
+<div class="card dashboard-card mb-3">
+  <div class="card-body py-3">
+    <form method="get" action="{% url 'dashboard:contact_list' %}" class="row g-2 g-md-3 align-items-end">
+      <div class="col-12 col-md-4 col-lg-5">
+        <label for="filter-q" class="form-label small text-muted mb-1">Search</label>
+        <input type="search" name="q" id="filter-q" class="form-control form-control-sm" value="{{ filter_q }}" placeholder="Name, email, phone, message…" autocomplete="off">
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <label for="filter-date-from" class="form-label small text-muted mb-1">From</label>
+        <input type="date" name="date_from" id="filter-date-from" class="form-control form-control-sm" value="{{ filter_date_from }}">
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <label for="filter-date-to" class="form-label small text-muted mb-1">To</label>
+        <input type="date" name="date_to" id="filter-date-to" class="form-control form-control-sm" value="{{ filter_date_to }}">
+      </div>
+      <div class="col-12 col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Filter</button>
+        {% if filter_q or filter_date_from or filter_date_to %}
+        <a href="{% url 'dashboard:contact_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Clear</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card dashboard-card">
+  <form method="post" action="{% url 'dashboard:contact_bulk_delete' %}" id="contact-bulk-form" class="contact-bulk-form">
+    {% csrf_token %}
+    {% if filter_q %}<input type="hidden" name="q" value="{{ filter_q }}">{% endif %}
+    {% if filter_date_from %}<input type="hidden" name="date_from" value="{{ filter_date_from }}">{% endif %}
+    {% if filter_date_to %}<input type="hidden" name="date_to" value="{{ filter_date_to }}">{% endif %}
+    {% if page_obj.number > 1 %}<input type="hidden" name="page" value="{{ page_obj.number }}">{% endif %}
+    {% if page_obj.paginator.count %}
+    <div class="card-body border-bottom py-2 d-flex flex-wrap align-items-center gap-2">
+      <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" id="contact-bulk-delete-btn" disabled data-confirm="Delete the selected messages? This cannot be undone.">Delete selected</button>
+      <span class="text-muted small" id="contact-bulk-hint">Select messages below, or use the header checkbox for this page.</span>
+    </div>
+    {% endif %}
+    <div class="card-body p-0">
+    <div class="table-responsive dashboard-table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th class="text-center" style="width: 2.75rem;" scope="col">
+              <span class="visually-hidden">Select</span>
+              <input type="checkbox" class="form-check-input" id="contact-select-all" title="Select all on this page" aria-label="Select all on this page">
+            </th>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Message</th>
+            <th class="text-end" style="min-width: 6rem;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in submissions %}
+          <tr>
+            <td class="text-center align-middle">
+              <input type="checkbox" class="form-check-input contact-row-check" name="submission_ids" value="{{ row.pk }}" aria-label="Select {{ row.name }}">
+            </td>
+            <td class="align-middle text-nowrap small">{{ row.created_at|date:"M d, Y H:i" }}</td>
+            <td class="align-middle">{{ row.name }}</td>
+            <td class="align-middle"><a href="mailto:{{ row.email }}">{{ row.email }}</a></td>
+            <td class="align-middle">{{ row.phone|default:"—" }}</td>
+            <td class="align-middle small text-break sf-contact-msg-cell">{{ row.message|linebreaksbr }}</td>
+            <td class="align-middle text-end">
+              <a href="{% url 'dashboard:contact_delete' row.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-2 px-sm-3">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">
+              {% if filter_q or filter_date_from or filter_date_to %}
+              No messages match your filters.
+              {% else %}
+              No submissions yet. They will appear here when visitors use the contact form on your site.
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    </div>
+  </form>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <div class="card-footer bg-transparent border-top-0 pt-0 pb-3">
+    <nav aria-label="Contact messages pages">
+      <ul class="pagination pagination-sm justify-content-center flex-wrap mb-0 gap-1">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link rounded-pill" href="?{% if filter_querystring %}{{ filter_querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link rounded-pill">Previous</span></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link border-0 bg-transparent">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link rounded-pill" href="?{% if filter_querystring %}{{ filter_querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link rounded-pill">Next</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_css %}
+<style>
+  .sf-contact-msg-cell { max-width: 28rem; max-height: 7.5rem; overflow-y: auto; }
+</style>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function() {
+  var form = document.getElementById('contact-bulk-form');
+  var btn = document.getElementById('contact-bulk-delete-btn');
+  var selectAll = document.getElementById('contact-select-all');
+  if (!form || !btn) return;
+  var checks = function() { return Array.prototype.slice.call(document.querySelectorAll('.contact-row-check')); };
+  function sync() {
+    var list = checks();
+    var n = list.filter(function(c) { return c.checked; }).length;
+    btn.disabled = n === 0;
+    if (selectAll) {
+      selectAll.indeterminate = n > 0 && n < list.length;
+      selectAll.checked = list.length > 0 && n === list.length;
+    }
+  }
+  form.addEventListener('change', function(e) {
+    if (e.target && (e.target.classList.contains('contact-row-check') || e.target.id === 'contact-select-all')) {
+      if (e.target.id === 'contact-select-all') {
+        checks().forEach(function(c) { c.checked = selectAll.checked; });
+      }
+      sync();
+    }
+  });
+  form.addEventListener('submit', function(e) {
+    var n = checks().filter(function(c) { return c.checked; }).length;
+    if (n === 0) {
+      e.preventDefault();
+      return;
+    }
+    var msg = btn.getAttribute('data-confirm') || 'Delete selected messages?';
+    if (!window.confirm(msg)) e.preventDefault();
+  });
+  sync();
+})();
+</script>
+{% endblock %}

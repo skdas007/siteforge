@@ -57,6 +57,9 @@
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'product_list' or request.resolver_match.url_name == 'product_add' or request.resolver_match.url_name == 'product_edit' %}active{% endif %}" href="{% url 'dashboard:product_list' %}">Products</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'contact_list' or request.resolver_match.url_name == 'contact_delete' %}active{% endif %}" href="{% url 'dashboard:contact_list' %}">Contact messages</a>
+          </li>
         </ul>
         <ul class="navbar-nav">
           <li class="nav-item">

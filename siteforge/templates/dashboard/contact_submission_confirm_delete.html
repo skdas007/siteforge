@@ -1,0 +1,18 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Delete message{% endblock %}
+{% block dashboard_content %}
+<div class="card dashboard-card dashboard-form-max">
+  <div class="card-header">
+    <h2 class="h5 mb-0">Delete contact message</h2>
+  </div>
+  <div class="card-body">
+    <p class="mb-2">Delete this message from <strong>{{ submission.name }}</strong> ({{ submission.email }})?</p>
+    <p class="text-muted small mb-4">This only removes the record from your dashboard. It cannot be undone.</p>
+    <form method="post" action="{% url 'dashboard:contact_delete' submission.pk %}" class="d-flex flex-wrap gap-2">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger rounded-pill px-4">Delete</button>
+      <a href="{% url 'dashboard:contact_list' %}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

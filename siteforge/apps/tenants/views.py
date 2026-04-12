@@ -2,16 +2,21 @@
 import json
 import re
 
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.dateparse import parse_date
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import FormView, ListView, TemplateView
 from django.views.generic.edit import DeleteView
 
 from apps.catalog.models import Category, Product
+from apps.leads.models import ContactSubmission
 from apps.core.storage_cleanup import delete_stored_file
 from apps.core.validators import MAX_IMAGE_UPLOAD_BYTES, MAX_VIDEO_UPLOAD_BYTES
 
@@ -532,5 +537,109 @@ class CategoryDeleteView(DashboardClientMixin, View):
         cat.delete()
         messages.success(request, "Category deleted.")
         return redirect("dashboard:category_list")
+
+
+def _get_contact_submission_queryset(request):
+    return ContactSubmission.objects.filter(client=request.user.client).order_by("-created_at")
+
+
+class ContactSubmissionListView(DashboardClientMixin, ListView):
+    """Paginated contact form submissions for the logged-in client's site."""
+
+    model = ContactSubmission
+    template_name = "dashboard/contact_submissions.html"
+    context_object_name = "submissions"
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = _get_contact_submission_queryset(self.request)
+        q = (self.request.GET.get("q") or "").strip()
+        if q:
+            qs = qs.filter(
+                Q(name__icontains=q)
+                | Q(email__icontains=q)
+                | Q(phone__icontains=q)
+                | Q(message__icontains=q)
+            )
+        df = (self.request.GET.get("date_from") or "").strip()
+        dt = (self.request.GET.get("date_to") or "").strip()
+        d_from = parse_date(df) if df else None
+        d_to = parse_date(dt) if dt else None
+        if d_from:
+            qs = qs.filter(created_at__date__gte=d_from)
+        if d_to:
+            qs = qs.filter(created_at__date__lte=d_to)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["filter_q"] = (self.request.GET.get("q") or "").strip()
+        ctx["filter_date_from"] = (self.request.GET.get("date_from") or "").strip()
+        ctx["filter_date_to"] = (self.request.GET.get("date_to") or "").strip()
+        params = self.request.GET.copy()
+        params.pop("page", None)
+        ctx["filter_querystring"] = urlencode(params)
+        return ctx
+
+
+class ContactSubmissionDeleteView(DashboardClientMixin, DeleteView):
+    model = ContactSubmission
+    template_name = "dashboard/contact_submission_confirm_delete.html"
+    context_object_name = "submission"
+    success_url = reverse_lazy("dashboard:contact_list")
+
+    def get_queryset(self):
+        return _get_contact_submission_queryset(self.request)
+
+    def form_valid(self, form):
+        messages.success(self.request, "Contact message deleted.")
+        return super().form_valid(form)
+
+
+class ContactSubmissionBulkDeleteView(DashboardClientMixin, View):
+    """POST: delete selected contact rows (current client only)."""
+
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        raw_ids = request.POST.getlist("submission_ids")
+        ids = []
+        for x in raw_ids:
+            try:
+                ids.append(int(x))
+            except (ValueError, TypeError):
+                continue
+        if not ids:
+            messages.warning(request, "No messages selected.")
+            return redirect(self._return_list_url(request))
+
+        qs = _get_contact_submission_queryset(request).filter(pk__in=ids)
+        deleted, _ = qs.delete()
+        if deleted:
+            messages.success(
+                request,
+                f"Deleted {deleted} message{'s' if deleted != 1 else ''}.",
+            )
+        return redirect(self._return_list_url(request))
+
+    def _return_list_url(self, request):
+        """Rebuild contact list URL with optional filters/page from POST (same keys as GET)."""
+        params = {}
+        q = (request.POST.get("q") or "").strip()
+        if q:
+            params["q"] = q
+        df = (request.POST.get("date_from") or "").strip()
+        if df:
+            params["date_from"] = df
+        dt = (request.POST.get("date_to") or "").strip()
+        if dt:
+            params["date_to"] = dt
+        page = (request.POST.get("page") or "").strip()
+        if page.isdigit() and int(page) > 1:
+            params["page"] = page
+        base = reverse("dashboard:contact_list")
+        if params:
+            return f"{base}?{urlencode(params)}"
+        return base
 
 

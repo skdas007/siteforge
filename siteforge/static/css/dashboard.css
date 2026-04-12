@@ -149,6 +149,11 @@
   color: #b45309;
 }
 
+.dashboard-tile-icon.contact {
+  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+  color: #4338ca;
+}
+
 .dashboard-tile h3 {
   font-size: 1.05rem;
   font-weight: 700;
