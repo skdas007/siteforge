@@ -65,6 +65,7 @@
         </thead>
         <tbody>
           {% for row in submissions %}
+          {% with script_id="contact-msg-"|add:row.pk %}
           <tr>
             <td class="text-center align-middle">
               <input type="checkbox" class="form-check-input contact-row-check" name="submission_ids" value="{{ row.pk }}" aria-label="Select {{ row.name }}">
@@ -73,11 +74,23 @@
             <td class="align-middle">{{ row.name }}</td>
             <td class="align-middle"><a href="mailto:{{ row.email }}">{{ row.email }}</a></td>
             <td class="align-middle">{{ row.phone|default:"—" }}</td>
-            <td class="align-middle small text-break sf-contact-msg-cell">{{ row.message|linebreaksbr }}</td>
+            <td class="align-middle small text-break sf-contact-msg-cell">
+              {{ row.message|json_script:script_id }}
+              <p class="mb-0 sf-msg-preview">{{ row.message|truncatechars:100 }}</p>
+              {% if row.message|length > 100 %}
+              <button type="button" class="btn btn-link btn-sm p-0 mt-1 sf-contact-view-more text-decoration-none"
+                data-bs-toggle="modal" data-bs-target="#contactMessageModal"
+                data-script-id="{{ script_id }}"
+                data-sender-name="{{ row.name|escape }}"
+                data-sender-email="{{ row.email|escape }}"
+                data-sent-at="{{ row.created_at|date:'M d, Y H:i' }}">View more</button>
+              {% endif %}
+            </td>
             <td class="align-middle text-end">
               <a href="{% url 'dashboard:contact_delete' row.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-2 px-sm-3">Delete</a>
             </td>
           </tr>
+          {% endwith %}
           {% empty %}
           <tr>
             <td colspan="7" class="text-center text-muted py-4">
@@ -118,10 +131,29 @@
   </div>
   {% endif %}
 </div>
+
+<div class="modal fade" id="contactMessageModal" tabindex="-1" aria-labelledby="contact-msg-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title h5 mb-0" id="contact-msg-modal-title">Message</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted mb-3" id="contact-msg-meta"></p>
+        <div class="sf-contact-msg-full text-break" id="contact-msg-body" style="white-space: pre-wrap;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 {% block extra_css %}
 <style>
-  .sf-contact-msg-cell { max-width: 28rem; max-height: 7.5rem; overflow-y: auto; }
+  .sf-contact-msg-cell { max-width: 22rem; }
+  .sf-msg-preview { line-height: 1.4; }
 </style>
 {% endblock %}
 {% block extra_js %}
@@ -159,6 +191,32 @@
     if (!window.confirm(msg)) e.preventDefault();
   });
   sync();
+})();
+
+(function() {
+  var modal = document.getElementById('contactMessageModal');
+  if (!modal || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
+  modal.addEventListener('show.bs.modal', function(ev) {
+    var btn = ev.relatedTarget;
+    if (!btn || !btn.classList.contains('sf-contact-view-more')) return;
+    var sid = btn.getAttribute('data-script-id');
+    var scriptEl = sid ? document.getElementById(sid) : null;
+    var full = '';
+    try {
+      full = scriptEl ? JSON.parse(scriptEl.textContent) : '';
+    } catch (e) {
+      full = '';
+    }
+    var bodyEl = document.getElementById('contact-msg-body');
+    var metaEl = document.getElementById('contact-msg-meta');
+    var titleEl = document.getElementById('contact-msg-modal-title');
+    if (bodyEl) bodyEl.textContent = full;
+    var name = btn.getAttribute('data-sender-name') || '';
+    var email = btn.getAttribute('data-sender-email') || '';
+    var sent = btn.getAttribute('data-sent-at') || '';
+    if (metaEl) metaEl.textContent = [name, email, sent].filter(Boolean).join(' · ');
+    if (titleEl) titleEl.textContent = name ? 'Message from ' + name : 'Message';
+  });
 })();
 </script>
 {% endblock %}
