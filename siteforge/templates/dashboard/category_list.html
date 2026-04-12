@@ -12,14 +12,24 @@
         <thead>
           <tr>
             <th>Name</th>
-            <th style="width: 120px;">Actions</th>
+            <th class="d-none d-md-table-cell">Spotlight</th>
+            <th style="min-width: 11rem;">Actions</th>
           </tr>
         </thead>
         <tbody>
           {% for cat in categories %}
           <tr>
             <td class="align-middle">{{ cat.name }}</td>
+            <td class="align-middle d-none d-md-table-cell small text-muted">
+              {% if cat.show_in_spotlight %}
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle">On home</span>
+              <span class="ms-1">order {{ cat.spotlight_order }}</span>
+              {% else %}
+              —
+              {% endif %}
+            </td>
             <td class="align-middle">
+              <a href="{% url 'dashboard:category_edit' cat.pk %}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
               <form method="post" action="{% url 'dashboard:category_delete' cat.pk %}" class="d-inline" onsubmit="return confirm('Delete this category? Products in it will be uncategorized.');">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
@@ -28,7 +38,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="2" class="text-center text-muted py-4">No categories yet. <a href="{% url 'dashboard:category_add' %}">Add your first category</a>.</td>
+            <td colspan="3" class="text-center text-muted py-4">No categories yet. <a href="{% url 'dashboard:category_add' %}">Add your first category</a>.</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -36,5 +46,5 @@
     </div>
   </div>
 </div>
-<p class="small text-muted mt-3 mb-0">Assign categories when editing products. Visitors can filter your public product list by category.</p>
+<p class="small text-muted mt-3 mb-0">Assign categories when editing products. Enable <strong>Spotlight</strong> on up to four categories to fill the promotional strip on your home page.</p>
 {% endblock %}

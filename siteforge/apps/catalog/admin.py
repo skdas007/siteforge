@@ -4,8 +4,8 @@ from .models import Category, Product
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "client", "order")
-    list_filter = ("client",)
+    list_display = ("name", "slug", "client", "order", "show_in_spotlight", "spotlight_order")
+    list_filter = ("client", "show_in_spotlight")
     search_fields = ("name",)
     raw_id_fields = ("client",)
 

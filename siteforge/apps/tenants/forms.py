@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django import forms
 
+from apps.catalog.models import Category
 from apps.core.validators import validate_favicon_upload, validate_image_upload_size
 
 _IMAGE_HELP = "Maximum file size: 3 MB."
@@ -72,23 +73,75 @@ class SiteSettingsForm(forms.Form):
         ]
 
 
-class CategoryForm(forms.Form):
-    """Dashboard: add product category (client-scoped in view)."""
-    name = forms.CharField(
-        label="Name",
-        max_length=100,
-        required=True,
-        strip=True,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "e.g. Electronics",
-                "maxlength": 100,
-                "id": "id_name",
-            }
-        ),
-        error_messages={"required": "Category name is required."},
-    )
+class CategoryForm(forms.ModelForm):
+    """Dashboard: create / edit category including home Spotlight tile."""
+
+    class Meta:
+        model = Category
+        fields = [
+            "name",
+            "show_in_spotlight",
+            "spotlight_order",
+            "spotlight_image",
+            "spotlight_video",
+            "spotlight_headline",
+            "spotlight_upto_label",
+            "spotlight_discount_text",
+            "spotlight_subtitle",
+            "spotlight_tag_style",
+            "spotlight_tag_text",
+        ]
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "e.g. Silk collection",
+                    "maxlength": 100,
+                    "id": "id_name",
+                }
+            ),
+            "show_in_spotlight": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_show_in_spotlight"}),
+            "spotlight_order": forms.NumberInput(attrs={"class": "form-control", "min": 0, "id": "id_spotlight_order"}),
+            "spotlight_image": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "image/*"}),
+            "spotlight_video": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "video/mp4,.mp4"}),
+            "spotlight_headline": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "e.g. Festival sale", "maxlength": 120}
+            ),
+            "spotlight_upto_label": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Leave blank for “Upto”", "maxlength": 30}
+            ),
+            "spotlight_discount_text": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "e.g. 15% OFF", "maxlength": 40}
+            ),
+            "spotlight_subtitle": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Blank uses category name", "maxlength": 120}
+            ),
+            "spotlight_tag_style": forms.Select(attrs={"class": "form-control"}),
+            "spotlight_tag_text": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "e.g. From ₹1,299 or SKU-102", "maxlength": 80}
+            ),
+        }
+
+    def __init__(self, *args, client=None, editing_pk=None, **kwargs):
+        self._client = client
+        self._editing_pk = editing_pk
+        super().__init__(*args, **kwargs)
+        for fname in ("spotlight_image", "spotlight_video"):
+            if fname in self.fields:
+                self.fields[fname].required = False
+
+    def clean_name(self):
+        name = (self.cleaned_data.get("name") or "").strip()
+        if not name:
+            raise forms.ValidationError("Category name is required.")
+        if not self._client:
+            return name
+        qs = Category.objects.filter(client=self._client, name__iexact=name)
+        if self._editing_pk:
+            qs = qs.exclude(pk=self._editing_pk)
+        if qs.exists():
+            raise forms.ValidationError("A category with that name already exists.")
+        return name[:100]
 
 
 class ProductForm(forms.Form):

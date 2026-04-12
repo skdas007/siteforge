@@ -85,7 +85,7 @@
         </div>
         <div class="col-lg-6">
           <label for="id_extra_images" class="form-label">Additional images</label>
-          <p class="upload-rec-size mb-1">Gallery on the product page. Recommended: <span class="upload-rec-size-dim">1000×1000 px</span> or larger square. <strong>Max 3 MB</strong> per file.</p>
+          <p class="upload-rec-size mb-1">Gallery on the product page. Up to <strong>{{ max_product_gallery_images }}</strong> additional images per product — select at most {{ max_product_gallery_images }} files at once. To change the gallery later, save the product, open Edit, remove images if needed, then add new ones. Recommended: <span class="upload-rec-size-dim">1000×1000 px</span> or larger square. <strong>Max 3 MB</strong> per file.</p>
           {% if product.extra_images %}
           <div class="dashboard-gallery-grid">
             {% for img in product.extra_images %}
@@ -110,10 +110,152 @@
         <input type="checkbox" name="is_active" id="id_is_active" class="form-check-input" {% if form.is_bound %}{% if form.is_active.value %}checked{% endif %}{% elif product.is_active != False %}checked{% endif %}>
         <label class="form-check-label" for="id_is_active">Active (show on site)</label>
       </div>
+      <div id="sf-product-upload-meta" class="d-none" hidden
+        data-max-gallery="{{ max_product_gallery_images }}"
+        data-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+        data-existing-gallery="{{ product.extra_images|length }}"></div>
       <div class="dashboard-form-actions">
         <button type="submit" class="btn btn-primary rounded-pill px-4">Save product</button>
       </div>
     </form>
   </div>
 </div>
+<script>
+(function () {
+  var form = document.querySelector("form.dashboard-form-product");
+  var meta = document.getElementById("sf-product-upload-meta");
+  if (!form || !meta) return;
+
+  var maxGallery = parseInt(meta.getAttribute("data-max-gallery") || "3", 10);
+  var maxBytes = parseInt(meta.getAttribute("data-max-bytes") || "3145728", 10);
+  var existingGallery = parseInt(meta.getAttribute("data-existing-gallery") || "0", 10);
+
+  var maxMbLabel =
+    maxBytes % (1024 * 1024) === 0
+      ? String(maxBytes / (1024 * 1024))
+      : (maxBytes / (1024 * 1024)).toFixed(1);
+
+  function imageFileError(file) {
+    if (!file) return null;
+    if (file.size > maxBytes) {
+      return "Each image must be at most " + maxMbLabel + " MB.";
+    }
+    if (file.type && file.type.indexOf("image/") !== 0) {
+      return "Please upload image files only.";
+    }
+    return null;
+  }
+
+  function currentAfterRemovals() {
+    var n = document.querySelectorAll('input[name="remove_extra_image"]:checked').length;
+    return Math.max(0, existingGallery - n);
+  }
+
+  function allowedNewGallery() {
+    return Math.max(0, maxGallery - currentAfterRemovals());
+  }
+
+  function validateExtraImages(input) {
+    var files = input.files;
+    if (!files || !files.length) return true;
+    if (files.length > maxGallery) {
+      alert(
+        "Please select at most " +
+          maxGallery +
+          " additional images at a time. Save your product with up to " +
+          maxGallery +
+          " gallery images, then use Edit to remove or replace images before adding more."
+      );
+      input.value = "";
+      return false;
+    }
+    var allow = allowedNewGallery();
+    if (files.length > allow) {
+      alert(
+        "You can add only " +
+          allow +
+          " more gallery image" +
+          (allow === 1 ? "" : "s") +
+          " (maximum " +
+          maxGallery +
+          " total). Remove some with “Remove”, save, then add more — or choose fewer files."
+      );
+      input.value = "";
+      return false;
+    }
+    for (var i = 0; i < files.length; i++) {
+      var err = imageFileError(files[i]);
+      if (err) {
+        alert(err);
+        input.value = "";
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function validateSingleImageInput(input) {
+    var files = input.files;
+    if (!files || !files.length) return true;
+    var err = imageFileError(files[0]);
+    if (err) {
+      alert(err);
+      input.value = "";
+      return false;
+    }
+    return true;
+  }
+
+  var extraInput = document.getElementById("id_extra_images");
+  if (extraInput) {
+    extraInput.addEventListener("change", function () {
+      validateExtraImages(this);
+    });
+  }
+
+  ["id_image", "id_seo_image"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("change", function () {
+        validateSingleImageInput(this);
+      });
+    }
+  });
+
+  form.addEventListener("submit", function (e) {
+    if (extraInput && extraInput.files && extraInput.files.length && !validateExtraImages(extraInput)) {
+      e.preventDefault();
+      return;
+    }
+    var primary = document.getElementById("id_image");
+    if (primary && primary.files && primary.files.length && !validateSingleImageInput(primary)) {
+      e.preventDefault();
+      return;
+    }
+    var seoImg = document.getElementById("id_seo_image");
+    if (seoImg && seoImg.files && seoImg.files.length && !validateSingleImageInput(seoImg)) {
+      e.preventDefault();
+      return;
+    }
+
+    var priceEl = document.getElementById("id_price");
+    var mrpEl = document.getElementById("id_compare_at_price");
+    if (priceEl && mrpEl) {
+      var saleStr = (priceEl.value || "").trim();
+      var mrpStr = (mrpEl.value || "").trim();
+      if (mrpStr) {
+        var sale = saleStr ? parseFloat(saleStr.replace(/,/g, "")) : 0;
+        var mrp = parseFloat(mrpStr.replace(/,/g, ""));
+        if (!isNaN(sale) && !isNaN(mrp) && mrp < sale) {
+          e.preventDefault();
+          alert(
+            "Original price (MRP) must be greater than or equal to the sale price."
+          );
+          return;
+        }
+      }
+    }
+  });
+})();
+</script>
 {% endblock %}

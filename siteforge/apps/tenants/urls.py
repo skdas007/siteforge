@@ -10,6 +10,7 @@ urlpatterns = [
     path("settings/carousel-reorder/", views.CarouselReorderView.as_view(), name="carousel_reorder"),
     path("categories/", views.CategoryListView.as_view(), name="category_list"),
     path("categories/add/", views.CategoryCreateView.as_view(), name="category_add"),
+    path("categories/<int:pk>/edit/", views.CategoryEditView.as_view(), name="category_edit"),
     path("categories/<int:pk>/delete/", views.CategoryDeleteView.as_view(), name="category_delete"),
     path("products/", views.ProductListView.as_view(), name="product_list"),
     path("products/reorder/", views.ProductReorderView.as_view(), name="product_reorder"),

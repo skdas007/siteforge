@@ -6,6 +6,8 @@ from django.core.exceptions import ValidationError
 # Maximum upload sizes (bytes)
 MAX_IMAGE_UPLOAD_BYTES = 3 * 1024 * 1024  # 3 MB — all images project-wide
 MAX_VIDEO_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB — carousel MP4 only
+# Additional gallery images per product (ProductImage), dashboard multi-upload.
+MAX_PRODUCT_GALLERY_IMAGES = 3
 MAX_FAVICON_BYTES = 512 * 1024  # 512 KB — browser tab icons
 _FAVICON_EXTENSIONS = frozenset({"ico", "png", "svg", "webp", "gif"})
 

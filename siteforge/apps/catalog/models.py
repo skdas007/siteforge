@@ -3,15 +3,28 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 
 from apps.core.image_compression import compress_model_image_fields
 from apps.core.storage_cleanup import clear_missing_file_fields
-from apps.core.validators import validate_image_upload_size
+from apps.core.validators import validate_image_upload_size, validate_video_upload_size
 
 
 class Category(models.Model):
     """Category for products; each client has their own categories."""
+
+    SPOTLIGHT_TAG_NONE = ""
+    SPOTLIGHT_TAG_PRICE = "price"
+    SPOTLIGHT_TAG_CODE = "code"
+    SPOTLIGHT_TAG_NEW = "new"
+    SPOTLIGHT_TAG_CHOICES = [
+        (SPOTLIGHT_TAG_NONE, "No corner tag"),
+        (SPOTLIGHT_TAG_PRICE, "Green — price / promo text"),
+        (SPOTLIGHT_TAG_CODE, "Green — code / SKU"),
+        (SPOTLIGHT_TAG_NEW, "White — badge text"),
+    ]
+
     client = models.ForeignKey(
         "tenants.Client",
         on_delete=models.CASCADE,
@@ -21,6 +34,64 @@ class Category(models.Model):
     slug = models.SlugField(max_length=100, blank=True)
     order = models.PositiveIntegerField(default=0)
 
+    show_in_spotlight = models.BooleanField(
+        default=False,
+        help_text="Show this category on the home Spotlight strip (up to four, ordered below).",
+    )
+    spotlight_order = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Lower numbers appear first in Spotlight.",
+    )
+    spotlight_image = models.ImageField(
+        upload_to="catalog/category_spotlight/",
+        blank=True,
+        null=True,
+        validators=[validate_image_upload_size],
+        help_text="Portrait-style photo works best. Max 3 MB.",
+    )
+    spotlight_video = models.FileField(
+        upload_to="catalog/category_spotlight/video/",
+        blank=True,
+        null=True,
+        validators=[
+            validate_video_upload_size,
+            FileExtensionValidator(["mp4"], message="Spotlight video must be an MP4 file."),
+        ],
+        help_text="Optional. If set, video plays instead of the image. Max 15 MB, MP4 only.",
+    )
+    spotlight_headline = models.CharField(
+        max_length=120,
+        blank=True,
+        help_text="Small caps line above the offer, e.g. Festival sale.",
+    )
+    spotlight_upto_label = models.CharField(
+        max_length=30,
+        blank=True,
+        default="",
+        help_text="Usually “Upto”. Leave blank to use “Upto”.",
+    )
+    spotlight_discount_text = models.CharField(
+        max_length=40,
+        blank=True,
+        help_text="Large offer line, e.g. 15% OFF.",
+    )
+    spotlight_subtitle = models.CharField(
+        max_length=120,
+        blank=True,
+        help_text="Line under the offer. Blank uses the category name.",
+    )
+    spotlight_tag_style = models.CharField(
+        max_length=16,
+        choices=SPOTLIGHT_TAG_CHOICES,
+        blank=True,
+        default=SPOTLIGHT_TAG_NONE,
+    )
+    spotlight_tag_text = models.CharField(
+        max_length=80,
+        blank=True,
+        help_text="Text for the corner tag (e.g. From ₹1,299 or SKU code).",
+    )
+
     class Meta:
         ordering = ["order", "name"]
         verbose_name_plural = "categories"
@@ -28,10 +99,26 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    def clean(self):
+        clear_missing_file_fields(self, "spotlight_image", "spotlight_video")
+        super().clean()
+        if self.show_in_spotlight:
+            has_media = bool(self.spotlight_image) or bool(self.spotlight_video)
+            if not has_media:
+                raise ValidationError(
+                    {"show_in_spotlight": "Add a spotlight image or video when Spotlight is enabled."}
+                )
+
     def save(self, *args, **kwargs):
         if not self.slug and self.name:
             from django.utils.text import slugify
+
             self.slug = slugify(self.name)
+        compress_model_image_fields(
+            self,
+            [("spotlight_image", settings.IMAGE_UPLOAD_BANNER_MAX_SIDE)],
+        )
+        self.full_clean()
         super().save(*args, **kwargs)
 
 

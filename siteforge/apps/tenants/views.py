@@ -12,13 +12,17 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils.dateparse import parse_date
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import FormView, ListView, TemplateView
+from django.views.generic import FormView, ListView, TemplateView, UpdateView
 from django.views.generic.edit import DeleteView
 
 from apps.catalog.models import Category, Product
 from apps.leads.models import ContactSubmission
 from apps.core.storage_cleanup import delete_stored_file
-from apps.core.validators import MAX_IMAGE_UPLOAD_BYTES, MAX_VIDEO_UPLOAD_BYTES
+from apps.core.validators import (
+    MAX_IMAGE_UPLOAD_BYTES,
+    MAX_PRODUCT_GALLERY_IMAGES,
+    MAX_VIDEO_UPLOAD_BYTES,
+)
 
 from .forms import CategoryForm, ProductForm, SiteSettingsForm
 from .mixins import DashboardClientMixin
@@ -60,17 +64,49 @@ def _validate_carousel_uploads(request):
     return errors
 
 
-def _validate_extra_product_images(request):
+def _validate_extra_product_images(request, *, existing_count: int = 0, removing_count: int = 0):
     """Return a list of error messages for additional product gallery uploads."""
+    raw = [f for f in (request.FILES.getlist("extra_images") or []) if f]
     errors = []
-    for i, f in enumerate(request.FILES.getlist("extra_images") or []):
-        if not f:
-            continue
+
+    if len(raw) > MAX_PRODUCT_GALLERY_IMAGES:
+        errors.append(
+            f"Please select at most {MAX_PRODUCT_GALLERY_IMAGES} additional images at a time. "
+            f"Save your product with up to {MAX_PRODUCT_GALLERY_IMAGES} gallery images, then use Edit to remove "
+            "or replace images before adding more."
+        )
+        return errors
+
+    new_files = []
+    for i, f in enumerate(raw, start=1):
         if not (getattr(f, "content_type", "") or "").startswith("image/"):
-            errors.append(f"Additional image {i + 1}: upload an image file only.")
-            continue
+            errors.append(f"Additional image {i}: upload an image file only.")
+        else:
+            new_files.append(f)
+    if errors:
+        return errors
+
+    n_new = len(new_files)
+    after_remove = max(0, existing_count - removing_count)
+    if after_remove + n_new > MAX_PRODUCT_GALLERY_IMAGES:
+        can_add = max(0, MAX_PRODUCT_GALLERY_IMAGES - after_remove)
+        if can_add == 0:
+            errors.append(
+                f"This product already has {MAX_PRODUCT_GALLERY_IMAGES} additional gallery images (the maximum). "
+                "Mark images with “Remove”, save, then add new ones — or choose at most "
+                f"{MAX_PRODUCT_GALLERY_IMAGES} files when adding a new product."
+            )
+        else:
+            errors.append(
+                f"You can have at most {MAX_PRODUCT_GALLERY_IMAGES} additional gallery images per product. "
+                f"After removals you can add {can_add} more here; you selected {n_new}. "
+                "Upload fewer files, or save and edit again after removing some images."
+            )
+        return errors
+
+    for i, f in enumerate(new_files, start=1):
         if f.size > MAX_IMAGE_UPLOAD_BYTES:
-            errors.append(f"Additional image {i + 1}: must be at most 3 MB.")
+            errors.append(f"Additional image {i}: must be at most 3 MB.")
     return errors
 
 
@@ -330,6 +366,8 @@ class ProductAddView(DashboardClientMixin, FormView):
             "seo_description": "",
             "seo_image": None,
         }
+        context["max_product_gallery_images"] = MAX_PRODUCT_GALLERY_IMAGES
+        context["max_image_upload_bytes"] = MAX_IMAGE_UPLOAD_BYTES
         return context
 
     def form_valid(self, form):
@@ -367,7 +405,19 @@ class ProductEditView(DashboardClientMixin, FormView):
         form = self.get_form()
         if not form.is_valid():
             return self.form_invalid(form)
-        extra_errors = _validate_extra_product_images(request)
+        product = get_object_or_404(_get_product_queryset(request), pk=self.kwargs["pk"])
+        remove_pks = []
+        for pk in request.POST.getlist("remove_extra_image"):
+            try:
+                remove_pks.append(int(pk))
+            except (ValueError, TypeError):
+                pass
+        removing_count = product.extra_images.filter(pk__in=remove_pks).count()
+        extra_errors = _validate_extra_product_images(
+            request,
+            existing_count=product.extra_images.count(),
+            removing_count=removing_count,
+        )
         if extra_errors:
             for msg in extra_errors:
                 form.add_error(None, msg)
@@ -404,6 +454,8 @@ class ProductEditView(DashboardClientMixin, FormView):
             "is_main": product.is_main,
             "extra_images": extra,
         }
+        context["max_product_gallery_images"] = MAX_PRODUCT_GALLERY_IMAGES
+        context["max_image_upload_bytes"] = MAX_IMAGE_UPLOAD_BYTES
         return context
 
     def get_initial(self):
@@ -518,15 +570,50 @@ class CategoryCreateView(DashboardClientMixin, FormView):
     template_name = "dashboard/category_form.html"
     success_url = reverse_lazy("dashboard:category_list")
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["client"] = self.request.user.client
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["form_title"] = "Add category"
+        ctx["is_edit"] = False
+        return ctx
+
     def form_valid(self, form):
-        name = form.cleaned_data["name"].strip()
-        if Category.objects.filter(client=self.request.user.client, name__iexact=name).exists():
-            form.add_error("name", "A category with that name already exists.")
-            return self.form_invalid(form)
-        order = _get_category_queryset(self.request).count()
-        Category.objects.create(client=self.request.user.client, name=name, order=order)
+        cat = form.save(commit=False)
+        cat.client = self.request.user.client
+        cat.order = _get_category_queryset(self.request).count()
+        cat.save()
         messages.success(self.request, "Category added.")
         return redirect(self.success_url)
+
+
+class CategoryEditView(DashboardClientMixin, UpdateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = "dashboard/category_form.html"
+    success_url = reverse_lazy("dashboard:category_list")
+
+    def get_queryset(self):
+        return _get_category_queryset(self.request)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["client"] = self.request.user.client
+        kwargs["editing_pk"] = self.object.pk
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["form_title"] = "Edit category"
+        ctx["is_edit"] = True
+        return ctx
+
+    def form_valid(self, form):
+        messages.success(self.request, "Category updated.")
+        return super().form_valid(form)
 
 
 class CategoryDeleteView(DashboardClientMixin, View):

@@ -47,7 +47,7 @@ def _whatsapp_product_inquiry_message(request, product):
 
 def _client_context(request):
     """Build template context from request.client when set (multi-tenant)."""
-    from apps.catalog.models import Product
+    from apps.catalog.models import Category, Product
     from apps.tenants.models import CarouselSlide
 
     client = getattr(request, "client", None)
@@ -64,6 +64,11 @@ def _client_context(request):
         slider_slides = None
     products = Product.objects.filter(client=client, is_active=True).order_by("order", "name")
     main_product = products.filter(is_main=True).first() or products.first()
+    spotlight_categories = list(
+        Category.objects.filter(client=client, show_in_spotlight=True).order_by(
+            "spotlight_order", "order", "pk"
+        )[:4]
+    )
     return {
         "theme_slug": client.theme_slug,
         "business_name": client.business_name,
@@ -79,6 +84,7 @@ def _client_context(request):
         "slider_slides": slider_slides,
         "main_product": main_product,
         "products": products,
+        "spotlight_categories": spotlight_categories,
     }
 
 
@@ -97,6 +103,7 @@ class IndexView(TemplateView):
             _empty = Paginator([], HOME_PRODUCTS_PER_PAGE)
             context["products"] = _empty.page(1)
             context["home_products_total_count"] = 0
+            context["spotlight_categories"] = []
         elif getattr(self.request, "client", None):
             from apps.catalog.models import Category
 
@@ -139,6 +146,7 @@ class IndexView(TemplateView):
             context.setdefault("categories", [])
             context.setdefault("current_category_id", None)
             context.setdefault("map_embed_url", None)
+            context.setdefault("spotlight_categories", [])
             _empty = Paginator([], HOME_PRODUCTS_PER_PAGE)
             context["products"] = _empty.page(1)
             context["home_products_total_count"] = 0

@@ -1,21 +1,83 @@
 {% extends "dashboard/base_dashboard.html" %}
-{% block title %}Add category{% endblock %}
+{% block title %}{{ form_title }}{% endblock %}
 {% block dashboard_content %}
 <div class="card dashboard-card">
   <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <h2 class="h5 mb-0">Add category</h2>
+    <h2 class="h5 mb-0">{{ form_title }}</h2>
     <a href="{% url 'dashboard:category_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">← Back to list</a>
   </div>
   <div class="card-body">
-    <form method="post" action="{% url 'dashboard:category_add' %}" class="dashboard-form dashboard-form-max">
+    <form method="post" enctype="multipart/form-data" action="{% if is_edit %}{% url 'dashboard:category_edit' object.pk %}{% else %}{% url 'dashboard:category_add' %}{% endif %}" class="dashboard-form dashboard-form-max">
       {% csrf_token %}
       {% include "includes/form_errors_alert.html" with form=form %}
-      <div class="mb-3">
-        <label for="id_name" class="form-label">Name</label>
-        {{ form.name }}
+      <div class="mb-4">
+        <h3 class="h6 text-uppercase text-muted mb-3">Basics</h3>
+        <div class="mb-3">
+          <label for="id_name" class="form-label">Category name</label>
+          {{ form.name }}
+        </div>
+      </div>
+      <div class="border-top pt-4 mb-2">
+        <h3 class="h6 text-uppercase text-muted mb-1">Home Spotlight strip</h3>
+        <p class="small text-muted mb-3">Up to <strong>four</strong> categories with Spotlight enabled appear on your public home page (ordered by “Spotlight order”, then category order). Each tile links to your product list filtered by this category.</p>
+        <div class="mb-3 form-check">
+          {{ form.show_in_spotlight }}
+          <label class="form-check-label" for="id_show_in_spotlight">Show in Spotlight on home page</label>
+        </div>
+        <div class="mb-3">
+          <label for="id_spotlight_order" class="form-label">Spotlight order</label>
+          {{ form.spotlight_order }}
+          <div class="form-text">Lower numbers appear first (e.g. 0, 1, 2…).</div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="id_spotlight_image" class="form-label">Spotlight image</label>
+            {{ form.spotlight_image }}
+            {% if is_edit and object.spotlight_image %}
+            <p class="small text-muted mt-1 mb-0">Current: <a href="{{ object.spotlight_image.url }}" target="_blank" rel="noopener">view</a></p>
+            {% endif %}
+            <p class="upload-rec-size mb-0 mt-2">Use a <strong>tall portrait</strong> image (width × height). Recommended: <span class="upload-rec-size-dim">1200 × 2000 px</span> (about <strong>3∶5</strong>), or <span class="upload-rec-size-dim">1080 × 1800 px</span> / <span class="upload-rec-size-dim">1000 × 1667 px</span>. Minimum about <span class="upload-rec-size-dim">800 × 1330 px</span> so it stays sharp when cropped. <strong>Max 3 MB.</strong></p>
+          </div>
+          <div class="col-md-6">
+            <label for="id_spotlight_video" class="form-label">Spotlight video (optional)</label>
+            {{ form.spotlight_video }}
+            {% if is_edit and object.spotlight_video %}
+            <p class="small text-muted mt-1 mb-0">Current: <a href="{{ object.spotlight_video.url }}" target="_blank" rel="noopener">view</a></p>
+            {% endif %}
+            <p class="upload-rec-size mb-0 mt-2">Match the same shape as the image: <strong>portrait</strong> frames best. Suggested frame sizes (width × height): <span class="upload-rec-size-dim">1080 × 1920 px</span> (9∶16 vertical) or <span class="upload-rec-size-dim">1080 × 1800 px</span> (~3∶5). <strong>MP4 only, max 15 MB.</strong> If you add both, the image can be the video poster until play.</p>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="id_spotlight_headline" class="form-label">Headline <span class="text-muted fw-normal">(small caps line)</span></label>
+          {{ form.spotlight_headline }}
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label for="id_spotlight_upto_label" class="form-label">“Upto” label</label>
+            {{ form.spotlight_upto_label }}
+          </div>
+          <div class="col-md-8">
+            <label for="id_spotlight_discount_text" class="form-label">Offer line</label>
+            {{ form.spotlight_discount_text }}
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="id_spotlight_subtitle" class="form-label">Subtitle under offer</label>
+          {{ form.spotlight_subtitle }}
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="id_spotlight_tag_style" class="form-label">Corner tag style</label>
+            {{ form.spotlight_tag_style }}
+          </div>
+          <div class="col-md-6">
+            <label for="id_spotlight_tag_text" class="form-label">Corner tag text</label>
+            {{ form.spotlight_tag_text }}
+          </div>
+        </div>
       </div>
       <div class="dashboard-form-actions">
-        <button type="submit" class="btn btn-primary">Add category</button>
+        <button type="submit" class="btn btn-primary">{% if is_edit %}Save changes{% else %}Add category{% endif %}</button>
       </div>
     </form>
   </div>

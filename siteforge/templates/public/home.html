@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 {% static 'img/no-image.svg' as no_image_url %}
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="{% static 'css/home-highlights.css' %}" rel="stylesheet">
+{% endblock %}
 {% block title %}{{ seo_title }}{% endblock %}
 
 {% block content %}
@@ -142,6 +148,55 @@
     </div>
   </div>
 </section>
+
+{# Spotlight: categories with "Show in Spotlight" (up to 4, ordered in dashboard) #}
+{% if spotlight_categories %}
+<section class="sf-showcase-section" id="highlights" aria-labelledby="highlights-heading">
+  <div class="container text-center pb-2 pb-lg-3" data-reveal="fade-up">
+    <h2 class="sf-showcase-heading" id="highlights-heading">Spotlight</h2>
+    <p class="sf-showcase-sub mb-0">Shop curated offers by category — managed in your dashboard under Categories.</p>
+  </div>
+  <div class="sf-showcase-strip">
+    <div class="sf-showcase-grid reveal-stagger sf-showcase-grid--count-{{ spotlight_categories|length }}">
+      {% for sc in spotlight_categories %}
+      <a class="sf-showcase-tile" href="{% url 'product_list' %}?category={{ sc.pk }}" data-reveal="fade-up">
+        <div class="sf-showcase-tile__media">
+          {% if sc.spotlight_video %}
+          <video class="sf-showcase-tile__video" autoplay muted loop playsinline preload="metadata"{% if sc.spotlight_image %} poster="{{ sc.spotlight_image.url }}"{% endif %}>
+            <source src="{{ sc.spotlight_video.url }}" type="video/mp4">
+          </video>
+          {% elif sc.spotlight_image %}
+          <img src="{{ sc.spotlight_image.url }}" alt="{{ sc.name }}" width="600" height="900" loading="lazy" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
+          {% else %}
+          <img src="{% static 'img/highlights/showcase-1.svg' %}" alt="" width="600" height="900" loading="lazy">
+          {% endif %}
+          <div class="sf-showcase-tile__scrim" aria-hidden="true"></div>
+          {% if sc.spotlight_tag_text and sc.spotlight_tag_style == 'price' %}
+          <span class="sf-showcase-tile__tag sf-showcase-tile__tag--price" aria-hidden="true">{{ sc.spotlight_tag_text }}</span>
+          {% elif sc.spotlight_tag_text and sc.spotlight_tag_style == 'code' %}
+          <span class="sf-showcase-tile__tag sf-showcase-tile__tag--code" aria-hidden="true">{{ sc.spotlight_tag_text }}</span>
+          {% elif sc.spotlight_tag_text and sc.spotlight_tag_style == 'new' %}
+          <span class="sf-showcase-tile__tag sf-showcase-tile__tag--new" aria-hidden="true">{{ sc.spotlight_tag_text }}</span>
+          {% endif %}
+          <span class="sf-showcase-tile__bag" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          </span>
+          <div class="sf-showcase-tile__copy">
+            <p class="sf-showcase-tile__sale-name">{{ sc.spotlight_headline|default:"Special offer" }}</p>
+            {% if sc.spotlight_discount_text %}
+            <p class="sf-showcase-tile__upto">{{ sc.spotlight_upto_label|default:"Upto" }}</p>
+            <p class="sf-showcase-tile__pct">{{ sc.spotlight_discount_text }}</p>
+            {% endif %}
+            <p class="sf-showcase-tile__cat">{{ sc.spotlight_subtitle|default:sc.name }}</p>
+            <span class="sf-showcase-tile__btn">Shop now</span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
 
 {# Products — same card grid as product list, with category filter #}
 <section id="products" class="py-5 section-padding" style="background: var(--clarity-light, #f8f9fa);">
