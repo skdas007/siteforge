@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.db import models
 
+from apps.core.image_compression import compress_model_image_fields
 from apps.core.storage_cleanup import clear_missing_file_fields
 from apps.core.validators import validate_image_upload_size
 
@@ -27,5 +29,9 @@ class Theme(models.Model):
         clear_missing_file_fields(self, "preview_image")
 
     def save(self, *args, **kwargs):
+        compress_model_image_fields(
+            self,
+            [("preview_image", settings.IMAGE_UPLOAD_THEME_PREVIEW_MAX_SIDE)],
+        )
         self.full_clean()
         super().save(*args, **kwargs)

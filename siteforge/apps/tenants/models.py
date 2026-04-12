@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 
+from apps.core.image_compression import compress_model_image_fields
 from apps.core.storage_cleanup import clear_missing_file_fields
 from apps.core.validators import (
     validate_favicon_upload,
@@ -101,6 +102,15 @@ class Client(models.Model):
         )
 
     def save(self, *args, **kwargs):
+        compress_model_image_fields(
+            self,
+            [
+                ("banner_image", settings.IMAGE_UPLOAD_BANNER_MAX_SIDE),
+                ("hero_image", settings.IMAGE_UPLOAD_BANNER_MAX_SIDE),
+                ("logo", settings.IMAGE_UPLOAD_LOGO_MAX_SIDE),
+                ("seo_image", settings.IMAGE_UPLOAD_SEO_MAX_SIDE),
+            ],
+        )
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -144,5 +154,6 @@ class CarouselSlide(models.Model):
         clear_missing_file_fields(self, "image", "video")
 
     def save(self, *args, **kwargs):
+        compress_model_image_fields(self, [("image", settings.IMAGE_UPLOAD_BANNER_MAX_SIDE)])
         self.full_clean()
         super().save(*args, **kwargs)

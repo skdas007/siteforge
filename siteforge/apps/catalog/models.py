@@ -1,9 +1,11 @@
 """Product and Category models: client-scoped."""
 from decimal import ROUND_HALF_UP, Decimal
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from apps.core.image_compression import compress_model_image_fields
 from apps.core.storage_cleanup import clear_missing_file_fields
 from apps.core.validators import validate_image_upload_size
 
@@ -132,6 +134,13 @@ class Product(models.Model):
             )
 
     def save(self, *args, **kwargs):
+        compress_model_image_fields(
+            self,
+            [
+                ("image", settings.IMAGE_UPLOAD_MAX_SIDE),
+                ("seo_image", settings.IMAGE_UPLOAD_SEO_MAX_SIDE),
+            ],
+        )
         self.full_clean()
         if self.is_main:
             Product.objects.filter(client=self.client).exclude(pk=self.pk).update(is_main=False)
@@ -155,5 +164,6 @@ class ProductImage(models.Model):
         ordering = ["order", "pk"]
 
     def save(self, *args, **kwargs):
+        compress_model_image_fields(self, [("image", settings.IMAGE_UPLOAD_MAX_SIDE)])
         self.full_clean()
         super().save(*args, **kwargs)

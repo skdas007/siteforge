@@ -153,6 +153,17 @@ else:
     MEDIA_URL = "media/"
     MEDIA_ROOT = os.environ.get("MEDIA_ROOT", str(BASE_DIR / "media"))
 
+# New raster uploads: resize + WebP (optional AVIF). SVG/ICO/animated GIF unchanged.
+IMAGE_AUTO_COMPRESS = os.environ.get("IMAGE_AUTO_COMPRESS", "true").lower() in ("1", "true", "yes")
+IMAGE_UPLOAD_MAX_SIDE = int(os.environ.get("IMAGE_UPLOAD_MAX_SIDE", "2400"))
+IMAGE_UPLOAD_LOGO_MAX_SIDE = int(os.environ.get("IMAGE_UPLOAD_LOGO_MAX_SIDE", "1200"))
+IMAGE_UPLOAD_BANNER_MAX_SIDE = int(os.environ.get("IMAGE_UPLOAD_BANNER_MAX_SIDE", "2560"))
+IMAGE_UPLOAD_SEO_MAX_SIDE = int(os.environ.get("IMAGE_UPLOAD_SEO_MAX_SIDE", "1600"))
+IMAGE_UPLOAD_THEME_PREVIEW_MAX_SIDE = int(os.environ.get("IMAGE_UPLOAD_THEME_PREVIEW_MAX_SIDE", "1600"))
+IMAGE_WEBP_QUALITY = int(os.environ.get("IMAGE_WEBP_QUALITY", "82"))
+IMAGE_AVIF_QUALITY = int(os.environ.get("IMAGE_AVIF_QUALITY", "70"))
+IMAGE_TRY_AVIF = os.environ.get("IMAGE_TRY_AVIF", "false").lower() in ("1", "true", "yes")
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Large enough that uploads reach validation (images max 3 MB, carousel MP4 max 15 MB).
