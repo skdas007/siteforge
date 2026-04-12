@@ -65,7 +65,8 @@
         </thead>
         <tbody>
           {% for row in submissions %}
-          {% with script_id="contact-msg-"|add:row.pk %}
+          {% with pkstr=row.pk|stringformat:"s" %}
+          {% with script_id="contact-msg-"|add:pkstr %}
           <tr>
             <td class="text-center align-middle">
               <input type="checkbox" class="form-check-input contact-row-check" name="submission_ids" value="{{ row.pk }}" aria-label="Select {{ row.name }}">
@@ -90,6 +91,7 @@
               <a href="{% url 'dashboard:contact_delete' row.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-2 px-sm-3">Delete</a>
             </td>
           </tr>
+          {% endwith %}
           {% endwith %}
           {% empty %}
           <tr>
