@@ -167,7 +167,8 @@
     <div class="row mt-5 pt-4 border-top">
       <div class="col-12" data-reveal="fade-up">
         <h2 class="h5 fw-bold mb-3">More in {{ product.category.name }}</h2>
-        <p class="text-muted small mb-3">Up to four products appear at once; the row moves slowly when there are more. Hover to pause. Use arrows to jump.</p>
+        <p class="text-muted small mb-3 d-none d-md-block">Up to four products show on large screens; the strip auto-advances smoothly. Hover to pause. Use arrows to move.</p>
+        <p class="text-muted small mb-3 d-md-none">Swipe sideways — one product at a time. It also advances automatically. Tap and drag or use the arrows.</p>
         <div class="product-related-carousel position-relative">
           <button type="button" class="product-related-nav product-related-nav--prev btn btn-light border shadow-sm" id="product-related-prev" aria-label="Scroll related products left">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -209,10 +210,11 @@
       if (!viewport || !prevBtn || !nextBtn) return;
 
       var gapPx = 16;
-      var autoSpeed = 0.3;
       var paused = false;
       var touchResumeTimer = null;
+      var autoTimer = null;
       var reducedMotion = false;
+      var autoIntervalMs = 5000;
       try {
         reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       } catch (e) {}
@@ -247,31 +249,51 @@
         nextBtn.hidden = false;
       }
 
-      function tickAuto() {
-        if (reducedMotion) return;
-        if (!paused && maxScroll() > 1) {
-          viewport.scrollLeft += autoSpeed;
-          if (viewport.scrollLeft >= maxScroll() - 0.5) {
-            viewport.scrollLeft = 0;
-          }
+      function scrollSmooth(behavior) {
+        return reducedMotion ? 'auto' : behavior;
+      }
+
+      function autoAdvance() {
+        if (paused || reducedMotion) return;
+        if (maxScroll() <= 1) return;
+        var maxS = maxScroll();
+        var b = scrollSmooth('smooth');
+        if (viewport.scrollLeft >= maxS - 3) {
+          viewport.scrollTo({ left: 0, behavior: b });
+        } else {
+          viewport.scrollBy({ left: stepDistance(), behavior: b });
         }
-        rafId = window.requestAnimationFrame(tickAuto);
+      }
+
+      function startAuto() {
+        stopAuto();
+        if (reducedMotion || maxScroll() <= 1) return;
+        autoTimer = window.setInterval(autoAdvance, autoIntervalMs);
+      }
+
+      function stopAuto() {
+        if (autoTimer) {
+          window.clearInterval(autoTimer);
+          autoTimer = null;
+        }
       }
 
       prevBtn.addEventListener('click', function() {
         var maxS = maxScroll();
+        var b = scrollSmooth('smooth');
         if (viewport.scrollLeft <= 2) {
-          viewport.scrollTo({ left: maxS, behavior: 'smooth' });
+          viewport.scrollTo({ left: maxS, behavior: b });
         } else {
-          viewport.scrollBy({ left: -stepDistance(), behavior: 'smooth' });
+          viewport.scrollBy({ left: -stepDistance(), behavior: b });
         }
       });
       nextBtn.addEventListener('click', function() {
         var maxS = maxScroll();
+        var b = scrollSmooth('smooth');
         if (viewport.scrollLeft >= maxS - 2) {
-          viewport.scrollTo({ left: 0, behavior: 'smooth' });
+          viewport.scrollTo({ left: 0, behavior: b });
         } else {
-          viewport.scrollBy({ left: stepDistance(), behavior: 'smooth' });
+          viewport.scrollBy({ left: stepDistance(), behavior: b });
         }
       });
       viewport.addEventListener('mouseenter', function() { paused = true; });
@@ -282,19 +304,21 @@
       }, { passive: true });
       viewport.addEventListener('touchend', function() {
         if (touchResumeTimer) clearTimeout(touchResumeTimer);
-        touchResumeTimer = setTimeout(function() { paused = false; }, 1800);
+        touchResumeTimer = setTimeout(function() { paused = false; }, 2000);
       }, { passive: true });
       viewport.addEventListener('scroll', function() { window.requestAnimationFrame(updateNav); }, { passive: true });
       window.addEventListener('resize', function() {
         readGap();
-        window.requestAnimationFrame(updateNav);
+        window.requestAnimationFrame(function() {
+          updateNav();
+          stopAuto();
+          startAuto();
+        });
       });
 
       updateNav();
       readGap();
-      if (!reducedMotion && maxScroll() > 1) {
-        rafId = window.requestAnimationFrame(tickAuto);
-      }
+      startAuto();
     })();
     </script>
     {% endif %}

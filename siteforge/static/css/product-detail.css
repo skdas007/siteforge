@@ -179,7 +179,7 @@
   }
 }
 
-/* Same-category related products: up to 10 items, 4 visible on large screens, slow auto-scroll */
+/* Same-category related products: up to 10 items; mobile = 1 per view + snap; desktop = 4 */
 .product-related-carousel {
   padding: 0 2.75rem;
 }
@@ -187,7 +187,6 @@
 .product-related-viewport {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 100%);
   align-items: stretch;
   gap: 1rem;
   width: 100%;
@@ -204,10 +203,31 @@
   height: 0;
 }
 
-/* Tablet: 2 products per “page” */
+/* Mobile: one full-width card per “page”, snap when swiping */
+@media (max-width: 767.98px) {
+  .product-related-viewport {
+    gap: 0.75rem;
+    grid-auto-columns: 100%;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0;
+  }
+
+  .product-related-card-wrap {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
+
+/* Small tablets / large phones: still one column until 768px; above use 2-up */
 @media (min-width: 768px) {
   .product-related-viewport {
     grid-auto-columns: calc((100% - 1rem) / 2);
+    scroll-snap-type: none;
+  }
+
+  .product-related-card-wrap {
+    scroll-snap-align: unset;
+    scroll-snap-stop: normal;
   }
 }
 
