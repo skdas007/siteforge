@@ -1,0 +1,43 @@
+/* Theme: aurora — colorful gradient accents */
+:root {
+  --sf-primary: #5b5bd6;
+  --sf-hero-bg: linear-gradient(135deg, #eef2ff 0%, #fff4f1 100%);
+}
+
+body.theme-aurora {
+  background-color: #f7f8ff;
+  color: #1f2340;
+}
+
+.theme-aurora .navbar-public {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.theme-aurora .btn-primary {
+  background: linear-gradient(135deg, #5b5bd6, #9a58d7);
+  border: none;
+}
+
+.theme-aurora .btn-primary:hover,
+.theme-aurora .btn-primary:focus {
+  background: linear-gradient(135deg, #4f4fc7, #8b49c9);
+}
+
+.theme-aurora .sf-hero {
+  background: var(--sf-hero-bg);
+}
+
+.theme-aurora .card,
+.theme-aurora .product-card {
+  border: 1px solid #e4e6ff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(61, 70, 165, 0.08);
+}
+
+.theme-aurora .section-title,
+.theme-aurora h1,
+.theme-aurora h2,
+.theme-aurora h3 {
+  color: #252a52;
+}

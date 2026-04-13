@@ -1,0 +1,46 @@
+/* Theme: midnight — dark storefront */
+:root {
+  --sf-primary: #7aa2ff;
+  --sf-hero-bg: #11162b;
+}
+
+body.theme-midnight {
+  background: #0c1020;
+  color: #e7ecff;
+}
+
+.theme-midnight .navbar-public {
+  background: rgba(15, 21, 43, 0.96);
+  border-bottom: 1px solid #273050;
+}
+
+.theme-midnight .navbar-public .nav-link,
+.theme-midnight .navbar-public .navbar-brand-text {
+  color: #dce4ff !important;
+}
+
+.theme-midnight .sf-hero {
+  background: linear-gradient(160deg, #131936 0%, #0d1226 100%);
+}
+
+.theme-midnight .card,
+.theme-midnight .product-card,
+.theme-midnight .spotlight-card {
+  background: #141b35;
+  border: 1px solid #2a3359;
+  color: #e7ecff;
+}
+
+.theme-midnight .text-muted {
+  color: #9ea8cf !important;
+}
+
+.theme-midnight .btn-primary {
+  background: #5f87ff;
+  border-color: #5f87ff;
+}
+
+.theme-midnight .btn-outline-secondary {
+  color: #cdd6ff;
+  border-color: #4c5888;
+}

@@ -156,7 +156,13 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         themes = Theme.objects.filter(is_active=True).order_by("name")
         kwargs["theme_choices"] = [(t.slug, t.name) for t in themes]
         if not themes:
-            kwargs["theme_choices"] = [("default", "Default"), ("minimal", "Minimal"), ("clarity", "Clarity")]
+            kwargs["theme_choices"] = [
+                ("default", "Default"),
+                ("minimal", "Minimal"),
+                ("clarity", "Clarity (agency style + animations)"),
+                ("aurora", "Aurora (colorful gradient)"),
+                ("midnight", "Midnight (dark mode)"),
+            ]
         return kwargs
 
     def get_initial(self):

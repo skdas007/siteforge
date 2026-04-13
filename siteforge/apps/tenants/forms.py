@@ -70,6 +70,8 @@ class SiteSettingsForm(forms.Form):
             ("default", "Default"),
             ("minimal", "Minimal"),
             ("clarity", "Clarity (agency style + animations)"),
+            ("aurora", "Aurora (colorful gradient)"),
+            ("midnight", "Midnight (dark mode)"),
         ]
 
 
