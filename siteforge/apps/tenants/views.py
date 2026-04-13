@@ -28,6 +28,16 @@ from .forms import CategoryForm, ProductForm, SiteSettingsForm
 from .mixins import DashboardClientMixin
 from .models import CarouselSlide
 
+BUILTIN_THEMES = [
+    ("default", "Default"),
+    ("minimal", "Minimal"),
+    ("clarity", "Clarity (agency style + animations)"),
+    ("aurora", "Aurora (colorful gradient)"),
+    ("midnight", "Midnight (dark mode)"),
+    ("blackred", "Black Red (bold contrast)"),
+    ("emeraldgold", "Emerald Gold (premium)"),
+]
+
 
 class DashboardHomeView(DashboardClientMixin, TemplateView):
     template_name = "dashboard/home.html"
@@ -131,6 +141,29 @@ def _get_carousel_slides_from_request(request):
     return result
 
 
+def _ensure_builtin_themes():
+    """
+    Ensure built-in themes exist so dashboard radio options always persist on save.
+    """
+    from apps.themes.models import Theme
+
+    for slug, name in BUILTIN_THEMES:
+        Theme.objects.get_or_create(
+            slug=slug,
+            defaults={"name": name, "is_active": True},
+        )
+
+
+def _theme_choices():
+    from apps.themes.models import Theme
+
+    _ensure_builtin_themes()
+    themes = Theme.objects.filter(is_active=True).order_by("name")
+    if not themes.exists():
+        return BUILTIN_THEMES
+    return [(t.slug, t.name) for t in themes]
+
+
 class DashboardSettingsView(DashboardClientMixin, FormView):
     """Site settings: load from and save to request.user.client."""
     form_class = SiteSettingsForm
@@ -152,17 +185,7 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         kwargs = super().get_form_kwargs()
         if self.request.method == "POST" and self.request.FILES:
             kwargs.setdefault("files", self.request.FILES)
-        from apps.themes.models import Theme
-        themes = Theme.objects.filter(is_active=True).order_by("name")
-        kwargs["theme_choices"] = [(t.slug, t.name) for t in themes]
-        if not themes:
-            kwargs["theme_choices"] = [
-                ("default", "Default"),
-                ("minimal", "Minimal"),
-                ("clarity", "Clarity (agency style + animations)"),
-                ("aurora", "Aurora (colorful gradient)"),
-                ("midnight", "Midnight (dark mode)"),
-            ]
+        kwargs["theme_choices"] = _theme_choices()
         return kwargs
 
     def get_initial(self):
@@ -262,10 +285,12 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
             client.seo_image = None
 
         from apps.themes.models import Theme
+        _ensure_builtin_themes()
         try:
             client.theme = Theme.objects.get(slug=form.cleaned_data.get("theme", "default"), is_active=True)
         except Theme.DoesNotExist:
-            pass
+            fallback_slug = "default"
+            client.theme = Theme.objects.filter(slug=fallback_slug, is_active=True).first()
         client.save()
 
         # Save carousel: update kept slides in place; add new; delete removed (post_delete deletes file from S3)

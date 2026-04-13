@@ -72,6 +72,8 @@ class SiteSettingsForm(forms.Form):
             ("clarity", "Clarity (agency style + animations)"),
             ("aurora", "Aurora (colorful gradient)"),
             ("midnight", "Midnight (dark mode)"),
+            ("blackred", "Black Red (bold contrast)"),
+            ("emeraldgold", "Emerald Gold (premium)"),
         ]
 
 

@@ -1,0 +1,47 @@
+/* Theme: blackred — bold black + red contrast */
+:root {
+  --sf-primary: #d90429;
+  --sf-hero-bg: #111111;
+}
+
+body.theme-blackred {
+  background: #0f0f10;
+  color: #f5f5f5;
+}
+
+.theme-blackred .navbar-public {
+  background: #121212;
+  border-bottom: 1px solid #2b2b2b;
+}
+
+.theme-blackred .navbar-public .nav-link,
+.theme-blackred .navbar-public .navbar-brand-text {
+  color: #f0f0f0 !important;
+}
+
+.theme-blackred .btn-primary {
+  background: #d90429;
+  border-color: #d90429;
+}
+
+.theme-blackred .btn-primary:hover,
+.theme-blackred .btn-primary:focus {
+  background: #b10322;
+  border-color: #b10322;
+}
+
+.theme-blackred .sf-hero {
+  background: linear-gradient(145deg, #0f0f10 0%, #1c1013 100%);
+}
+
+.theme-blackred .card,
+.theme-blackred .product-card,
+.theme-blackred .spotlight-card {
+  background: #171717;
+  border: 1px solid #343434;
+  color: #f4f4f4;
+}
+
+.theme-blackred .text-muted {
+  color: #b5b5b5 !important;
+}

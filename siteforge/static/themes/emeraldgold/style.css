@@ -1,0 +1,49 @@
+/* Theme: emeraldgold — rich green + gold accents */
+:root {
+  --sf-primary: #0f8a5f;
+  --sf-hero-bg: #f5fff9;
+}
+
+body.theme-emeraldgold {
+  background: #f7fbf8;
+  color: #173329;
+}
+
+.theme-emeraldgold .navbar-public {
+  background: #ffffff;
+  border-bottom: 1px solid #d7eadf;
+}
+
+.theme-emeraldgold .btn-primary {
+  background: linear-gradient(135deg, #0f8a5f, #1aa06f);
+  border: none;
+}
+
+.theme-emeraldgold .btn-primary:hover,
+.theme-emeraldgold .btn-primary:focus {
+  background: linear-gradient(135deg, #0b7651, #148b60);
+}
+
+.theme-emeraldgold .sf-hero {
+  background: linear-gradient(140deg, #f5fff9 0%, #fff9e9 100%);
+}
+
+.theme-emeraldgold .card,
+.theme-emeraldgold .product-card {
+  border: 1px solid #d8e8dc;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(14, 94, 68, 0.08);
+}
+
+.theme-emeraldgold .section-title,
+.theme-emeraldgold h1,
+.theme-emeraldgold h2,
+.theme-emeraldgold h3 {
+  color: #173329;
+}
+
+.theme-emeraldgold .badge,
+.theme-emeraldgold .spotlight-pill {
+  background: #b4872d !important;
+  color: #fff8e6 !important;
+}
