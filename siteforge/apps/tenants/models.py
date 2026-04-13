@@ -64,6 +64,11 @@ class Client(models.Model):
         blank=True,
         help_text="WhatsApp number with country code (e.g. 919876543210). Used for 'Buy in WhatsApp' on product pages.",
     )
+    map_embed_url = models.URLField(
+        max_length=1200,
+        blank=True,
+        help_text="Optional map embed URL for Contact section iframe (Google Maps / OpenStreetMap embed link).",
+    )
     seo_title = models.CharField(
         max_length=200,
         blank=True,

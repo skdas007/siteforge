@@ -23,6 +23,11 @@ class SiteSettingsForm(forms.Form):
         label="WhatsApp number",
         help_text="With country code, no + or spaces (e.g. 919876543210). Used for 'Buy in WhatsApp' on product pages.",
     )
+    map_embed_url = forms.URLField(
+        required=False,
+        label="Map embed URL",
+        help_text="Paste an iframe embed URL from Google Maps or OpenStreetMap for the Contact section map.",
+    )
     banner_image = forms.ImageField(
         required=False,
         validators=[validate_image_upload_size],

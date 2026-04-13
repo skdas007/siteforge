@@ -98,7 +98,7 @@ class IndexView(TemplateView):
         context.setdefault("search_query", (self.request.GET.get("q") or "").strip())
         # Query param ?theme= for preview overrides
         q = self.request.GET.get("theme")
-        if q in ("default", "minimal", "clarity"):
+        if q in ("default", "minimal", "clarity", "aurora", "midnight", "blackred", "emeraldgold"):
             context["theme_slug"] = q
             _empty = Paginator([], HOME_PRODUCTS_PER_PAGE)
             context["products"] = _empty.page(1)
@@ -151,7 +151,7 @@ class IndexView(TemplateView):
             context["products"] = _empty.page(1)
             context["home_products_total_count"] = 0
 
-        if q in ("default", "minimal", "clarity"):
+        if q in ("default", "minimal", "clarity", "aurora", "midnight", "blackred", "emeraldgold"):
             add_seo_context(
                 self.request,
                 context,

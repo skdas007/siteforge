@@ -196,6 +196,7 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
             "theme": client.theme.slug if client.theme_id else "default",
             "contact_email": client.contact_email or "",
             "whatsapp_number": getattr(client, "whatsapp_number", "") or "",
+            "map_embed_url": getattr(client, "map_embed_url", "") or "",
             "seo_title": getattr(client, "seo_title", "") or "",
             "seo_description": getattr(client, "seo_description", "") or "",
         }
@@ -209,6 +210,7 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         context["theme_slug"] = post.get("theme") or (client.theme.slug if client.theme_id else "default")
         context["contact_email"] = post.get("contact_email") or client.contact_email or ""
         context["whatsapp_number"] = post.get("whatsapp_number") or getattr(client, "whatsapp_number", "") or ""
+        context["map_embed_url"] = post.get("map_embed_url") or getattr(client, "map_embed_url", "") or ""
         slides = CarouselSlide.objects.filter(client=client).order_by("order")
         context["existing_slides"] = [
             {
@@ -242,6 +244,7 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         client.hero_subtitle = form.cleaned_data.get("hero_subtitle", "")
         client.contact_email = form.cleaned_data.get("contact_email", "") or ""
         client.whatsapp_number = (form.cleaned_data.get("whatsapp_number", "") or "").strip()[:20]
+        client.map_embed_url = (form.cleaned_data.get("map_embed_url", "") or "").strip()[:1200]
 
         # Prefer new upload over "remove" so replace-by-file-picker deletes the old S3 object.
         # Banner
