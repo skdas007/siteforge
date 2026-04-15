@@ -290,6 +290,20 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
             "map_embed_url": getattr(client, "map_embed_url", "") or "",
             "seo_title": getattr(client, "seo_title", "") or "",
             "seo_description": getattr(client, "seo_description", "") or "",
+            "seo_keywords": getattr(client, "seo_keywords", "") or "",
+            "seo_author": getattr(client, "seo_author", "") or "",
+            "seo_robots": getattr(client, "seo_robots", "") or "index, follow",
+            "seo_language": getattr(client, "seo_language", "") or "English",
+            "seo_revisit_after": getattr(client, "seo_revisit_after", "") or "7 days",
+            "seo_geo_region": getattr(client, "seo_geo_region", "") or "",
+            "seo_geo_placename": getattr(client, "seo_geo_placename", "") or "",
+            "seo_geo_position": getattr(client, "seo_geo_position", "") or "",
+            "seo_icbm": getattr(client, "seo_icbm", "") or "",
+            "seo_founder": getattr(client, "seo_founder", "") or "",
+            "seo_address_locality": getattr(client, "seo_address_locality", "") or "",
+            "seo_postal_code": getattr(client, "seo_postal_code", "") or "",
+            "seo_address_region": getattr(client, "seo_address_region", "") or "",
+            "seo_address_country": getattr(client, "seo_address_country", "") or "IN",
         }
 
     def get_context_data(self, **kwargs):
@@ -322,9 +336,37 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         if self.request.method == "POST":
             context["seo_title"] = post.get("seo_title", "")
             context["seo_description"] = post.get("seo_description", "")
+            context["seo_keywords"] = post.get("seo_keywords", "")
+            context["seo_author"] = post.get("seo_author", "")
+            context["seo_robots"] = post.get("seo_robots", "index, follow")
+            context["seo_language"] = post.get("seo_language", "English")
+            context["seo_revisit_after"] = post.get("seo_revisit_after", "7 days")
+            context["seo_geo_region"] = post.get("seo_geo_region", "")
+            context["seo_geo_placename"] = post.get("seo_geo_placename", "")
+            context["seo_geo_position"] = post.get("seo_geo_position", "")
+            context["seo_icbm"] = post.get("seo_icbm", "")
+            context["seo_founder"] = post.get("seo_founder", "")
+            context["seo_address_locality"] = post.get("seo_address_locality", "")
+            context["seo_postal_code"] = post.get("seo_postal_code", "")
+            context["seo_address_region"] = post.get("seo_address_region", "")
+            context["seo_address_country"] = post.get("seo_address_country", "IN")
         else:
             context["seo_title"] = getattr(client, "seo_title", "") or ""
             context["seo_description"] = getattr(client, "seo_description", "") or ""
+            context["seo_keywords"] = getattr(client, "seo_keywords", "") or ""
+            context["seo_author"] = getattr(client, "seo_author", "") or ""
+            context["seo_robots"] = getattr(client, "seo_robots", "") or "index, follow"
+            context["seo_language"] = getattr(client, "seo_language", "") or "English"
+            context["seo_revisit_after"] = getattr(client, "seo_revisit_after", "") or "7 days"
+            context["seo_geo_region"] = getattr(client, "seo_geo_region", "") or ""
+            context["seo_geo_placename"] = getattr(client, "seo_geo_placename", "") or ""
+            context["seo_geo_position"] = getattr(client, "seo_geo_position", "") or ""
+            context["seo_icbm"] = getattr(client, "seo_icbm", "") or ""
+            context["seo_founder"] = getattr(client, "seo_founder", "") or ""
+            context["seo_address_locality"] = getattr(client, "seo_address_locality", "") or ""
+            context["seo_postal_code"] = getattr(client, "seo_postal_code", "") or ""
+            context["seo_address_region"] = getattr(client, "seo_address_region", "") or ""
+            context["seo_address_country"] = getattr(client, "seo_address_country", "") or "IN"
         context["seo_image_url"] = client.seo_image.url if getattr(client, "seo_image", None) and client.seo_image else None
         return context
 
@@ -371,6 +413,20 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
 
         client.seo_title = (form.cleaned_data.get("seo_title", "") or "")[:200]
         client.seo_description = form.cleaned_data.get("seo_description", "") or ""
+        client.seo_keywords = form.cleaned_data.get("seo_keywords", "") or ""
+        client.seo_author = (form.cleaned_data.get("seo_author", "") or "")[:200]
+        client.seo_robots = (form.cleaned_data.get("seo_robots", "") or "index, follow")[:40]
+        client.seo_language = (form.cleaned_data.get("seo_language", "") or "English")[:40]
+        client.seo_revisit_after = (form.cleaned_data.get("seo_revisit_after", "") or "7 days")[:40]
+        client.seo_geo_region = (form.cleaned_data.get("seo_geo_region", "") or "")[:24]
+        client.seo_geo_placename = (form.cleaned_data.get("seo_geo_placename", "") or "")[:120]
+        client.seo_geo_position = (form.cleaned_data.get("seo_geo_position", "") or "")[:50]
+        client.seo_icbm = (form.cleaned_data.get("seo_icbm", "") or "")[:50]
+        client.seo_founder = (form.cleaned_data.get("seo_founder", "") or "")[:120]
+        client.seo_address_locality = (form.cleaned_data.get("seo_address_locality", "") or "")[:120]
+        client.seo_postal_code = (form.cleaned_data.get("seo_postal_code", "") or "")[:20]
+        client.seo_address_region = (form.cleaned_data.get("seo_address_region", "") or "")[:120]
+        client.seo_address_country = (form.cleaned_data.get("seo_address_country", "") or "IN")[:10]
         if form.cleaned_data.get("seo_image"):
             delete_stored_file(getattr(client, "seo_image", None))
             client.seo_image = form.cleaned_data["seo_image"]
@@ -500,6 +556,7 @@ class ProductAddView(DashboardClientMixin, FormView):
             "extra_images": [],
             "seo_title": "",
             "seo_description": "",
+            "seo_keywords": "",
             "seo_image": None,
             "size_rows": _extract_size_rows(self.request.POST) if self.request.method == "POST" else [{}],
         }
@@ -521,6 +578,7 @@ class ProductAddView(DashboardClientMixin, FormView):
             image=form.cleaned_data.get("image") or None,
             seo_title=(form.cleaned_data.get("seo_title", "") or "")[:200],
             seo_description=form.cleaned_data.get("seo_description", "") or "",
+            seo_keywords=form.cleaned_data.get("seo_keywords", "") or "",
             seo_image=form.cleaned_data.get("seo_image") or None,
             is_active=form.cleaned_data.get("is_active", True),
             is_main=form.cleaned_data.get("is_main", False),
@@ -606,6 +664,7 @@ class ProductEditView(DashboardClientMixin, FormView):
             "image": product.image.url if product.image else None,
             "seo_title": getattr(product, "seo_title", "") or "",
             "seo_description": getattr(product, "seo_description", "") or "",
+            "seo_keywords": getattr(product, "seo_keywords", "") or "",
             "seo_image": product.seo_image.url if getattr(product, "seo_image", None) and product.seo_image else None,
             "is_active": product.is_active,
             "is_main": product.is_main,
@@ -641,6 +700,7 @@ class ProductEditView(DashboardClientMixin, FormView):
             "category": product.category,
             "seo_title": getattr(product, "seo_title", "") or "",
             "seo_description": getattr(product, "seo_description", "") or "",
+            "seo_keywords": getattr(product, "seo_keywords", "") or "",
             "is_active": product.is_active,
             "is_main": product.is_main,
         }
@@ -695,6 +755,7 @@ class ProductEditView(DashboardClientMixin, FormView):
         product.category = form.cleaned_data.get("category") or None
         product.seo_title = (form.cleaned_data.get("seo_title", "") or "")[:200]
         product.seo_description = form.cleaned_data.get("seo_description", "") or ""
+        product.seo_keywords = form.cleaned_data.get("seo_keywords", "") or ""
         product.is_active = form.cleaned_data.get("is_active", True)
         product.is_main = form.cleaned_data.get("is_main", False)
         product.save()

@@ -27,6 +27,6 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = (ProductSizeVariantInline,)
     fieldsets = (
         (None, {"fields": ("client", "category", "name", "description", "price", "compare_at_price", "image", "order", "is_active", "is_main")}),
-        ("SEO & social previews", {"fields": ("seo_title", "seo_description", "seo_image"), "classes": ("collapse",)}),
+        ("SEO & social previews", {"fields": ("seo_title", "seo_description", "seo_keywords", "seo_image"), "classes": ("collapse",)}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
     )

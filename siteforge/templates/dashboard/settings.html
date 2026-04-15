@@ -221,6 +221,67 @@
         <p class="form-text small text-muted mb-0">Shown on your home page and product listing. Product-specific SEO overrides this on product pages.</p>
       </div>
       <div class="mb-3">
+        <label for="id_seo_keywords" class="form-label">Default keywords</label>
+        <textarea name="seo_keywords" id="id_seo_keywords" class="form-control" rows="2" maxlength="1500" placeholder="keyword 1, keyword 2, keyword 3">{{ seo_keywords|default:'' }}</textarea>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="id_seo_author" class="form-label">Author / brand</label>
+          <input type="text" name="seo_author" id="id_seo_author" class="form-control" maxlength="200" value="{{ seo_author|default:'' }}" placeholder="e.g. Bobdy International">
+        </div>
+        <div class="col-md-6">
+          <label for="id_seo_robots" class="form-label">Robots</label>
+          <input type="text" name="seo_robots" id="id_seo_robots" class="form-control" maxlength="40" value="{{ seo_robots|default:'index, follow' }}" placeholder="index, follow">
+        </div>
+        <div class="col-md-6">
+          <label for="id_seo_language" class="form-label">Language</label>
+          <input type="text" name="seo_language" id="id_seo_language" class="form-control" maxlength="40" value="{{ seo_language|default:'English' }}">
+        </div>
+        <div class="col-md-6">
+          <label for="id_seo_revisit_after" class="form-label">Revisit after</label>
+          <input type="text" name="seo_revisit_after" id="id_seo_revisit_after" class="form-control" maxlength="40" value="{{ seo_revisit_after|default:'7 days' }}">
+        </div>
+      </div>
+      <p class="dashboard-form-section-title mt-4">Local SEO &amp; Schema</p>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="id_seo_geo_region" class="form-label">Geo region</label>
+          <input type="text" name="seo_geo_region" id="id_seo_geo_region" class="form-control" maxlength="24" value="{{ seo_geo_region|default:'' }}" placeholder="IN-OD">
+        </div>
+        <div class="col-md-8">
+          <label for="id_seo_geo_placename" class="form-label">Geo place name</label>
+          <input type="text" name="seo_geo_placename" id="id_seo_geo_placename" class="form-control" maxlength="120" value="{{ seo_geo_placename|default:'' }}" placeholder="Bhuban, Odisha">
+        </div>
+        <div class="col-md-6">
+          <label for="id_seo_geo_position" class="form-label">Geo position</label>
+          <input type="text" name="seo_geo_position" id="id_seo_geo_position" class="form-control" maxlength="50" value="{{ seo_geo_position|default:'' }}" placeholder="20.881;85.833">
+        </div>
+        <div class="col-md-6">
+          <label for="id_seo_icbm" class="form-label">ICBM</label>
+          <input type="text" name="seo_icbm" id="id_seo_icbm" class="form-control" maxlength="50" value="{{ seo_icbm|default:'' }}" placeholder="20.881,85.833">
+        </div>
+        <div class="col-md-6">
+          <label for="id_seo_founder" class="form-label">Founder (Organization schema)</label>
+          <input type="text" name="seo_founder" id="id_seo_founder" class="form-control" maxlength="120" value="{{ seo_founder|default:'' }}" placeholder="Milan Sahoo">
+        </div>
+        <div class="col-md-6">
+          <label for="id_seo_address_locality" class="form-label">Address locality</label>
+          <input type="text" name="seo_address_locality" id="id_seo_address_locality" class="form-control" maxlength="120" value="{{ seo_address_locality|default:'' }}" placeholder="Bhuban">
+        </div>
+        <div class="col-md-4">
+          <label for="id_seo_postal_code" class="form-label">Postal code</label>
+          <input type="text" name="seo_postal_code" id="id_seo_postal_code" class="form-control" maxlength="20" value="{{ seo_postal_code|default:'' }}" placeholder="759017">
+        </div>
+        <div class="col-md-4">
+          <label for="id_seo_address_region" class="form-label">Address region</label>
+          <input type="text" name="seo_address_region" id="id_seo_address_region" class="form-control" maxlength="120" value="{{ seo_address_region|default:'' }}" placeholder="Odisha">
+        </div>
+        <div class="col-md-4">
+          <label for="id_seo_address_country" class="form-label">Address country</label>
+          <input type="text" name="seo_address_country" id="id_seo_address_country" class="form-control" maxlength="10" value="{{ seo_address_country|default:'IN' }}" placeholder="IN">
+        </div>
+      </div>
+      <div class="mb-3">
         <label for="id_seo_image" class="form-label">Default share image</label>
         {% if seo_image_url %}
         <p class="small text-success mb-1">Current: <img src="{{ seo_image_url }}" alt="" class="img-thumbnail" style="max-height: 60px;" onerror="this.onerror=null;this.src='{{ no_image_url }}';"> Saved.</p>

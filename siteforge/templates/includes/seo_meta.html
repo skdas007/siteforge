@@ -4,6 +4,15 @@
 {% share_page_url as og_page_url %}
 <link rel="canonical" href="{{ canonical_href }}">
 <meta name="description" content="{{ seo_description|default:''|truncatechars:320 }}">
+{% if seo_keywords %}<meta name="keywords" content="{{ seo_keywords }}">{% endif %}
+<meta name="author" content="{% firstof seo_author business_name 'SiteForge' %}">
+<meta name="robots" content="{{ seo_robots|default:'index, follow' }}">
+{% if seo_language %}<meta name="language" content="{{ seo_language }}">{% endif %}
+{% if seo_revisit_after %}<meta name="revisit-after" content="{{ seo_revisit_after }}">{% endif %}
+{% if seo_geo_region %}<meta name="geo.region" content="{{ seo_geo_region }}">{% endif %}
+{% if seo_geo_placename %}<meta name="geo.placename" content="{{ seo_geo_placename }}">{% endif %}
+{% if seo_geo_position %}<meta name="geo.position" content="{{ seo_geo_position }}">{% endif %}
+{% if seo_icbm %}<meta name="ICBM" content="{{ seo_icbm }}">{% endif %}
 <meta property="og:site_name" content="{{ business_name|default:'SiteForge' }}">
 <meta property="og:title" content="{% firstof seo_title business_name "SiteForge" %}">
 <meta property="og:description" content="{{ seo_description|default:''|truncatechars:320 }}">
@@ -21,4 +30,24 @@
 <meta name="twitter:description" content="{{ seo_description|default:''|truncatechars:320 }}">
 {% if seo_image_absolute %}
 <meta name="twitter:image" content="{{ seo_image_absolute }}">
+{% endif %}
+{% if request.path == "/" and business_name %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "{{ business_name|escapejs }}",
+  "url": "{{ canonical_href|escapejs }}",
+  {% if seo_founder %}"founder": "{{ seo_founder|escapejs }}",{% endif %}
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "{{ seo_address_locality|default:''|escapejs }}",
+    "postalCode": "{{ seo_postal_code|default:''|escapejs }}",
+    "addressRegion": "{{ seo_address_region|default:''|escapejs }}",
+    "addressCountry": "{{ seo_address_country|default:'IN'|escapejs }}"
+  },
+  "description": "{{ seo_description|default:''|truncatechars:320|escapejs }}"{% if seo_keywords %},
+  "keywords": "{{ seo_keywords|escapejs }}"{% endif %}
+}
+</script>
 {% endif %}

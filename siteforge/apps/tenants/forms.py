@@ -62,6 +62,25 @@ class SiteSettingsForm(forms.Form):
         label="SEO description (default)",
         help_text="Optional. Default snippet for your home and products listing. Product-specific SEO overrides this on product pages.",
     )
+    seo_keywords = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        required=False,
+        label="SEO keywords",
+        help_text="Optional comma-separated keywords.",
+    )
+    seo_author = forms.CharField(max_length=200, required=False, label="SEO author / brand")
+    seo_robots = forms.CharField(max_length=40, required=False, label="Robots", initial="index, follow")
+    seo_language = forms.CharField(max_length=40, required=False, label="Language", initial="English")
+    seo_revisit_after = forms.CharField(max_length=40, required=False, label="Revisit after", initial="7 days")
+    seo_geo_region = forms.CharField(max_length=24, required=False, label="Geo region")
+    seo_geo_placename = forms.CharField(max_length=120, required=False, label="Geo place name")
+    seo_geo_position = forms.CharField(max_length=50, required=False, label="Geo position")
+    seo_icbm = forms.CharField(max_length=50, required=False, label="ICBM")
+    seo_founder = forms.CharField(max_length=120, required=False, label="Founder")
+    seo_address_locality = forms.CharField(max_length=120, required=False, label="Address locality")
+    seo_postal_code = forms.CharField(max_length=20, required=False, label="Postal code")
+    seo_address_region = forms.CharField(max_length=120, required=False, label="Address region")
+    seo_address_country = forms.CharField(max_length=10, required=False, label="Address country", initial="IN")
     seo_image = forms.ImageField(
         required=False,
         validators=[validate_image_upload_size],
@@ -198,6 +217,12 @@ class ProductForm(forms.Form):
         required=False,
         label="SEO description",
         help_text="Optional. Overrides the product description in snippets. If empty, the main description is used.",
+    )
+    seo_keywords = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        required=False,
+        label="SEO keywords",
+        help_text="Optional comma-separated keywords for this product page.",
     )
     seo_image = forms.ImageField(
         required=False,

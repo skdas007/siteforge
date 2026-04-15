@@ -78,6 +78,32 @@ class Client(models.Model):
         blank=True,
         help_text="Optional. Default description for your home page and product listing when you do not set a product-specific description. Aim for under ~160 characters.",
     )
+    seo_keywords = models.TextField(
+        blank=True,
+        help_text="Optional comma-separated keywords for search engines.",
+    )
+    seo_author = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Optional author/brand meta tag.",
+    )
+    seo_robots = models.CharField(
+        max_length=40,
+        blank=True,
+        default="index, follow",
+        help_text="Robots directive, e.g. index, follow",
+    )
+    seo_language = models.CharField(max_length=40, blank=True, default="English")
+    seo_revisit_after = models.CharField(max_length=40, blank=True, default="7 days")
+    seo_geo_region = models.CharField(max_length=24, blank=True, help_text="Example: IN-OD")
+    seo_geo_placename = models.CharField(max_length=120, blank=True, help_text="Example: Bhuban, Odisha")
+    seo_geo_position = models.CharField(max_length=50, blank=True, help_text="Example: 20.881;85.833")
+    seo_icbm = models.CharField(max_length=50, blank=True, help_text="Example: 20.881,85.833")
+    seo_founder = models.CharField(max_length=120, blank=True, help_text="Founder name for Organization schema.")
+    seo_address_locality = models.CharField(max_length=120, blank=True)
+    seo_postal_code = models.CharField(max_length=20, blank=True)
+    seo_address_region = models.CharField(max_length=120, blank=True)
+    seo_address_country = models.CharField(max_length=10, blank=True, default="IN")
     seo_image = models.ImageField(
         upload_to="tenants/seo/",
         blank=True,

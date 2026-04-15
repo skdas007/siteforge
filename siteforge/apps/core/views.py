@@ -81,6 +81,20 @@ def _client_context(request):
         "whatsapp_number": (getattr(client, "whatsapp_number", "") or "").strip(),
         "whatsapp_digits": "".join(c for c in (getattr(client, "whatsapp_number", "") or "") if c.isdigit()),
         "map_embed_url": getattr(client, "map_embed_url", None),
+        "seo_keywords": getattr(client, "seo_keywords", "") or "",
+        "seo_author": getattr(client, "seo_author", "") or "",
+        "seo_robots": getattr(client, "seo_robots", "") or "index, follow",
+        "seo_language": getattr(client, "seo_language", "") or "English",
+        "seo_revisit_after": getattr(client, "seo_revisit_after", "") or "7 days",
+        "seo_geo_region": getattr(client, "seo_geo_region", "") or "",
+        "seo_geo_placename": getattr(client, "seo_geo_placename", "") or "",
+        "seo_geo_position": getattr(client, "seo_geo_position", "") or "",
+        "seo_icbm": getattr(client, "seo_icbm", "") or "",
+        "seo_founder": getattr(client, "seo_founder", "") or "",
+        "seo_address_locality": getattr(client, "seo_address_locality", "") or "",
+        "seo_postal_code": getattr(client, "seo_postal_code", "") or "",
+        "seo_address_region": getattr(client, "seo_address_region", "") or "",
+        "seo_address_country": getattr(client, "seo_address_country", "") or "IN",
         "slider_slides": slider_slides,
         "main_product": main_product,
         "products": products,
@@ -174,6 +188,8 @@ class IndexView(TemplateView):
                 description=desc,
                 image_url=img,
             )
+            context["seo_keywords"] = getattr(c, "seo_keywords", "") or ""
+            context["seo_author"] = (getattr(c, "seo_author", "") or "").strip() or biz
         else:
             add_seo_context(
                 self.request,
@@ -347,6 +363,8 @@ class ProductListView(ListView):
                 description=desc,
                 image_url=img,
             )
+            context["seo_keywords"] = getattr(c, "seo_keywords", "") or ""
+            context["seo_author"] = (getattr(c, "seo_author", "") or "").strip() or biz
         return context
 
 
@@ -402,6 +420,8 @@ class ProductDetailView(DetailView):
                 description=desc,
                 image_url=img,
             )
+            context["seo_keywords"] = (getattr(product, "seo_keywords", "") or "").strip() or (getattr(c, "seo_keywords", "") or "")
+            context["seo_author"] = (getattr(c, "seo_author", "") or "").strip() or biz
             from apps.catalog.models import Product
 
             if product.category_id:

@@ -34,6 +34,10 @@
         <textarea name="seo_description" id="id_seo_description" class="form-control" rows="2" maxlength="500" placeholder="Short snippet for search and chat apps">{% if form.is_bound %}{{ form.seo_description.value|default:'' }}{% else %}{{ product.seo_description|default:'' }}{% endif %}</textarea>
       </div>
       <div class="mb-3">
+        <label for="id_seo_keywords" class="form-label">SEO keywords</label>
+        <textarea name="seo_keywords" id="id_seo_keywords" class="form-control" rows="2" maxlength="1500" placeholder="keyword 1, keyword 2, keyword 3">{% if form.is_bound %}{{ form.seo_keywords.value|default:'' }}{% else %}{{ product.seo_keywords|default:'' }}{% endif %}</textarea>
+      </div>
+      <div class="mb-3">
         <label for="id_seo_image" class="form-label">SEO / share image</label>
         <p class="upload-rec-size mb-1">Optional. If empty, the primary product image is used. <span class="upload-rec-size-dim">1200×630 px</span> ideal for chat/social previews.</p>
         <p class="form-text small text-muted mb-1">{{ form.seo_image.help_text }}</p>

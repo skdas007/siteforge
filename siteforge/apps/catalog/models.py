@@ -167,6 +167,10 @@ class Product(models.Model):
         blank=True,
         help_text="Optional. Overrides the product description in search and social snippets.",
     )
+    seo_keywords = models.TextField(
+        blank=True,
+        help_text="Optional comma-separated keywords for this product page.",
+    )
     seo_image = models.ImageField(
         upload_to="catalog/seo/",
         blank=True,
