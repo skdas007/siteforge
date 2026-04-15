@@ -286,7 +286,11 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
             "hero_subtitle": client.hero_subtitle or "",
             "theme": client.theme.slug if client.theme_id else "default",
             "contact_email": client.contact_email or "",
+            "address_text": getattr(client, "address_text", "") or "",
             "whatsapp_number": getattr(client, "whatsapp_number", "") or "",
+            "instagram_url": getattr(client, "instagram_url", "") or "",
+            "facebook_url": getattr(client, "facebook_url", "") or "",
+            "youtube_url": getattr(client, "youtube_url", "") or "",
             "map_embed_url": getattr(client, "map_embed_url", "") or "",
             "seo_title": getattr(client, "seo_title", "") or "",
             "seo_description": getattr(client, "seo_description", "") or "",
@@ -314,7 +318,11 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         context["hero_subtitle"] = post.get("hero_subtitle") or client.hero_subtitle or ""
         context["theme_slug"] = post.get("theme") or (client.theme.slug if client.theme_id else "default")
         context["contact_email"] = post.get("contact_email") or client.contact_email or ""
+        context["address_text"] = post.get("address_text") or getattr(client, "address_text", "") or ""
         context["whatsapp_number"] = post.get("whatsapp_number") or getattr(client, "whatsapp_number", "") or ""
+        context["instagram_url"] = post.get("instagram_url") or getattr(client, "instagram_url", "") or ""
+        context["facebook_url"] = post.get("facebook_url") or getattr(client, "facebook_url", "") or ""
+        context["youtube_url"] = post.get("youtube_url") or getattr(client, "youtube_url", "") or ""
         context["map_embed_url"] = post.get("map_embed_url") or getattr(client, "map_embed_url", "") or ""
         slides = CarouselSlide.objects.filter(client=client).order_by("order")
         context["existing_slides"] = [
@@ -376,7 +384,11 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         client.hero_title = form.cleaned_data.get("hero_title", "")[:300]
         client.hero_subtitle = form.cleaned_data.get("hero_subtitle", "")
         client.contact_email = form.cleaned_data.get("contact_email", "") or ""
+        client.address_text = form.cleaned_data.get("address_text", "") or ""
         client.whatsapp_number = (form.cleaned_data.get("whatsapp_number", "") or "").strip()[:20]
+        client.instagram_url = form.cleaned_data.get("instagram_url", "") or ""
+        client.facebook_url = form.cleaned_data.get("facebook_url", "") or ""
+        client.youtube_url = form.cleaned_data.get("youtube_url", "") or ""
         client.map_embed_url = (form.cleaned_data.get("map_embed_url", "") or "").strip()[:1200]
 
         # Prefer new upload over "remove" so replace-by-file-picker deletes the old S3 object.

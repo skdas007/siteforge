@@ -14,7 +14,7 @@
       {% endif %}
       <div class="card-body">
         <h5 class="card-title">{{ product.name }}</h5>
-        <p class="card-text text-muted small">{{ product.description|default:""|truncatewords:15 }}</p>
+        <p class="card-text text-muted small">{{ product.description|default:""|striptags|truncatewords:15 }}</p>
         {% include "public/includes/product_price.html" with product=product %}
       </div>
     </div>

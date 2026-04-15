@@ -59,11 +59,18 @@ class Client(models.Model):
         help_text="Browser tab icon (.ico, PNG, or SVG). Max 512 KB.",
     )
     contact_email = models.EmailField(blank=True)
+    address_text = models.TextField(
+        blank=True,
+        help_text="Business address shown in footer/contact sections.",
+    )
     whatsapp_number = models.CharField(
         max_length=20,
         blank=True,
         help_text="WhatsApp number with country code (e.g. 919876543210). Used for 'Buy in WhatsApp' on product pages.",
     )
+    instagram_url = models.URLField(max_length=500, blank=True)
+    facebook_url = models.URLField(max_length=500, blank=True)
+    youtube_url = models.URLField(max_length=500, blank=True)
     map_embed_url = models.URLField(
         max_length=1200,
         blank=True,

@@ -78,8 +78,12 @@ def _client_context(request):
         "hero_title": client.hero_title or "Welcome",
         "hero_subtitle": client.hero_subtitle or "Your tagline or short description goes here.",
         "contact_email": client.contact_email,
+        "address_text": getattr(client, "address_text", "") or "",
         "whatsapp_number": (getattr(client, "whatsapp_number", "") or "").strip(),
         "whatsapp_digits": "".join(c for c in (getattr(client, "whatsapp_number", "") or "") if c.isdigit()),
+        "instagram_url": getattr(client, "instagram_url", "") or "",
+        "facebook_url": getattr(client, "facebook_url", "") or "",
+        "youtube_url": getattr(client, "youtube_url", "") or "",
         "map_embed_url": getattr(client, "map_embed_url", None),
         "seo_keywords": getattr(client, "seo_keywords", "") or "",
         "seo_author": getattr(client, "seo_author", "") or "",
@@ -156,6 +160,10 @@ class IndexView(TemplateView):
             context.setdefault("logo", None)
             context.setdefault("hero_title", "Welcome")
             context.setdefault("hero_subtitle", "Your tagline or short description goes here.")
+            context.setdefault("address_text", "")
+            context.setdefault("instagram_url", "")
+            context.setdefault("facebook_url", "")
+            context.setdefault("youtube_url", "")
             context.setdefault("main_product", None)
             context.setdefault("categories", [])
             context.setdefault("current_category_id", None)

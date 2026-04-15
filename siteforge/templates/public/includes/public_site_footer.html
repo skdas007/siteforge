@@ -4,7 +4,11 @@
     <div class="row g-4">
       <div class="col-md-6 col-lg-4" data-reveal="fade-up">
         <h5 class="fw-bold mb-3">{{ business_name|default:"SiteForge" }}</h5>
+        {% if address_text %}
+        <p class="small opacity-75 mb-0">{{ address_text|linebreaksbr }}</p>
+        {% else %}
         <p class="small opacity-75 mb-0">Multi-tenant website platform. Build your presence with clarity and style.</p>
+        {% endif %}
       </div>
       <div class="col-md-6 col-lg-4" data-reveal="fade-up">
         <h5 class="fw-bold mb-3">Quick links</h5>
@@ -14,6 +18,26 @@
           <li class="mb-2"><a href="{% url 'home' %}#products">Products</a></li>
           <li class="mb-2"><a href="{% url 'home' %}#contact">Contact</a></li>
           {% comment %}<li class="mb-2"><a href="{% url 'dashboard:home' %}">Dashboard</a></li>{% endcomment %}
+        </ul>
+      </div>
+      <div class="col-md-12 col-lg-4" data-reveal="fade-up">
+        <h5 class="fw-bold mb-3">Connect</h5>
+        <ul class="list-unstyled small mb-0">
+          {% if instagram_url %}
+          <li class="mb-2"><a href="{{ instagram_url }}" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+          {% endif %}
+          {% if facebook_url %}
+          <li class="mb-2"><a href="{{ facebook_url }}" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+          {% endif %}
+          {% if youtube_url %}
+          <li class="mb-2"><a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+          {% endif %}
+          {% if contact_email %}
+          <li class="mb-2"><a href="mailto:{{ contact_email }}">{{ contact_email }}</a></li>
+          {% endif %}
+          {% if not instagram_url and not facebook_url and not youtube_url and not contact_email %}
+          <li class="mb-2 opacity-75">Social links coming soon.</li>
+          {% endif %}
         </ul>
       </div>
     </div>

@@ -172,7 +172,7 @@
           {% endif %}
         </div>
         {% if product.description %}
-        <div class="text-muted mb-4">{{ product.description|linebreaks }}</div>
+        <div class="text-muted mb-4">{{ product.description|safe }}</div>
         {% endif %}
         <div class="product-purchase-box mb-4">
           <div class="product-purchase-head d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
@@ -274,7 +274,7 @@
                   {% endif %}
                   <div class="card-body">
                     <h3 class="h6 card-title">{{ rp.name }}</h3>
-                    <p class="card-text text-muted small mb-2">{{ rp.description|default:""|truncatewords:12 }}</p>
+                    <p class="card-text text-muted small mb-2">{{ rp.description|default:""|striptags|truncatewords:12 }}</p>
                     {% include "public/includes/product_price.html" with product=rp %}
                   </div>
                 </div>

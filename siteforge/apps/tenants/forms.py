@@ -17,12 +17,21 @@ class SiteSettingsForm(forms.Form):
     hero_subtitle = forms.CharField(widget=forms.Textarea(attrs={"rows": 2}), required=False)
     theme = forms.ChoiceField(choices=[], required=True)
     contact_email = forms.EmailField(required=False)
+    address_text = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        required=False,
+        label="Address",
+        help_text="Shown in footer and contact block.",
+    )
     whatsapp_number = forms.CharField(
         max_length=20,
         required=False,
         label="WhatsApp number",
         help_text="With country code, no + or spaces (e.g. 919876543210). Used for 'Buy in WhatsApp' on product pages.",
     )
+    instagram_url = forms.URLField(required=False, label="Instagram URL")
+    facebook_url = forms.URLField(required=False, label="Facebook URL")
+    youtube_url = forms.URLField(required=False, label="YouTube URL")
     map_embed_url = forms.URLField(
         required=False,
         label="Map embed URL",

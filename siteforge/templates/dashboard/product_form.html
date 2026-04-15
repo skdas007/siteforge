@@ -2,6 +2,18 @@
 {% load static %}
 {% static 'img/no-image.svg' as no_image_url %}
 {% block title %}{{ form_title|default:"Product" }}{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+<style>
+  .sf-rich-editor {
+    background: #fff;
+    border-radius: 0.5rem;
+  }
+  .sf-rich-editor .ql-editor {
+    min-height: 180px;
+  }
+</style>
+{% endblock %}
 {% block dashboard_content %}
 <div class="card dashboard-card">
   <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -19,7 +31,9 @@
       </div>
       <div class="mb-3">
         <label for="id_description" class="form-label">Description</label>
+        <div id="id_description_editor" class="sf-rich-editor mb-2"></div>
         <textarea name="description" id="id_description" class="form-control" rows="3">{% if form.is_bound %}{{ form.description.value|default:'' }}{% else %}{{ product.description|default:'' }}{% endif %}</textarea>
+        <p class="form-text small text-muted mb-0">Use the editor for long, formatted descriptions (headings, bold, lists, links).</p>
       </div>
       <p class="dashboard-form-section-title">SEO and social previews <span class="fw-normal text-muted">(optional)</span></p>
       <div class="dashboard-callout mb-3">
@@ -162,6 +176,7 @@
     </form>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 <script>
 (function () {
   var form = document.querySelector("form.dashboard-form-product");
@@ -173,6 +188,32 @@
   var existingGallery = parseInt(meta.getAttribute("data-existing-gallery") || "0", 10);
   var sizeRowsHost = document.getElementById("size-rows");
   var addSizeBtn = document.getElementById("add-size-row");
+  var descTextarea = document.getElementById("id_description");
+  var descEditorHost = document.getElementById("id_description_editor");
+  var quill = null;
+
+  if (descTextarea && descEditorHost && window.Quill) {
+    quill = new Quill(descEditorHost, {
+      theme: "snow",
+      modules: {
+        toolbar: [
+          [{ header: [2, 3, false] }],
+          ["bold", "italic", "underline"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          ["link", "clean"],
+        ],
+      },
+    });
+    var initial = descTextarea.value || "";
+    if (initial.trim()) {
+      if (/<[a-z][\s\S]*>/i.test(initial)) {
+        quill.clipboard.dangerouslyPasteHTML(initial);
+      } else {
+        quill.setText(initial);
+      }
+    }
+    descTextarea.style.display = "none";
+  }
 
   var maxMbLabel =
     maxBytes % (1024 * 1024) === 0
@@ -347,6 +388,10 @@
   if (addSizeBtn) addSizeBtn.addEventListener("click", addSizeRow);
 
   form.addEventListener("submit", function (e) {
+    if (quill && descTextarea) {
+      var html = (quill.root.innerHTML || "").trim();
+      descTextarea.value = html === "<p><br></p>" ? "" : html;
+    }
     if (extraInput && extraInput.files && extraInput.files.length && !validateExtraImages(extraInput)) {
       e.preventDefault();
       return;
