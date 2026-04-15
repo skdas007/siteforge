@@ -67,6 +67,44 @@
         {{ form.category }}
         <p class="form-text small text-muted">Optional. <a href="{% url 'dashboard:category_list' %}">Manage categories</a> to filter products on your site.</p>
       </div>
+      <p class="dashboard-form-section-title">Size-wise pricing</p>
+      <div class="mb-3">
+        <p class="form-text small text-muted mb-2">Optional. Add size options (S/M/L etc.) with cm/inch notes and per-size price. Product list shows the lowest size price; detail page lets customers pick size and quantity.</p>
+        <div id="size-rows">
+          {% for row in product.size_rows %}
+          <div class="row g-2 align-items-end border rounded-3 p-2 mb-2 size-row">
+            <div class="col-12 col-md-2">
+              <label class="form-label small mb-1">Size</label>
+              <input type="text" name="size_label" class="form-control" maxlength="40" placeholder="M" value="{{ row.size_label|default:'' }}">
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label small mb-1">CM</label>
+              <input type="text" name="size_cm" class="form-control" maxlength="60" placeholder="Chest 96-100" value="{{ row.size_cm|default:'' }}">
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label small mb-1">Inches</label>
+              <input type="text" name="size_inch" class="form-control" maxlength="60" placeholder="Chest 38-40" value="{{ row.size_inch|default:'' }}">
+            </div>
+            <div class="col-9 col-md-2">
+              <label class="form-label small mb-1">Sale price</label>
+              <input type="text" name="size_price" class="form-control" inputmode="decimal" placeholder="0.00" value="{{ row.size_price|default:'' }}">
+            </div>
+            <div class="col-9 col-md-2">
+              <label class="form-label small mb-1">Original price</label>
+              <input type="text" name="size_compare_at_price" class="form-control" inputmode="decimal" placeholder="MRP" value="{{ row.size_compare_at_price|default:'' }}">
+            </div>
+            <div class="col-9 col-md-1">
+              <label class="form-label small mb-1">Stock</label>
+              <input type="number" name="size_stock" class="form-control" min="0" step="1" placeholder="0" value="{{ row.size_stock|default:'0' }}">
+            </div>
+            <div class="col-3 col-md-1 d-grid">
+              <button type="button" class="btn btn-outline-danger btn-sm size-row-remove" title="Remove size">×</button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="button" id="add-size-row" class="btn btn-sm btn-outline-primary rounded-pill px-3">+ Add size</button>
+      </div>
       <p class="dashboard-form-section-title">Images</p>
       <div class="row g-3 mb-1">
         <div class="col-lg-6">
@@ -129,6 +167,8 @@
   var maxGallery = parseInt(meta.getAttribute("data-max-gallery") || "3", 10);
   var maxBytes = parseInt(meta.getAttribute("data-max-bytes") || "3145728", 10);
   var existingGallery = parseInt(meta.getAttribute("data-existing-gallery") || "0", 10);
+  var sizeRowsHost = document.getElementById("size-rows");
+  var addSizeBtn = document.getElementById("add-size-row");
 
   var maxMbLabel =
     maxBytes % (1024 * 1024) === 0
@@ -206,6 +246,84 @@
     return true;
   }
 
+  function bindSizeRowButtons() {
+    if (!sizeRowsHost) return;
+    sizeRowsHost.querySelectorAll(".size-row-remove").forEach(function (btn) {
+      btn.onclick = function () {
+        var rows = sizeRowsHost.querySelectorAll(".size-row");
+        if (rows.length <= 1) {
+          rows[0].querySelectorAll("input").forEach(function (inp) { inp.value = ""; });
+          return;
+        }
+        var row = btn.closest(".size-row");
+        if (row) row.remove();
+      };
+    });
+  }
+  function addSizeRow() {
+    if (!sizeRowsHost) return;
+    var row = document.createElement("div");
+    row.className = "row g-2 align-items-end border rounded-3 p-2 mb-2 size-row";
+    row.innerHTML =
+      '<div class="col-12 col-md-2"><label class="form-label small mb-1">Size</label><input type="text" name="size_label" class="form-control" maxlength="40" placeholder="M"></div>' +
+      '<div class="col-12 col-md-3"><label class="form-label small mb-1">CM</label><input type="text" name="size_cm" class="form-control" maxlength="60" placeholder="Chest 96-100"></div>' +
+      '<div class="col-12 col-md-3"><label class="form-label small mb-1">Inches</label><input type="text" name="size_inch" class="form-control" maxlength="60" placeholder="Chest 38-40"></div>' +
+      '<div class="col-9 col-md-2"><label class="form-label small mb-1">Sale price</label><input type="text" name="size_price" class="form-control" inputmode="decimal" placeholder="0.00"></div>' +
+      '<div class="col-9 col-md-2"><label class="form-label small mb-1">Original price</label><input type="text" name="size_compare_at_price" class="form-control" inputmode="decimal" placeholder="MRP"></div>' +
+      '<div class="col-9 col-md-1"><label class="form-label small mb-1">Stock</label><input type="number" name="size_stock" class="form-control" min="0" step="1" placeholder="0" value="0"></div>' +
+      '<div class="col-3 col-md-1 d-grid"><button type="button" class="btn btn-outline-danger btn-sm size-row-remove" title="Remove size">×</button></div>';
+    sizeRowsHost.appendChild(row);
+    bindSizeRowButtons();
+  }
+  function validateSizeRows() {
+    if (!sizeRowsHost) return true;
+    var rows = sizeRowsHost.querySelectorAll(".size-row");
+    var seen = {};
+    for (var i = 0; i < rows.length; i++) {
+      var label = (rows[i].querySelector('input[name="size_label"]').value || "").trim();
+      var cm = (rows[i].querySelector('input[name="size_cm"]').value || "").trim();
+      var inch = (rows[i].querySelector('input[name="size_inch"]').value || "").trim();
+      var priceRaw = (rows[i].querySelector('input[name="size_price"]').value || "").trim();
+      var compareRaw = (rows[i].querySelector('input[name="size_compare_at_price"]').value || "").trim();
+      var stockRaw = (rows[i].querySelector('input[name="size_stock"]').value || "").trim();
+      if (!(label || cm || inch || priceRaw || compareRaw || stockRaw)) continue;
+      if (!label) {
+        alert("Please enter size label for each filled size row (e.g. M, L, XL).");
+        return false;
+      }
+      var key = label.toLowerCase();
+      if (seen[key]) {
+        alert("Duplicate size label found: " + label + ". Please keep each size unique.");
+        return false;
+      }
+      seen[key] = true;
+      if (!priceRaw) {
+        alert("Please enter price for size " + label + ".");
+        return false;
+      }
+      var p = parseFloat(priceRaw.replace(/,/g, ""));
+      if (isNaN(p) || p < 0) {
+        alert("Please enter a valid price for size " + label + ".");
+        return false;
+      }
+      if (compareRaw) {
+        var cp = parseFloat(compareRaw.replace(/,/g, ""));
+        if (isNaN(cp) || cp < p) {
+          alert("Original price must be greater than or equal to sale price for size " + label + ".");
+          return false;
+        }
+      }
+      if (stockRaw) {
+        var sq = parseInt(stockRaw, 10);
+        if (isNaN(sq) || sq < 0) {
+          alert("Please enter a valid stock quantity for size " + label + ".");
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   var extraInput = document.getElementById("id_extra_images");
   if (extraInput) {
     extraInput.addEventListener("change", function () {
@@ -221,6 +339,8 @@
       });
     }
   });
+  bindSizeRowButtons();
+  if (addSizeBtn) addSizeBtn.addEventListener("click", addSizeRow);
 
   form.addEventListener("submit", function (e) {
     if (extraInput && extraInput.files && extraInput.files.length && !validateExtraImages(extraInput)) {
@@ -234,6 +354,10 @@
     }
     var seoImg = document.getElementById("id_seo_image");
     if (seoImg && seoImg.files && seoImg.files.length && !validateSingleImageInput(seoImg)) {
+      e.preventDefault();
+      return;
+    }
+    if (!validateSizeRows()) {
       e.preventDefault();
       return;
     }

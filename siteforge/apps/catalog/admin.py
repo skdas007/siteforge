@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import Category, Product
+from .models import Category, Product, ProductSizeVariant
+
+
+class ProductSizeVariantInline(admin.TabularInline):
+    model = ProductSizeVariant
+    extra = 1
+    fields = ("order", "size_label", "measurement_cm", "measurement_inch", "price", "compare_at_price", "stock_qty")
 
 
 @admin.register(Category)
@@ -18,6 +24,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_editable = ("order", "is_active", "is_main")
     raw_id_fields = ("client",)
     readonly_fields = ("created_at", "updated_at")
+    inlines = (ProductSizeVariantInline,)
     fieldsets = (
         (None, {"fields": ("client", "category", "name", "description", "price", "compare_at_price", "image", "order", "is_active", "is_main")}),
         ("SEO & social previews", {"fields": ("seo_title", "seo_description", "seo_image"), "classes": ("collapse",)}),

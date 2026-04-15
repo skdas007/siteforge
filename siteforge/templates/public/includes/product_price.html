@@ -1,6 +1,8 @@
 {# E-commerce style: sale price + strikethrough MRP + % off. `product` required; optional `price_large` for product detail. #}
 <div class="product-price-ecom d-flex flex-wrap align-items-baseline gap-2 mb-0">
-  {% if product.has_discount %}
+  {% if product.has_size_variants %}
+    <span class="fw-bold text-primary {% if price_large %}fs-2{% else %}fs-6{% endif %}">From {{ product.display_price }}</span>
+  {% elif product.has_discount %}
     <span class="fw-bold text-success {% if price_large %}fs-2{% else %}fs-5{% endif %}">{{ product.price }}</span>
     <span class="text-muted text-decoration-line-through {% if price_large %}fs-5{% else %}small{% endif %}">{{ product.compare_at_price }}</span>
     {% if product.discount_percent %}

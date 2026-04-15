@@ -150,16 +150,99 @@
       </div>
       <div class="col-md-7 col-lg-8" data-reveal="fade-left">
         <h1 class="h2 fw-bold mb-3">{{ product.name }}</h1>
-        <div class="mb-4">
-          {% include "public/includes/product_price.html" with product=product price_large=True %}
+        <div class="mb-3">
+          <div id="product-selected-price" class="product-price-ecom d-flex flex-wrap align-items-baseline gap-2 mb-1">
+            {% if selected_size_default %}
+            <span class="fw-bold text-success fs-2">{{ selected_size_default.price }}</span>
+            {% if selected_size_default.compare_at_price and selected_size_default.compare_at_price > selected_size_default.price %}
+            <span class="text-muted text-decoration-line-through fs-5">{{ selected_size_default.compare_at_price }}</span>
+            {% endif %}
+            {% elif product.has_discount %}
+            <span class="fw-bold text-success fs-2">{{ product.price }}</span>
+            <span class="text-muted text-decoration-line-through fs-5">{{ product.compare_at_price }}</span>
+            {% if product.discount_percent %}
+            <span class="badge bg-danger align-self-center fs-6">{{ product.discount_percent }}% off</span>
+            {% endif %}
+            {% else %}
+            <span class="fw-bold text-primary fs-2">{{ product.display_price }}</span>
+            {% endif %}
+          </div>
+          {% if size_variants %}
+          <p class="text-muted small mb-0">Select size to view exact price. Starting from {{ product.display_price }}.</p>
+          {% endif %}
         </div>
         {% if product.description %}
         <div class="text-muted mb-4">{{ product.description|linebreaks }}</div>
         {% endif %}
-        {% if whatsapp_digits %}
-        <a href="https://wa.me/{{ whatsapp_digits }}?text={{ whatsapp_message|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-success" title="Opens WhatsApp with your product name, price, link, and ID filled in for the seller">Buy in WhatsApp</a>
-        {% endif %}
-        <a href="{% url 'product_list' %}" class="btn btn-outline-secondary ms-2">View all products</a>
+        <div class="product-purchase-box mb-4">
+          <div class="product-purchase-head d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <h3 class="h6 mb-0">Choose options</h3>
+            <span class="product-purchase-hint">Fast order via WhatsApp</span>
+          </div>
+          {% if size_variants %}
+          <div class="mb-3 product-option-group">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <label class="form-label fw-semibold mb-0">Select Size</label>
+              <a href="javascript:void(0)" id="size-chart-toggle" class="size-chart-link">Size Chart</a>
+            </div>
+            <div id="product-size-chips" class="product-size-chips" role="radiogroup" aria-label="Select size">
+              {% for sv in size_variants %}
+              <button type="button"
+                class="size-chip{% if forloop.first %} active{% endif %}"
+                role="radio"
+                aria-checked="{% if forloop.first %}true{% else %}false{% endif %}"
+                data-price="{{ sv.price }}"
+                data-compare="{{ sv.compare_at_price|default:'' }}"
+                data-stock="{{ sv.stock_qty }}"
+                data-size="{{ sv.size_label }}"
+                data-cm="{{ sv.measurement_cm }}"
+                data-inch="{{ sv.measurement_inch }}">
+                {{ sv.size_label }}
+              </button>
+              {% endfor %}
+            </div>
+            <div id="size-chart-panel" class="size-chart-panel" hidden>
+              <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                  <thead>
+                    <tr><th>Size</th><th>CM</th><th>IN</th><th>Price</th><th>Stock</th></tr>
+                  </thead>
+                  <tbody>
+                    {% for sv in size_variants %}
+                    <tr>
+                      <td>{{ sv.size_label }}</td>
+                      <td>{{ sv.measurement_cm|default:"-" }}</td>
+                      <td>{{ sv.measurement_inch|default:"-" }}</td>
+                      <td>
+                        {{ sv.price }}
+                        {% if sv.compare_at_price and sv.compare_at_price > sv.price %}
+                        <span class="text-muted text-decoration-line-through ms-1">{{ sv.compare_at_price }}</span>
+                        {% endif %}
+                      </td>
+                      <td>{% if sv.stock_qty == 0 %}<span class="text-danger fw-semibold">Out</span>{% else %}{{ sv.stock_qty }}{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <p id="product-size-measurement" class="small text-muted mt-2 mb-0"></p>
+            <p id="product-size-stock" class="small mb-0 mt-1"></p>
+          </div>
+          {% endif %}
+          <div class="mb-3 product-option-group">
+            <label for="product-qty" class="form-label fw-semibold mb-1">Quantity</label>
+            <input type="number" id="product-qty" class="form-control product-qty-input" min="1" step="1" value="1">
+          </div>
+          <div class="product-purchase-actions d-flex flex-wrap gap-2">
+            {% if whatsapp_digits %}
+            <a id="buy-whatsapp-btn" href="https://wa.me/{{ whatsapp_digits }}?text={{ whatsapp_message|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-success btn-buy-whatsapp">
+              Buy in WhatsApp
+            </a>
+            {% endif %}
+            <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-view-products">View all products</a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -324,4 +407,159 @@
     {% endif %}
   </div>
 </section>
+<script>
+(function () {
+  var waBtn = document.getElementById("buy-whatsapp-btn");
+  var sizeHost = document.getElementById("product-size-chips");
+  var sizeChartToggle = document.getElementById("size-chart-toggle");
+  var sizeChartPanel = document.getElementById("size-chart-panel");
+  var qtyInput = document.getElementById("product-qty");
+  var priceWrap = document.getElementById("product-selected-price");
+  var measureEl = document.getElementById("product-size-measurement");
+  var stockEl = document.getElementById("product-size-stock");
+  var baseName = "{{ product.name|escapejs }}";
+  var baseUrl = "{{ request.build_absolute_uri|escapejs }}";
+  var baseId = "{{ product.pk }}";
+  var basePrice = "{{ product.display_price }}";
+  var baseCategory = "{% if product.category %}{{ product.category.name|escapejs }}{% endif %}";
+
+  function selectedSizeData() {
+    if (!sizeHost) return null;
+    var opt = sizeHost.querySelector(".size-chip.active");
+    if (!opt) return null;
+    return {
+      size: opt.getAttribute("data-size") || "",
+      price: opt.getAttribute("data-price") || "",
+      compare: opt.getAttribute("data-compare") || "",
+      stock: parseInt(opt.getAttribute("data-stock") || "0", 10),
+      cm: opt.getAttribute("data-cm") || "",
+      inch: opt.getAttribute("data-inch") || ""
+    };
+  }
+
+  function renderPrice() {
+    var data = selectedSizeData();
+    if (!data || !priceWrap) return;
+    var html = '<span class="fw-bold text-success fs-2">' + data.price + "</span>";
+    var p = parseFloat((data.price || "").replace(/,/g, ""));
+    var cp = parseFloat((data.compare || "").replace(/,/g, ""));
+    if (!isNaN(p) && !isNaN(cp) && cp > p) {
+      html += '<span class="text-muted text-decoration-line-through fs-5">' + data.compare + "</span>";
+    }
+    priceWrap.innerHTML = html;
+    if (measureEl) {
+      var txt = [];
+      if (data.cm) txt.push("CM: " + data.cm);
+      if (data.inch) txt.push("IN: " + data.inch);
+      measureEl.textContent = txt.length ? ("Measurements - " + txt.join(" | ")) : "";
+    }
+    if (stockEl) {
+      stockEl.className = "small mb-0 mt-1";
+      if (!data.stock || data.stock <= 0) {
+        stockEl.classList.add("text-danger", "fw-semibold");
+        stockEl.textContent = "Out of stock";
+      } else if (data.stock < 50) {
+        stockEl.classList.add("text-danger", "fw-semibold");
+        stockEl.textContent = "Only " + data.stock + " left in stock";
+      } else {
+        stockEl.classList.add("text-success", "fw-semibold");
+        stockEl.textContent = data.stock + " products available";
+      }
+    }
+    if (qtyInput) {
+      if (data.stock > 0) {
+        qtyInput.max = String(data.stock);
+        if (parseInt(qtyInput.value || "1", 10) > data.stock) {
+          qtyInput.value = String(data.stock);
+        }
+        qtyInput.disabled = false;
+      } else {
+        qtyInput.value = "1";
+        qtyInput.max = "1";
+        qtyInput.disabled = true;
+      }
+    }
+    if (waBtn) {
+      if (!data.stock || data.stock <= 0) {
+        waBtn.classList.add("disabled");
+        waBtn.setAttribute("aria-disabled", "true");
+        waBtn.title = "Selected size is out of stock";
+      } else {
+        waBtn.classList.remove("disabled");
+        waBtn.removeAttribute("aria-disabled");
+        waBtn.title = "";
+      }
+    }
+  }
+
+  function updateWaLink() {
+    if (!waBtn) return;
+    var qty = parseInt((qtyInput && qtyInput.value) || "1", 10);
+    if (!qty || qty < 1) qty = 1;
+    var data = selectedSizeData();
+    var lines = [
+      "Hi! I'm interested in this product from your website:",
+      "",
+      "Product: " + baseName
+    ];
+    if (data && data.size) {
+      lines.push("Selected size: " + data.size);
+      if (data.cm) lines.push("Size (CM): " + data.cm);
+      if (data.inch) lines.push("Size (IN): " + data.inch);
+      if (data.price) lines.push("Price: " + data.price);
+      if (data.compare) lines.push("Original price: " + data.compare);
+    } else {
+      lines.push("Price: " + basePrice);
+    }
+    lines.push("Quantity: " + qty);
+    if (data && !data.stock) lines.push("Stock status: Out of stock");
+    else if (data && data.stock < 50) lines.push("Stock status: Only " + data.stock + " left in stock");
+    if (baseCategory) lines.push("Category: " + baseCategory);
+    lines.push("", "Product page: " + baseUrl, "Product ID: " + baseId, "", "Please let me know availability and how to order. Thank you!");
+    waBtn.href = "https://wa.me/{{ whatsapp_digits }}?text=" + encodeURIComponent(lines.join("\n"));
+  }
+
+  if (sizeHost) {
+    sizeHost.querySelectorAll(".size-chip").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        sizeHost.querySelectorAll(".size-chip").forEach(function (x) {
+          x.classList.remove("active");
+          x.setAttribute("aria-checked", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-checked", "true");
+        renderPrice();
+        updateWaLink();
+      });
+    });
+  }
+  if (sizeChartToggle && sizeChartPanel) {
+    sizeChartToggle.addEventListener("click", function () {
+      var isHidden = sizeChartPanel.hasAttribute("hidden");
+      if (isHidden) sizeChartPanel.removeAttribute("hidden");
+      else sizeChartPanel.setAttribute("hidden", "hidden");
+    });
+  }
+  if (qtyInput) {
+    qtyInput.addEventListener("input", function () {
+      var data = selectedSizeData();
+      var max = data && data.stock > 0 ? data.stock : 1;
+      var v = parseInt(qtyInput.value || "1", 10);
+      if (!v || v < 1) v = 1;
+      if (v > max) v = max;
+      qtyInput.value = String(v);
+      updateWaLink();
+    });
+  }
+  if (waBtn) {
+    waBtn.addEventListener("click", function (e) {
+      if (waBtn.getAttribute("aria-disabled") === "true") {
+        e.preventDefault();
+      }
+    });
+  }
+  renderPrice();
+  updateWaLink();
+})();
+</script>
 {% endblock %}

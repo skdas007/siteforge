@@ -190,11 +190,26 @@ class Product(models.Model):
         return f"{self.name} ({self.client.business_name})"
 
     @property
+    def has_size_variants(self):
+        return self.size_variants.exists()
+
+    @property
+    def lowest_variant_price(self):
+        first = self.size_variants.order_by("price", "order", "pk").first()
+        return first.price if first else None
+
+    @property
+    def display_price(self):
+        return self.lowest_variant_price if self.lowest_variant_price is not None else self.price
+
+    @property
     def has_discount(self):
+        if self.has_size_variants:
+            return False
         mrp = self.compare_at_price
         if mrp is None:
             return False
-        return mrp > self.price
+        return mrp > self.display_price
 
     @property
     def discount_percent(self):
@@ -254,3 +269,36 @@ class ProductImage(models.Model):
         compress_model_image_fields(self, [("image", settings.IMAGE_UPLOAD_MAX_SIDE)])
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+class ProductSizeVariant(models.Model):
+    """Size option with optional measurements and variant-specific price."""
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="size_variants",
+    )
+    size_label = models.CharField(max_length=40, help_text="Examples: XS, S, M, L, XL")
+    measurement_cm = models.CharField(max_length=60, blank=True, help_text="Optional, e.g. Chest 96-100")
+    measurement_inch = models.CharField(max_length=60, blank=True, help_text="Optional, e.g. Chest 38-40")
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    compare_at_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    stock_qty = models.PositiveIntegerField(default=0)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "pk"]
+        unique_together = [("product", "size_label")]
+
+    def __str__(self):
+        return f"{self.product.name} - {self.size_label}"
+
+    @property
+    def has_discount(self):
+        return self.compare_at_price is not None and self.compare_at_price > self.price
+
+    def clean(self):
+        super().clean()
+        if self.compare_at_price is not None and self.compare_at_price < self.price:
+            raise ValidationError({"compare_at_price": "Original price must be greater than or equal to sale price."})

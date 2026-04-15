@@ -1,4 +1,5 @@
 """Dashboard views: login required, client-scoped; settings save to Client."""
+from decimal import Decimal, InvalidOperation
 import json
 import re
 
@@ -118,6 +119,96 @@ def _validate_extra_product_images(request, *, existing_count: int = 0, removing
         if f.size > MAX_IMAGE_UPLOAD_BYTES:
             errors.append(f"Additional image {i}: must be at most 3 MB.")
     return errors
+
+
+def _extract_size_rows(post):
+    labels = post.getlist("size_label")
+    cms = post.getlist("size_cm")
+    inches = post.getlist("size_inch")
+    prices = post.getlist("size_price")
+    compare_prices = post.getlist("size_compare_at_price")
+    stocks = post.getlist("size_stock")
+    row_count = max(len(labels), len(cms), len(inches), len(prices), len(compare_prices), len(stocks), 0)
+    rows = []
+    for i in range(row_count):
+        rows.append(
+            {
+                "size_label": (labels[i] if i < len(labels) else "").strip(),
+                "size_cm": (cms[i] if i < len(cms) else "").strip(),
+                "size_inch": (inches[i] if i < len(inches) else "").strip(),
+                "size_price": (prices[i] if i < len(prices) else "").strip(),
+                "size_compare_at_price": (compare_prices[i] if i < len(compare_prices) else "").strip(),
+                "size_stock": (stocks[i] if i < len(stocks) else "").strip(),
+            }
+        )
+    return rows
+
+
+def _validate_size_rows(post):
+    cleaned = []
+    errors = []
+    rows = _extract_size_rows(post)
+    seen = set()
+    for idx, row in enumerate(rows, start=1):
+        label = row["size_label"]
+        cm = row["size_cm"]
+        inch = row["size_inch"]
+        price_raw = row["size_price"]
+        compare_raw = row["size_compare_at_price"]
+        stock_raw = row["size_stock"]
+        if not (label or cm or inch or price_raw or compare_raw or stock_raw):
+            continue
+        if not label:
+            errors.append(f"Size row {idx}: size label is required (e.g. M, L, XL).")
+            continue
+        key = label.lower()
+        if key in seen:
+            errors.append(f"Size row {idx}: duplicate size label '{label}'.")
+            continue
+        seen.add(key)
+        if not price_raw:
+            errors.append(f"Size row {idx}: price is required.")
+            continue
+        try:
+            price = Decimal(price_raw)
+        except (InvalidOperation, TypeError):
+            errors.append(f"Size row {idx}: enter a valid price.")
+            continue
+        if price < 0:
+            errors.append(f"Size row {idx}: price must be zero or more.")
+            continue
+        compare_price = None
+        if compare_raw:
+            try:
+                compare_price = Decimal(compare_raw)
+            except (InvalidOperation, TypeError):
+                errors.append(f"Size row {idx}: enter a valid original price (MRP).")
+                continue
+            if compare_price < price:
+                errors.append(f"Size row {idx}: original price (MRP) must be greater than or equal to sale price.")
+                continue
+        if stock_raw == "":
+            stock_qty = 0
+        else:
+            try:
+                stock_qty = int(stock_raw)
+            except (TypeError, ValueError):
+                errors.append(f"Size row {idx}: enter a valid stock quantity.")
+                continue
+            if stock_qty < 0:
+                errors.append(f"Size row {idx}: stock quantity cannot be negative.")
+                continue
+        cleaned.append(
+            {
+                "size_label": label[:40],
+                "measurement_cm": cm[:60],
+                "measurement_inch": inch[:60],
+                "price": price,
+                "compare_at_price": compare_price,
+                "stock_qty": stock_qty,
+            }
+        )
+    return cleaned, errors
 
 
 def _get_carousel_slides_from_request(request):
@@ -356,7 +447,12 @@ def _get_category_queryset(request):
 
 
 def _get_product_queryset(request):
-    return Product.objects.filter(client=request.user.client).select_related("category").order_by("order", "name")
+    return (
+        Product.objects.filter(client=request.user.client)
+        .select_related("category")
+        .prefetch_related("size_variants")
+        .order_by("order", "name")
+    )
 
 
 class ProductListView(DashboardClientMixin, ListView):
@@ -377,10 +473,16 @@ class ProductAddView(DashboardClientMixin, FormView):
         if not form.is_valid():
             return self.form_invalid(form)
         extra_errors = _validate_extra_product_images(request)
+        size_rows, size_errors = _validate_size_rows(request.POST)
         if extra_errors:
             for msg in extra_errors:
                 form.add_error(None, msg)
+        if size_errors:
+            for msg in size_errors:
+                form.add_error(None, msg)
+        if extra_errors or size_errors:
             return self.form_invalid(form)
+        request._validated_size_rows = size_rows
         return self.form_valid(form)
 
     def get_form_kwargs(self):
@@ -399,13 +501,14 @@ class ProductAddView(DashboardClientMixin, FormView):
             "seo_title": "",
             "seo_description": "",
             "seo_image": None,
+            "size_rows": _extract_size_rows(self.request.POST) if self.request.method == "POST" else [{}],
         }
         context["max_product_gallery_images"] = MAX_PRODUCT_GALLERY_IMAGES
         context["max_image_upload_bytes"] = MAX_IMAGE_UPLOAD_BYTES
         return context
 
     def form_valid(self, form):
-        from apps.catalog.models import Product, ProductImage
+        from apps.catalog.models import Product, ProductImage, ProductSizeVariant
 
         client = self.request.user.client
         product = Product.objects.create(
@@ -426,6 +529,20 @@ class ProductAddView(DashboardClientMixin, FormView):
         for i, f in enumerate(self.request.FILES.getlist("extra_images") or []):
             if f and getattr(f, "content_type", "").startswith("image/"):
                 ProductImage.objects.create(product=product, image=f, order=i)
+        size_rows = getattr(self.request, "_validated_size_rows", None)
+        if size_rows is None:
+            size_rows, _ = _validate_size_rows(self.request.POST)
+        for i, row in enumerate(size_rows):
+            ProductSizeVariant.objects.create(
+                product=product,
+                order=i,
+                size_label=row["size_label"],
+                measurement_cm=row["measurement_cm"],
+                measurement_inch=row["measurement_inch"],
+                price=row["price"],
+                compare_at_price=row["compare_at_price"],
+                stock_qty=row["stock_qty"],
+            )
         messages.success(self.request, "Product added.")
         return redirect(self.success_url)
 
@@ -452,10 +569,16 @@ class ProductEditView(DashboardClientMixin, FormView):
             existing_count=product.extra_images.count(),
             removing_count=removing_count,
         )
+        size_rows, size_errors = _validate_size_rows(request.POST)
         if extra_errors:
             for msg in extra_errors:
                 form.add_error(None, msg)
+        if size_errors:
+            for msg in size_errors:
+                form.add_error(None, msg)
+        if extra_errors or size_errors:
             return self.form_invalid(form)
+        request._validated_size_rows = size_rows
         return self.form_valid(form)
 
     def get_form_kwargs(self):
@@ -487,6 +610,22 @@ class ProductEditView(DashboardClientMixin, FormView):
             "is_active": product.is_active,
             "is_main": product.is_main,
             "extra_images": extra,
+            "size_rows": (
+                _extract_size_rows(self.request.POST)
+                if self.request.method == "POST"
+                else [
+                    {
+                        "size_label": s.size_label,
+                        "size_cm": s.measurement_cm,
+                        "size_inch": s.measurement_inch,
+                        "size_price": s.price,
+                        "size_compare_at_price": s.compare_at_price,
+                        "size_stock": s.stock_qty,
+                    }
+                    for s in product.size_variants.all()
+                ]
+                or [{}]
+            ),
         }
         context["max_product_gallery_images"] = MAX_PRODUCT_GALLERY_IMAGES
         context["max_image_upload_bytes"] = MAX_IMAGE_UPLOAD_BYTES
@@ -507,7 +646,7 @@ class ProductEditView(DashboardClientMixin, FormView):
         }
 
     def form_valid(self, form):
-        from apps.catalog.models import Product, ProductImage
+        from apps.catalog.models import Product, ProductImage, ProductSizeVariant
 
         product = get_object_or_404(_get_product_queryset(self.request), pk=self.kwargs["pk"])
         product.refresh_from_db()
@@ -534,6 +673,21 @@ class ProductEditView(DashboardClientMixin, FormView):
         for i, f in enumerate(self.request.FILES.getlist("extra_images") or []):
             if f and getattr(f, "content_type", "").startswith("image/"):
                 ProductImage.objects.create(product=product, image=f, order=start_order + i)
+        size_rows = getattr(self.request, "_validated_size_rows", None)
+        if size_rows is None:
+            size_rows, _ = _validate_size_rows(self.request.POST)
+        product.size_variants.all().delete()
+        for i, row in enumerate(size_rows):
+            ProductSizeVariant.objects.create(
+                product=product,
+                order=i,
+                size_label=row["size_label"],
+                measurement_cm=row["measurement_cm"],
+                measurement_inch=row["measurement_inch"],
+                price=row["price"],
+                compare_at_price=row["compare_at_price"],
+                stock_qty=row["stock_qty"],
+            )
         product.name = form.cleaned_data["name"]
         product.description = form.cleaned_data.get("description", "") or ""
         product.price = form.cleaned_data.get("price") or 0

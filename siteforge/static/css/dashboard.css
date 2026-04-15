@@ -254,7 +254,8 @@
 
 /* Product add/edit — a bit wider for two-column rows */
 .dashboard-form-product {
-  max-width: 56rem;
+  max-width: none;
+  width: 100%;
 }
 
 /* Site settings & wide editors — use full content column */

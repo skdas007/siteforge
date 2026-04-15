@@ -27,7 +27,7 @@ def _whatsapp_product_inquiry_message(request, product):
         "",
         f"Product: {name}",
     ]
-    price = getattr(product, "price", None)
+    price = getattr(product, "display_price", None)
     if price is not None:
         lines.append(f"Price: {price}")
     cat = getattr(product, "category", None)
@@ -62,7 +62,7 @@ def _client_context(request):
             slider_slides.append({"media_type": "image", "image": s.image.url, "video": None, "caption": s.caption or ""})
     if not slider_slides:
         slider_slides = None
-    products = Product.objects.filter(client=client, is_active=True).order_by("order", "name")
+    products = Product.objects.filter(client=client, is_active=True).prefetch_related("size_variants").order_by("order", "name")
     main_product = products.filter(is_main=True).first() or products.first()
     spotlight_categories = list(
         Category.objects.filter(client=client, show_in_spotlight=True).order_by(
@@ -289,7 +289,12 @@ class ProductListView(ListView):
         client = getattr(self.request, "client", None)
         if not client:
             raise Http404("No site configured for this domain.")
-        qs = Product.objects.filter(client=client, is_active=True).select_related("category").order_by("order", "name")
+        qs = (
+            Product.objects.filter(client=client, is_active=True)
+            .select_related("category")
+            .prefetch_related("size_variants")
+            .order_by("order", "name")
+        )
         cat_id = self.request.GET.get("category")
         if cat_id:
             try:
@@ -359,7 +364,7 @@ class ProductDetailView(DetailView):
         return (
             Product.objects.filter(client=client, is_active=True)
             .select_related("category")
-            .prefetch_related("extra_images")
+            .prefetch_related("extra_images", "size_variants")
         )
 
     def get_context_data(self, **kwargs):
@@ -382,6 +387,9 @@ class ProductDetailView(DetailView):
                 gallery_urls = [static("img/no-image.svg")]
             context["product_gallery_urls"] = gallery_urls
             context["whatsapp_message"] = _whatsapp_product_inquiry_message(self.request, product)
+            size_variants = list(product.size_variants.all())
+            context["size_variants"] = size_variants
+            context["selected_size_default"] = size_variants[0] if size_variants else None
             biz = context.get("business_name") or "SiteForge"
             c = getattr(self.request, "client", None)
             title = (getattr(product, "seo_title", "") or "").strip() or f"{product.name} — {biz}"
@@ -405,6 +413,7 @@ class ProductDetailView(DetailView):
                     )
                     .exclude(pk=product.pk)
                     .select_related("category")
+                    .prefetch_related("size_variants")
                     .order_by("order", "name")[:10]
                 )
             else:
