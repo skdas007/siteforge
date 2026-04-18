@@ -7,7 +7,7 @@
     <a href="{% url 'dashboard:category_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">← Back to list</a>
   </div>
   <div class="card-body">
-    <form method="post" enctype="multipart/form-data" action="{% if is_edit %}{% url 'dashboard:category_edit' object.pk %}{% else %}{% url 'dashboard:category_add' %}{% endif %}" class="dashboard-form dashboard-form-max">
+    <form method="post" enctype="multipart/form-data" action="{% if is_edit %}{% url 'dashboard:category_edit' object.pk %}{% else %}{% url 'dashboard:category_add' %}{% endif %}" class="dashboard-form dashboard-form-product">
       {% csrf_token %}
       {% include "includes/form_errors_alert.html" with form=form %}
       <div class="mb-4">

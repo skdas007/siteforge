@@ -4,8 +4,8 @@
     <div class="row g-4">
       <div class="col-md-6 col-lg-4" data-reveal="fade-up">
         <h5 class="fw-bold mb-3">{{ business_name|default:"SiteForge" }}</h5>
-        {% if address_text %}
-        <p class="small opacity-75 mb-0">{{ address_text|linebreaksbr }}</p>
+        {% if footer_intro %}
+        <p class="small opacity-75 mb-0">{{ footer_intro|linebreaksbr }}</p>
         {% else %}
         <p class="small opacity-75 mb-0">Multi-tenant website platform. Build your presence with clarity and style.</p>
         {% endif %}
@@ -17,28 +17,72 @@
           <li class="mb-2"><a href="{% url 'home' %}#highlights">Spotlight</a></li>
           <li class="mb-2"><a href="{% url 'home' %}#products">Products</a></li>
           <li class="mb-2"><a href="{% url 'home' %}#contact">Contact</a></li>
+          {% for lp in legal_pages_footer %}
+          <li class="mb-2"><a href="{% url 'legal_page' lp.slug %}" target="_blank" rel="noopener noreferrer">{{ lp.title }}</a></li>
+          {% endfor %}
           {% comment %}<li class="mb-2"><a href="{% url 'dashboard:home' %}">Dashboard</a></li>{% endcomment %}
         </ul>
       </div>
       <div class="col-md-12 col-lg-4" data-reveal="fade-up">
-        <h5 class="fw-bold mb-3">Connect</h5>
-        <ul class="list-unstyled small mb-0">
-          {% if instagram_url %}
-          <li class="mb-2"><a href="{{ instagram_url }}" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+        <h5 class="fw-bold mb-3">Contact</h5>
+        <ul class="list-unstyled small mb-3">
+          {% if address_text %}
+          <li class="mb-2 d-flex align-items-start gap-2">
+            <span aria-hidden="true" class="opacity-75 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 16s6-5.686 6-10A6 6 0 1 0 2 6c0 4.314 6 10 6 10ZM8 8.5A2.5 2.5 0 1 1 8 3.5a2.5 2.5 0 0 1 0 5Z"/>
+              </svg>
+            </span>
+            <span class="opacity-75">{{ address_text|linebreaksbr }}</span>
+          </li>
           {% endif %}
-          {% if facebook_url %}
-          <li class="mb-2"><a href="{{ facebook_url }}" target="_blank" rel="noopener noreferrer">Facebook</a></li>
-          {% endif %}
-          {% if youtube_url %}
-          <li class="mb-2"><a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+          {% if whatsapp_number %}
+          <li class="mb-2 d-flex align-items-center gap-2">
+            <span aria-hidden="true" class="opacity-75">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M3.654 1.328a.678.678 0 0 1 .737-.157l2.522 1.01c.329.132.445.532.236.827L6.11 4.88c-.11.19-.084.427.06.588l2.457 2.457c.161.145.398.17.588.06l1.873-1.038a.678.678 0 0 1 .827.236l1.01 2.522a.678.678 0 0 1-.157.737l-1.2 1.2c-.497.497-1.225.686-1.914.48-1.83-.548-3.56-1.96-5.02-3.42-1.46-1.46-2.872-3.19-3.42-5.02-.206-.689-.017-1.417.48-1.914l1.2-1.2Z"/>
+              </svg>
+            </span>
+            <a href="tel:{{ whatsapp_number }}">{{ whatsapp_number }}</a>
+          </li>
           {% endif %}
           {% if contact_email %}
-          <li class="mb-2"><a href="mailto:{{ contact_email }}">{{ contact_email }}</a></li>
-          {% endif %}
-          {% if not instagram_url and not facebook_url and not youtube_url and not contact_email %}
-          <li class="mb-2 opacity-75">Social links coming soon.</li>
+          <li class="mb-2 d-flex align-items-center gap-2">
+            <span aria-hidden="true" class="opacity-75">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v.217L8 8.583.001 4.217V4ZM0 5.383l5.804 3.17L0 12.801V5.383ZM6.761 9.129 0 13h16l-6.761-3.871L8 9.583l-1.239-.454ZM16 12.801l-5.804-4.248L16 5.383V12.8Z"/>
+              </svg>
+            </span>
+            <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+          </li>
           {% endif %}
         </ul>
+        <div class="d-flex align-items-center gap-3 small">
+          {% if instagram_url %}
+          <a href="{{ instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.087 3.269.222 2.76.42a3.95 3.95 0 0 0-1.437.936A3.95 3.95 0 0 0 .386 2.793c-.198.51-.333 1.09-.372 1.944C-.024 5.59-.034 5.863-.034 8.034c0 2.17.01 2.443.048 3.296.039.854.174 1.434.372 1.944.205.526.48.971.937 1.428.457.457.902.732 1.428.937.51.198 1.09.333 1.944.372.853.038 1.126.048 3.296.048 2.171 0 2.444-.01 3.297-.048.853-.039 1.433-.174 1.943-.372a3.95 3.95 0 0 0 1.429-.937 3.95 3.95 0 0 0 .936-1.428c.198-.51.333-1.09.372-1.944.038-.853.048-1.126.048-3.296 0-2.171-.01-2.444-.048-3.297-.039-.853-.174-1.433-.372-1.943a3.95 3.95 0 0 0-.936-1.429A3.95 3.95 0 0 0 13.24.42c-.51-.198-1.09-.333-1.943-.372C10.444.01 10.171 0 8 0Zm0 1.441c2.134 0 2.387.008 3.232.046.782.036 1.207.166 1.489.275.374.145.641.319.921.599.281.281.455.548.6.922.109.282.239.707.274 1.49.039.844.047 1.097.047 3.231 0 2.134-.008 2.387-.047 3.232-.035.782-.165 1.207-.274 1.489a2.514 2.514 0 0 1-.6.922 2.514 2.514 0 0 1-.921.599c-.282.109-.707.239-1.49.275-.844.038-1.097.046-3.231.046-2.134 0-2.387-.008-3.232-.046-.782-.036-1.207-.166-1.489-.275a2.514 2.514 0 0 1-.922-.599 2.514 2.514 0 0 1-.599-.922c-.109-.282-.239-.707-.274-1.49-.039-.844-.047-1.097-.047-3.231 0-2.134.008-2.387.047-3.232.035-.782.165-1.207.274-1.489.145-.374.318-.641.599-.922.281-.28.548-.454.922-.599.282-.109.707-.239 1.489-.275.845-.038 1.098-.046 3.232-.046Zm0 2.456a4.137 4.137 0 1 0 0 8.274 4.137 4.137 0 0 0 0-8.274Zm0 6.833a2.696 2.696 0 1 1 0-5.392 2.696 2.696 0 0 1 0 5.392Zm5.268-7.001a.966.966 0 1 1-1.932 0 .966.966 0 0 1 1.932 0Z"/>
+            </svg>
+          </a>
+          {% endif %}
+          {% if facebook_url %}
+          <a href="{{ facebook_url }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M16 8.049C16 3.603 12.418 0 8 0S0 3.603 0 8.049c0 4.017 2.926 7.347 6.75 7.951V10.38H4.719V8.049H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.158 1.791.158v1.98h-1.01c-.994 0-1.303.621-1.303 1.258v1.509h2.219l-.355 2.331H9.25V16c3.824-.604 6.75-3.934 6.75-7.951Z"/>
+            </svg>
+          </a>
+          {% endif %}
+          {% if youtube_url %}
+          <a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8.051 1.999h-.102C3.624 1.999 2.47 2.17 1.806 2.834 1.146 3.494.975 4.648.975 8.001c0 3.353.171 4.507.831 5.167.664.664 1.818.834 6.143.834h.102c4.325 0 5.479-.17 6.143-.834.66-.66.831-1.814.831-5.167 0-3.353-.171-4.507-.831-5.167-.664-.664-1.818-.835-6.143-.835ZM6.4 10.4V5.6l4.267 2.4L6.4 10.4Z"/>
+            </svg>
+          </a>
+          {% endif %}
+          {% if not instagram_url and not facebook_url and not youtube_url %}
+          <span class="opacity-75">Social links coming soon.</span>
+          {% endif %}
+        </div>
       </div>
     </div>
     <div class="footer-bottom text-center small opacity-75">

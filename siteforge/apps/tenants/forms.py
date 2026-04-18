@@ -1,11 +1,24 @@
 from decimal import Decimal
+from datetime import datetime, timedelta, timezone as dt_timezone
 
 from django import forms
+from django.utils import timezone
+from django.utils.text import slugify
 
 from apps.catalog.models import Category
+from apps.tenants.models import LegalPage
 from apps.core.validators import validate_favicon_upload, validate_image_upload_size
 
 _IMAGE_HELP = "Maximum file size: 3 MB."
+_FONT_CHOICES = [
+    ("inter", "Inter (modern clean)"),
+    ("poppins", "Poppins (geometric)"),
+    ("dm-sans", "DM Sans (friendly)"),
+    ("lato", "Lato (balanced)"),
+    ("roboto", "Roboto (neutral)"),
+    ("playfair", "Playfair Display (elegant serif)"),
+    ("cormorant", "Cormorant Garamond (premium serif)"),
+]
 
 # Primary product image help_text; other sizes are in dashboard templates.
 _REC_PRODUCT_MAIN = "Recommended: at least 800×800 px, or 1000×1000 / 1200×900 px for sharp grids and zoom (list cards ~220 px tall)."
@@ -16,7 +29,15 @@ class SiteSettingsForm(forms.Form):
     hero_title = forms.CharField(max_length=200, required=False)
     hero_subtitle = forms.CharField(widget=forms.Textarea(attrs={"rows": 2}), required=False)
     theme = forms.ChoiceField(choices=[], required=True)
+    font_body = forms.ChoiceField(choices=_FONT_CHOICES, required=False, initial="inter", label="Body font")
+    font_heading = forms.ChoiceField(choices=_FONT_CHOICES, required=False, initial="poppins", label="Heading font")
     contact_email = forms.EmailField(required=False)
+    footer_intro = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        required=False,
+        label="Footer intro text",
+        help_text="Shown under your business name in footer.",
+    )
     address_text = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 2}),
         required=False,
@@ -37,6 +58,36 @@ class SiteSettingsForm(forms.Form):
         label="Map embed URL",
         help_text="Paste an iframe embed URL from Google Maps or OpenStreetMap for the Contact section map.",
     )
+    announcement_enabled = forms.BooleanField(required=False, label="Enable announcement bar")
+    announcement_text = forms.CharField(max_length=240, required=False, label="Announcement text")
+    announcement_cta_label = forms.CharField(max_length=40, required=False, label="Announcement button label")
+    announcement_cta_url = forms.URLField(required=False, label="Announcement button URL")
+    announcement_bg_color = forms.CharField(max_length=7, required=False, label="Announcement background color")
+    announcement_text_color = forms.CharField(max_length=7, required=False, label="Announcement text color")
+    popup_enabled = forms.BooleanField(required=False, label="Enable popup campaign")
+    popup_title = forms.CharField(max_length=160, required=False, label="Popup title")
+    popup_message = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False, label="Popup message")
+    popup_image = forms.ImageField(
+        required=False,
+        validators=[validate_image_upload_size],
+        label="Popup image",
+        help_text=_IMAGE_HELP,
+    )
+    popup_cta_label = forms.CharField(max_length=40, required=False, label="Popup button label")
+    popup_cta_url = forms.URLField(required=False, label="Popup button URL")
+    popup_show_rule = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("always", "Show every page load"),
+            ("session", "Once per browser session"),
+            ("day", "Once per day"),
+        ],
+        initial="session",
+        label="Popup show rule",
+    )
+    popup_start_at = forms.CharField(required=False, label="Popup start")
+    popup_end_at = forms.CharField(required=False, label="Popup end")
+    popup_timezone_offset = forms.IntegerField(required=False)
     banner_image = forms.ImageField(
         required=False,
         validators=[validate_image_upload_size],
@@ -107,7 +158,45 @@ class SiteSettingsForm(forms.Form):
             ("midnight", "Midnight (dark mode)"),
             ("blackred", "Black Red (bold contrast)"),
             ("emeraldgold", "Emerald Gold (premium)"),
+            ("goldforest", "Golden Forest (Gold + Forest)"),
         ]
+
+    def clean(self):
+        cleaned = super().clean()
+        offset_raw = cleaned.get("popup_timezone_offset")
+        try:
+            offset_minutes = int(offset_raw)
+        except (TypeError, ValueError):
+            offset_minutes = 0
+
+        def parse_local_dt(raw):
+            raw = (raw or "").strip()
+            if not raw:
+                return None
+            try:
+                local_naive = datetime.strptime(raw, "%Y-%m-%dT%H:%M")
+            except ValueError:
+                raise forms.ValidationError("Enter date/time in valid format.")
+            # Browser gives local wall time. Convert to UTC using browser offset.
+            utc_naive = local_naive + timedelta(minutes=offset_minutes)
+            return timezone.make_aware(utc_naive, dt_timezone.utc)
+
+        try:
+            start = parse_local_dt(cleaned.get("popup_start_at"))
+        except forms.ValidationError:
+            self.add_error("popup_start_at", "Enter a valid popup start date/time.")
+            start = None
+        try:
+            end = parse_local_dt(cleaned.get("popup_end_at"))
+        except forms.ValidationError:
+            self.add_error("popup_end_at", "Enter a valid popup end date/time.")
+            end = None
+
+        cleaned["popup_start_at"] = start
+        cleaned["popup_end_at"] = end
+        if start and end and end <= start:
+            self.add_error("popup_end_at", "Popup end must be after popup start.")
+        return cleaned
 
 
 class CategoryForm(forms.ModelForm):
@@ -257,3 +346,45 @@ class ProductForm(forms.Form):
                 "Original price (MRP) must be greater than or equal to the sale price.",
             )
         return cleaned
+
+
+class LegalPageForm(forms.ModelForm):
+    class Meta:
+        model = LegalPage
+        fields = ["title", "slug", "page_type", "content", "show_in_footer", "is_active"]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control", "maxlength": 160}),
+            "slug": forms.TextInput(
+                attrs={"class": "form-control", "maxlength": 180, "placeholder": "Add an unique slug for the page"}
+            ),
+            "page_type": forms.Select(attrs={"class": "form-select"}),
+            "content": forms.Textarea(attrs={"class": "form-control", "rows": 8}),
+            "show_in_footer": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+
+    def __init__(self, *args, client=None, editing_pk=None, **kwargs):
+        self._client = client
+        self._editing_pk = editing_pk
+        super().__init__(*args, **kwargs)
+
+    def clean_title(self):
+        title = (self.cleaned_data.get("title") or "").strip()
+        if not title:
+            raise forms.ValidationError("Title is required.")
+        return title[:160]
+
+    def clean_slug(self):
+        raw_slug = (self.cleaned_data.get("slug") or "").strip()
+        title = (self.cleaned_data.get("title") or "").strip()
+        slug = slugify(raw_slug or title)[:180]
+        if not slug:
+            raise forms.ValidationError("Slug is required.")
+        if not self._client:
+            return slug
+        qs = LegalPage.objects.filter(client=self._client, slug=slug)
+        if self._editing_pk:
+            qs = qs.exclude(pk=self._editing_pk)
+        if qs.exists():
+            raise forms.ValidationError("A page with this slug already exists.")
+        return slug

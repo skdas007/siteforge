@@ -1,0 +1,123 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}{{ form_title }}{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+<style>
+  .sf-rich-editor {
+    background: #fff;
+    border-radius: 0.5rem;
+  }
+  .sf-rich-editor .ql-editor {
+    min-height: 280px;
+  }
+</style>
+{% endblock %}
+{% block dashboard_content %}
+<div class="card dashboard-card">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <h2 class="h5 mb-0">{{ form_title }}</h2>
+    <a href="{% url 'dashboard:legal_page_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">← Back to list</a>
+  </div>
+  <div class="card-body">
+    <form method="post" action="{% if is_edit %}{% url 'dashboard:legal_page_edit' object.pk %}{% else %}{% url 'dashboard:legal_page_add' %}{% endif %}" class="dashboard-form dashboard-form-max" id="legal-page-form">
+      {% csrf_token %}
+      {% include "includes/form_errors_alert.html" with form=form %}
+      <p class="dashboard-form-section-title">Basics</p>
+      <div class="row g-3 mb-1">
+        <div class="col-md-6">
+          <label for="id_title" class="form-label">Page title</label>
+          {{ form.title }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_slug" class="form-label">URL slug</label>
+          {{ form.slug }}
+          <p class="form-text small text-muted mb-0">Public URL: <code>/business-name/your-slug/</code>. Leave blank to auto-generate from title.</p>
+        </div>
+      </div>
+      <div class="row g-3 mb-1">
+        <div class="col-md-6">
+          <label for="id_page_type" class="form-label">Page type</label>
+          {{ form.page_type }}
+        </div>
+      </div>
+      <p class="dashboard-form-section-title">Content</p>
+      <div class="mb-3">
+        <label for="id_content_editor" class="form-label">Page content</label>
+        <div id="id_content_editor" class="sf-rich-editor mb-2"></div>
+        {{ form.content }}
+      </div>
+      <p class="dashboard-form-section-title">Visibility</p>
+      <div class="mb-2 form-check">
+        {{ form.show_in_footer }}
+        <label class="form-check-label" for="id_show_in_footer">Show link in public footer</label>
+      </div>
+      <div class="mb-3 form-check">
+        {{ form.is_active }}
+        <label class="form-check-label" for="id_is_active">Active (page accessible publicly)</label>
+      </div>
+      <div class="dashboard-form-actions">
+        <button type="submit" class="btn btn-primary rounded-pill px-4">{% if is_edit %}Save changes{% else %}Add page{% endif %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+<script>
+(function () {
+  var form = document.getElementById("legal-page-form");
+  var titleInput = document.getElementById("id_title");
+  var slugInput = document.getElementById("id_slug");
+  var contentTextarea = document.getElementById("id_content");
+  var contentEditorHost = document.getElementById("id_content_editor");
+  if (!form || !contentTextarea || !contentEditorHost) return;
+
+  function slugify(text) {
+    return (text || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  if (titleInput && slugInput) {
+    titleInput.addEventListener("input", function () {
+      if ((slugInput.value || "").trim()) return;
+      slugInput.value = slugify(titleInput.value || "");
+    });
+  }
+
+  var quill = window.Quill ? new Quill(contentEditorHost, {
+    theme: "snow",
+    modules: {
+      toolbar: [
+        [{ header: [2, 3, false] }],
+        ["bold", "italic", "underline"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link", "clean"]
+      ]
+    }
+  }) : null;
+
+  if (quill) {
+    var initial = contentTextarea.value || "";
+    if (initial.trim()) {
+      if (/<[a-z][\s\S]*>/i.test(initial)) {
+        quill.clipboard.dangerouslyPasteHTML(initial);
+      } else {
+        quill.setText(initial);
+      }
+    }
+    contentTextarea.style.display = "none";
+  }
+
+  form.addEventListener("submit", function () {
+    if (!quill) return;
+    contentTextarea.value = quill.root.innerHTML;
+  });
+})();
+</script>
+{% endblock %}

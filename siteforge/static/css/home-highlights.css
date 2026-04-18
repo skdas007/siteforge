@@ -1,13 +1,31 @@
-/* Home: Spotlight — editorial 4-up grid (full-bleed imagery, bottom overlays) */
+/* Home: Spotlight — editorial 4-up grid; palette from theme (--sf-primary) via --sf-sc-* */
 
 .sf-showcase-section {
   --sf-showcase-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --sf-showcase-sans: "DM Sans", system-ui, -apple-system, sans-serif;
   --sf-showcase-gap: 4px;
   --sf-showcase-radius: 0;
+  --sf-sc-accent: var(--sf-primary, #0d6efd);
+  --sf-sc-bg: color-mix(in srgb, var(--sf-sc-accent) 5%, #ffffff);
+  --sf-sc-strip-bg: color-mix(in srgb, var(--sf-sc-accent) 4%, #ffffff);
+  --sf-sc-heading: #1a1a1a;
+  --sf-sc-sub: color-mix(in srgb, var(--sf-sc-accent) 35%, #6b7280);
+  --sf-sc-media-fallback: #1c1917;
+  --sf-sc-focus-ring: var(--sf-sc-accent);
+  --sf-sc-focus-halo: #ffffff;
+  --sf-sc-bag-bg: color-mix(in srgb, var(--sf-sc-accent) 11%, #ffffff);
+  --sf-sc-bag-fg: color-mix(in srgb, var(--sf-sc-accent) 72%, #111827);
+  --sf-sc-tag-price-bg: color-mix(in srgb, var(--sf-sc-accent) 28%, #047857);
+  --sf-sc-tag-code-bg: color-mix(in srgb, var(--sf-sc-accent) 24%, #065f46);
+  --sf-sc-tag-new-bg: rgba(255, 255, 255, 0.95);
+  --sf-sc-tag-new-fg: #1a1a1a;
+  --sf-sc-btn-bg: #ffffff;
+  --sf-sc-btn-fg: #111827;
+  --sf-sc-btn-hover-bg: var(--sf-sc-accent);
+  --sf-sc-btn-hover-fg: #ffffff;
   padding-top: 2.5rem;
   padding-bottom: 0.25rem;
-  background: #fff;
+  background: var(--sf-sc-bg);
 }
 
 .sf-showcase-heading {
@@ -16,21 +34,21 @@
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #1a1a1a;
+  color: var(--sf-sc-heading);
   margin-bottom: 0;
 }
 
 .sf-showcase-heading + .sf-showcase-sub {
   font-family: var(--sf-showcase-sans);
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--sf-sc-sub);
   margin-top: 0.35rem;
 }
 
-/* Full-width strip with thin white gutters (reference style) */
+/* Full-width strip with thin gutters matching section */
 .sf-showcase-strip {
   width: 100%;
-  background: #fff;
+  background: var(--sf-sc-strip-bg);
   padding: var(--sf-showcase-gap) max(var(--sf-showcase-gap), 0.5rem);
 }
 
@@ -88,13 +106,15 @@
 }
 
 .sf-showcase-tile:focus-visible {
-  box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--bs-primary, #0d6efd);
+  box-shadow:
+    0 0 0 3px var(--sf-sc-focus-halo),
+    0 0 0 6px var(--sf-sc-focus-ring, var(--bs-primary, #0d6efd));
 }
 
 .sf-showcase-tile__media {
   position: absolute;
   inset: 0;
-  background: #1c1917;
+  background: var(--sf-sc-media-fallback);
 }
 
 .sf-showcase-tile__media img,
@@ -139,12 +159,12 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background: #fff;
-  color: #111;
+  background: var(--sf-sc-bag-bg);
+  color: var(--sf-sc-bag-fg);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--sf-sc-accent) 22%, rgba(0, 0, 0, 0.12));
   pointer-events: none;
 }
 
@@ -178,18 +198,18 @@
 }
 
 .sf-showcase-tile__tag--price {
-  background: #15803d;
+  background: var(--sf-sc-tag-price-bg);
   color: #fff;
 }
 
 .sf-showcase-tile__tag--code {
-  background: #166534;
+  background: var(--sf-sc-tag-code-bg);
   color: #fff;
 }
 
 .sf-showcase-tile__tag--new {
-  background: rgba(255, 255, 255, 0.95);
-  color: #111;
+  background: var(--sf-sc-tag-new-bg);
+  color: var(--sf-sc-tag-new-fg);
 }
 
 /* Bottom copy stack */
@@ -249,7 +269,7 @@
   opacity: 0.95;
 }
 
-/* SHOP NOW pill */
+/* SHOP NOW pill — hover uses theme accent */
 .sf-showcase-tile__btn {
   display: inline-block;
   font-family: var(--sf-showcase-sans);
@@ -257,17 +277,17 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #111 !important;
-  background: #fff;
+  color: var(--sf-sc-btn-fg) !important;
+  background: var(--sf-sc-btn-bg);
   padding: 0.55rem 1.85rem;
   border-radius: 2px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--sf-sc-accent) 18%, rgba(0, 0, 0, 0.18));
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .sf-showcase-tile:hover .sf-showcase-tile__btn {
-  background: #111;
-  color: #fff !important;
+  background: var(--sf-sc-btn-hover-bg);
+  color: var(--sf-sc-btn-hover-fg) !important;
   transform: translateY(-2px);
 }
 
@@ -297,4 +317,110 @@
   .sf-showcase-tile:hover .sf-showcase-tile__btn {
     transform: none;
   }
+}
+
+/* ── Home: Products — layered mesh + long multi-stop band (themes tune --sf-hp-bg-* / accent) ── */
+.sf-home-products {
+  --sf-hp-accent: var(--sf-primary, #0d6efd);
+  --sf-hp-bg-1: #f8fafc;
+  --sf-hp-bg-2: #f1f5f9;
+  --sf-hp-bg-3: #eef2ff;
+  --sf-hp-heading: #0f172a;
+  --sf-hp-sub: #64748b;
+  --sf-hp-placeholder: #e9ecef;
+  --sf-hp-card-border: rgba(15, 23, 42, 0.08);
+  --sf-hp-card-shine: rgba(255, 255, 255, 0.5);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  /* Top lighter → bottom deeper (every theme; --sf-hp-bg-1 … --sf-hp-bg-3 tune per theme) */
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--sf-hp-accent) 2%, var(--sf-hp-bg-1)) 0%,
+    color-mix(in srgb, var(--sf-hp-accent) 5%, var(--sf-hp-bg-1)) 18%,
+    color-mix(in srgb, var(--sf-hp-accent) 7%, var(--sf-hp-bg-2)) 36%,
+    color-mix(in srgb, var(--sf-hp-accent) 9%, var(--sf-hp-bg-2)) 54%,
+    color-mix(in srgb, var(--sf-hp-accent) 11%, var(--sf-hp-bg-3)) 72%,
+    color-mix(in srgb, var(--sf-hp-accent) 14%, var(--sf-hp-bg-3)) 88%,
+    color-mix(in srgb, var(--sf-hp-accent) 16%, var(--sf-hp-bg-3)) 100%
+  );
+}
+
+.sf-home-products::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 88% 48% at 50% 4%,
+      color-mix(in srgb, var(--sf-hp-accent) 14%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 58% 48% at 96% 18%,
+      color-mix(in srgb, var(--sf-hp-accent) 10%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 72% 50% at 92% 82%,
+      color-mix(in srgb, var(--sf-hp-accent) 12%, transparent),
+      transparent 54%
+    ),
+    radial-gradient(
+      ellipse 48% 40% at 48% 98%,
+      color-mix(in srgb, var(--sf-hp-accent) 9%, transparent),
+      transparent 46%
+    ),
+    radial-gradient(
+      ellipse 36% 32% at 52% 42%,
+      color-mix(in srgb, var(--sf-hp-accent) 5%, transparent),
+      transparent 62%
+    );
+}
+
+.sf-home-products::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.38;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--sf-hp-accent) 8%, transparent) 48%,
+    color-mix(in srgb, var(--sf-hp-accent) 14%, transparent) 100%
+  );
+}
+
+.sf-home-products > .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Avoid global .section-title-glow (fixed #212529 / teal) — use theme-driven title */
+.sf-home-products__title {
+  font-weight: 700;
+  color: var(--sf-hp-heading) !important;
+  background: none !important;
+  -webkit-text-fill-color: unset !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  animation: none !important;
+}
+
+.sf-home-products__subtitle.section-subtitle,
+.sf-home-products .sf-home-products__subtitle {
+  color: var(--sf-hp-sub);
+}
+
+.sf-home-products .card-body .card-title {
+  color: var(--sf-hp-card-title, inherit);
+}
+
+.sf-home-products .card-body .card-text.text-muted {
+  color: var(--sf-hp-card-muted, inherit) !important;
 }

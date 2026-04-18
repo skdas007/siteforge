@@ -12,3 +12,41 @@
 .card {
   border-radius: 0.5rem;
 }
+
+/* Home — Spotlight + Products: neutral grayscale */
+body.theme-minimal .sf-showcase-section {
+  --sf-sc-bg: #ffffff;
+  --sf-sc-strip-bg: #fafafa;
+  --sf-sc-heading: #212529;
+  --sf-sc-sub: #6c757d;
+  --sf-sc-btn-hover-bg: #212529;
+  --sf-sc-btn-hover-fg: #ffffff;
+}
+
+body.theme-minimal .sf-home-products {
+  --sf-hp-bg-1: #ffffff;
+  --sf-hp-bg-2: #f5f5f5;
+  --sf-hp-bg-3: #e8e8e8;
+  --sf-hp-heading: #212529;
+  --sf-hp-sub: #6c757d;
+  --sf-hp-card-title: #212529;
+  --sf-hp-card-muted: #6c757d;
+}
+
+body.theme-minimal #contact.sf-contact-home {
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f3f3f3 42%,
+    #e6e6e6 100%
+  );
+}
+
+body.theme-minimal #contact.sf-contact-home::after {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.04) 55%,
+    rgba(0, 0, 0, 0.07) 100%
+  );
+}

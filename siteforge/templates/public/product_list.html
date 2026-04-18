@@ -2,131 +2,109 @@
 {% load static %}
 {% block title %}{{ seo_title }}{% endblock %}
 {% block extra_css %}
-<style>
-  .product-filter {
-    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
-    border: 1px solid rgba(0,0,0,0.06);
-    border-radius: 1rem;
-    padding: 1.25rem 1.5rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  }
-  .product-filter .filter-title {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #6c757d;
-    margin-bottom: 0.75rem;
-  }
-  .product-filter .form-label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #495057;
-    margin-bottom: 0.35rem;
-  }
-  .product-filter .form-control,
-  .product-filter .form-select {
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.9375rem;
-    min-height: 2.5rem;
-  }
-  .product-filter .form-control:focus,
-  .product-filter .form-select:focus {
-    border-color: var(--bs-primary, #0d6efd);
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-  }
-  .product-filter .btn-filter {
-    min-height: 2.5rem;
-    padding: 0.5rem 1.25rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    font-size: 0.9375rem;
-  }
-  .product-filter .btn-clear {
-    font-size: 0.875rem;
-    color: #6c757d;
-    text-decoration: none;
-    padding: 0.5rem 0;
-  }
-  .product-filter .btn-clear:hover {
-    color: var(--bs-primary, #0d6efd);
-  }
-  @media (min-width: 768px) {
-    .product-filter .filter-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-end;
-      gap: 1rem;
-    }
-    .product-filter .filter-group {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-    .product-filter .filter-group-search { flex: 1 1 12rem; max-width: 18rem; }
-    .product-filter .filter-group-category { flex: 0 1 10rem; }
-    .product-filter .filter-group-price { flex: 0 1 5rem; }
-    .product-filter .filter-actions { flex: 0 0 auto; display: flex; align-items: flex-end; gap: 0.5rem; }
-  }
-  @media (max-width: 767px) {
-    .product-filter { padding: 1rem; }
-    .product-filter .filter-group { margin-bottom: 1rem; }
-    .product-filter .filter-group:last-of-type { margin-bottom: 0; }
-    .product-filter .filter-actions {
-      margin-top: 0.75rem;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .product-filter .btn-filter { flex: 1 1 auto; min-width: 8rem; }
-  }
-</style>
+<link href="{% static 'css/home-highlights.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/product-filters.css' %}">
 {% endblock %}
 {% block content %}
-<section class="py-5 section-padding">
-  <div class="container">
+<section class="sf-home-products py-5 section-padding">
+  <div class="container position-relative">
     <div class="text-center mb-5" data-reveal="fade-up">
       <h1 class="section-title section-title-glow">Products</h1>
       <p class="section-subtitle">Explore what we have for you.</p>
     </div>
-    <div class="product-filter mb-4" data-reveal="fade-up">
-      <form method="get" action="{% url 'product_list' %}">
-        <p class="filter-title mb-0">Refine results</p>
-        <div class="filter-row">
-          <div class="filter-group filter-group-search">
-            <label for="filter-q" class="form-label">Search</label>
-            <input type="text" name="q" id="filter-q" class="form-control" placeholder="Name or description…" value="{{ filter_q }}">
+
+    <form id="sf-product-filter-form" method="get" action="{% url 'product_list' %}" class="sf-product-filters mb-4" data-reveal="fade-up">
+      <div class="sf-filter-responsive">
+        <div class="sf-area-search">
+          <label class="sf-filter-label" for="sf-filter-q"><span class="d-md-none">Find products</span><span class="d-none d-md-inline">Search</span></label>
+          <div class="input-group sf-filter-search-wrap">
+            <span class="input-group-text" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+            </span>
+            <input type="search" name="q" id="sf-filter-q" class="form-control" placeholder="Search by name or description…" value="{{ filter_q }}" autocomplete="off" aria-label="Search products">
           </div>
-          {% if categories %}
-          <div class="filter-group filter-group-category">
-            <label for="filter-category" class="form-label">Category</label>
-            <select name="category" id="filter-category" class="form-select">
-              <option value="">All categories</option>
-              {% for cat in categories %}
-              <option value="{{ cat.id }}" {% if current_category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          {% endif %}
-          <div class="filter-group filter-group-price">
-            <label for="filter-min" class="form-label">Min price</label>
-            <input type="number" name="min_price" id="filter-min" class="form-control" placeholder="0" min="0" step="any" value="{{ filter_min_price }}">
-          </div>
-          <div class="filter-group filter-group-price">
-            <label for="filter-max" class="form-label">Max price</label>
-            <input type="number" name="max_price" id="filter-max" class="form-control" placeholder="Max" min="0" step="any" value="{{ filter_max_price }}">
-          </div>
-          <div class="filter-actions">
-            <button type="submit" class="btn btn-primary btn-filter">Apply</button>
-            {% if filter_q or current_category_id or filter_min_price or filter_max_price %}
-            <a href="{% url 'product_list' %}" class="btn btn-clear align-self-center">Clear</a>
-            {% endif %}
+          <div class="sf-filter-mobile-actions d-md-none">
+            <button type="submit" class="btn btn-primary sf-filter-mobile-search-btn w-100">Search</button>
+            <button type="button" class="btn sf-filter-open-btn sf-filter-open-btn--wide w-100" data-bs-toggle="offcanvas" data-bs-target="#sfProductFilterDrawer" aria-controls="sfProductFilterDrawer">
+              <span class="sf-filter-open-btn__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
+              </span>
+              <span class="sf-filter-open-btn__text">Category &amp; price</span>
+              {% if filter_drawer_active_count %}<span class="sf-filter-badge">{{ filter_drawer_active_count }}</span>{% endif %}
+            </button>
           </div>
         </div>
-      </form>
+
+        <div class="sf-area-price d-none d-md-block">
+          <span class="sf-filter-label">Price range</span>
+          <div class="sf-filter-price-range">
+            <input type="number" name="min_price" id="sf-min-desktop" inputmode="decimal" class="form-control" placeholder="Min" min="0" step="any" value="{{ filter_min_price }}" data-filter-view="desktop" aria-label="Minimum price">
+            <span class="sf-filter-price-sep">—</span>
+            <input type="number" name="max_price" id="sf-max-desktop" inputmode="decimal" class="form-control" placeholder="Max" min="0" step="any" value="{{ filter_max_price }}" data-filter-view="desktop" aria-label="Maximum price">
+          </div>
+        </div>
+
+        <div class="sf-area-actions d-none d-md-flex flex-wrap align-items-end gap-2">
+          <button type="submit" class="btn btn-primary sf-filter-btn-apply">Apply</button>
+          {% if filter_q or current_category_id or filter_min_price or filter_max_price %}
+          <a href="{% url 'product_list' %}" class="sf-filter-btn-clear">Reset</a>
+          {% endif %}
+        </div>
+
+        {% if categories %}
+        <div class="sf-area-chips sf-filter-chip-row-label d-none d-md-block">
+          <span class="sf-filter-label mb-2">Category</span>
+          <div class="sf-filter-chips" role="group" aria-label="Filter by category">
+            <a class="sf-filter-chip{% if not current_category_id %} active{% endif %}" href="{% if filter_q or filter_min_price or filter_max_price %}{% url 'product_list' %}?{% if filter_q %}q={{ filter_q|urlencode }}&{% endif %}{% if filter_min_price %}min_price={{ filter_min_price }}&{% endif %}{% if filter_max_price %}max_price={{ filter_max_price }}{% endif %}{% else %}{% url 'product_list' %}{% endif %}">All</a>
+            {% for cat in categories %}
+            <a class="sf-filter-chip{% if current_category_id == cat.id %} active{% endif %}" href="{% url 'product_list' %}?{% if filter_q %}q={{ filter_q|urlencode }}&{% endif %}{% if filter_min_price %}min_price={{ filter_min_price }}&{% endif %}{% if filter_max_price %}max_price={{ filter_max_price }}&{% endif %}category={{ cat.id }}">{{ cat.name }}</a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if current_category_id %}
+        <input type="hidden" name="category" value="{{ current_category_id }}" data-filter-view="desktop">
+        {% endif %}
+      </div>
+    </form>
+
+    {# Offcanvas must NOT live inside .sf-product-filters: ancestor backdrop-filter clips position:fixed backdrop #}
+    <div class="offcanvas offcanvas-bottom sf-filter-offcanvas d-md-none" tabindex="-1" id="sfProductFilterDrawer" aria-labelledby="sfProductFilterDrawerLabel">
+      <div class="offcanvas-header">
+        <h2 class="offcanvas-title" id="sfProductFilterDrawerLabel">Category &amp; price</h2>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <p class="sf-filter-drawer-lead small text-muted mb-3">{% if categories %}Pick a category and/or price range.{% else %}Set a minimum or maximum price.{% endif %} Your search text above is kept when you apply.</p>
+        {% if categories %}
+        <div class="mb-3">
+          <label class="sf-filter-label" for="sf-filter-category-mobile">Category</label>
+          <select name="category" id="sf-filter-category-mobile" class="form-select" form="sf-product-filter-form" data-filter-view="mobile">
+            <option value="">All categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if current_category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        <div class="mb-4">
+          <span class="sf-filter-label">Price range</span>
+          <div class="sf-filter-price-range mt-1">
+            <input type="number" name="min_price" id="sf-min-mobile" form="sf-product-filter-form" inputmode="decimal" class="form-control" placeholder="Min" min="0" step="any" value="{{ filter_min_price }}" data-filter-view="mobile" aria-label="Minimum price">
+            <span class="sf-filter-price-sep">—</span>
+            <input type="number" name="max_price" id="sf-max-mobile" form="sf-product-filter-form" inputmode="decimal" class="form-control" placeholder="Max" min="0" step="any" value="{{ filter_max_price }}" data-filter-view="mobile" aria-label="Maximum price">
+          </div>
+        </div>
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary sf-filter-btn-apply rounded-pill py-2" form="sf-product-filter-form">Apply category &amp; price</button>
+          {% if filter_q or current_category_id or filter_min_price or filter_max_price %}
+          <a href="{% url 'product_list' %}" class="btn btn-outline-secondary rounded-pill py-2">Clear all</a>
+          {% endif %}
+        </div>
+      </div>
     </div>
+
     <div class="row g-4 reveal-stagger" id="product-list-rows">
       {% for product in products %}
       {% include "public/includes/product_list_item_col.html" %}
@@ -229,5 +207,23 @@
     {% endif %}
   </div>
 </section>
+<script>
+(function () {
+  var form = document.getElementById("sf-product-filter-form");
+  if (!form) return;
+  form.addEventListener("submit", function () {
+    var desktop = typeof window.matchMedia !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
+    form.querySelectorAll("[data-filter-view]").forEach(function (el) {
+      var v = el.getAttribute("data-filter-view");
+      if (!v) return;
+      if (v === "desktop") {
+        el.disabled = !desktop;
+      } else if (v === "mobile") {
+        el.disabled = desktop;
+      }
+    });
+  });
+})();
+</script>
 {% include "public/includes/public_site_footer.html" %}
 {% endblock %}

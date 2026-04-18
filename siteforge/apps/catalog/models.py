@@ -193,18 +193,38 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name} ({self.client.business_name})"
 
+    def _prefetched_size_variants(self):
+        cache = getattr(self, "_prefetched_objects_cache", None) or {}
+        return cache.get("size_variants")
+
+    def _lowest_variant(self):
+        cached = getattr(self, "_lowest_variant_cached", None)
+        if cached is not None:
+            return cached
+        prefetched = self._prefetched_size_variants()
+        if prefetched is not None:
+            candidate = min(prefetched, key=lambda v: (v.price, v.order, v.pk), default=None)
+        else:
+            candidate = self.size_variants.order_by("price", "order", "pk").first()
+        self._lowest_variant_cached = candidate
+        return candidate
+
     @property
     def has_size_variants(self):
+        prefetched = self._prefetched_size_variants()
+        if prefetched is not None:
+            return bool(prefetched)
         return self.size_variants.exists()
 
     @property
     def lowest_variant_price(self):
-        first = self.size_variants.order_by("price", "order", "pk").first()
+        first = self._lowest_variant()
         return first.price if first else None
 
     @property
     def display_price(self):
-        return self.lowest_variant_price if self.lowest_variant_price is not None else self.price
+        variant_price = self.lowest_variant_price
+        return variant_price if variant_price is not None else self.price
 
     @property
     def has_discount(self):

@@ -41,3 +41,43 @@ body.theme-aurora {
 .theme-aurora h3 {
   color: #252a52;
 }
+
+/* Home — Spotlight + Products: lavender mist + purple primary */
+.theme-aurora .sf-showcase-section {
+  --sf-sc-bg: color-mix(in srgb, var(--sf-primary) 8%, #f7f8ff);
+  --sf-sc-strip-bg: color-mix(in srgb, var(--sf-primary) 5%, #ffffff);
+  --sf-sc-heading: #252a52;
+  --sf-sc-sub: color-mix(in srgb, var(--sf-primary) 42%, #64748b);
+  --sf-sc-focus-halo: #f7f8ff;
+  --sf-sc-btn-hover-bg: var(--sf-primary);
+  --sf-sc-btn-hover-fg: #ffffff;
+}
+
+.theme-aurora .sf-home-products {
+  --sf-hp-accent: var(--sf-primary);
+  --sf-hp-bg-1: #ffffff;
+  --sf-hp-bg-2: color-mix(in srgb, var(--sf-primary) 9%, #f5f7ff);
+  --sf-hp-bg-3: color-mix(in srgb, var(--sf-primary) 14%, #e8ebfb);
+  --sf-hp-heading: #252a52;
+  --sf-hp-sub: rgba(37, 42, 82, 0.68);
+  --sf-hp-card-title: #252a52;
+  --sf-hp-card-muted: rgba(37, 42, 82, 0.62);
+}
+
+body.theme-aurora #contact.sf-contact-home {
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    color-mix(in srgb, var(--sf-primary) 6%, #f6f8ff) 38%,
+    color-mix(in srgb, var(--sf-primary) 12%, #e6e9fb) 100%
+  );
+}
+
+body.theme-aurora #contact.sf-contact-home::after {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--sf-primary) 7%, transparent) 52%,
+    color-mix(in srgb, var(--sf-primary) 11%, transparent) 100%
+  );
+}

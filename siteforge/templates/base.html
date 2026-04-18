@@ -6,6 +6,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}SiteForge{% endblock %}</title>
+  {% if font_google_families %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family={{ font_google_families }}&display=swap" rel="stylesheet">
+  {% endif %}
   {% if favicon_url %}
   <link rel="icon" href="{{ favicon_url }}" sizes="any">
   {% endif %}
@@ -21,9 +26,109 @@
   <link href="{% static 'css/hero-split.css' %}" rel="stylesheet">
   <link href="{% static 'css/navbar-public.css' %}" rel="stylesheet">
   <link href="{% static 'css/image-fallback.css' %}" rel="stylesheet">
+  <style>
+    :root {
+      --sf-font-body: {% firstof font_body_css "system-ui, sans-serif" %};
+      --sf-font-heading: {% firstof font_heading_css "system-ui, sans-serif" %};
+      --sf-showcase-sans: var(--sf-font-body);
+      --sf-showcase-serif: var(--sf-font-heading);
+    }
+    body { font-family: var(--sf-font-body); }
+    h1, h2, h3, h4, h5, h6, .section-title, .hero-title, .card-title { font-family: var(--sf-font-heading); }
+    .sf-campaign-modal .modal-dialog {
+      max-width: min(92vw, 860px);
+    }
+    .sf-campaign-modal .modal-content {
+      border-radius: 1rem;
+      overflow: hidden;
+      background: #0f172a;
+    }
+    .sf-campaign-hero {
+      position: relative;
+      min-height: min(72vh, 560px);
+      background: #111827;
+      display: flex;
+      align-items: flex-end;
+    }
+    .sf-campaign-hero img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .sf-campaign-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(2, 6, 23, 0.1) 20%, rgba(2, 6, 23, 0.85) 100%);
+      pointer-events: none;
+    }
+    .sf-campaign-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      color: #fff;
+      padding: 1.15rem 1.2rem 1.3rem;
+      text-align: left;
+    }
+    .sf-campaign-title {
+      font-size: clamp(1.2rem, 2.1vw, 1.85rem);
+      font-weight: 800;
+      margin: 0 0 0.45rem;
+      line-height: 1.25;
+    }
+    .sf-campaign-message {
+      font-size: 0.96rem;
+      line-height: 1.45;
+      color: rgba(255, 255, 255, 0.92);
+      margin: 0 0 0.9rem;
+      max-width: 60ch;
+    }
+    .sf-campaign-actions .btn {
+      border-radius: 999px;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+    }
+    .sf-campaign-close {
+      position: absolute;
+      top: 0.55rem;
+      right: 0.55rem;
+      z-index: 3;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(2, 6, 23, 0.55);
+      color: #fff;
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+    @media (max-width: 576px) {
+      .sf-campaign-hero {
+        min-height: min(78vh, 500px);
+      }
+      .sf-campaign-content {
+        padding: 0.95rem 0.9rem 1rem;
+      }
+      .sf-campaign-message {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
   {% block extra_css %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100 {% if theme_slug %}theme-{{ theme_slug }}{% endif %}" data-sf-no-image="{% static 'img/no-image.svg' %}">
+  {% if announcement_enabled %}
+  <section class="sf-announcement-bar py-2" data-bg="{{ announcement_bg_color }}" data-fg="{{ announcement_text_color }}">
+    <div class="container d-flex flex-wrap align-items-center justify-content-center gap-2 text-center">
+      <span class="small fw-semibold">{{ announcement_text }}</span>
+      {% if announcement_cta_label and announcement_cta_url %}
+      <a href="{{ announcement_cta_url }}" class="btn btn-sm btn-light rounded-pill px-3" target="_blank" rel="noopener noreferrer">{{ announcement_cta_label }}</a>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
   <script src="{% static 'js/image-fallback.js' %}"></script>
   {% block nav %}
   <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-public" id="publicNavbar">
@@ -68,6 +173,30 @@
   </nav>
   {% endblock %}
   {% block content %}{% endblock %}
+  {% if popup_enabled and popup_title %}
+  <div class="modal fade sf-campaign-modal" id="sfCampaignModal" tabindex="-1" aria-labelledby="sfCampaignModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <button type="button" class="sf-campaign-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+        <div class="sf-campaign-hero">
+          {% if popup_image_url %}
+          <img src="{{ popup_image_url }}" alt="{{ popup_title }}" onerror="this.style.display='none'">
+          {% endif %}
+          <div class="sf-campaign-content">
+            <h2 class="sf-campaign-title" id="sfCampaignModalLabel">{{ popup_title }}</h2>
+            {% if popup_message %}<p class="sf-campaign-message">{{ popup_message }}</p>{% endif %}
+            <div class="sf-campaign-actions d-flex flex-wrap gap-2">
+            {% if popup_cta_label and popup_cta_url %}
+            <a id="sfCampaignCta" href="{{ popup_cta_url }}" class="btn btn-light text-dark" target="_blank" rel="noopener noreferrer">{{ popup_cta_label }}</a>
+            {% endif %}
+            <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
   <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'js/scroll-reveal.js' %}"></script>
   <script src="{% static 'js/card-3d-tilt.js' %}"></script>
@@ -82,6 +211,70 @@
     }
     window.addEventListener('scroll', onScroll);
     onScroll();
+  })();
+  </script>
+  {% if popup_enabled and popup_title %}
+  <script>
+  (function() {
+    if (!window.bootstrap) return;
+    var modalEl = document.getElementById('sfCampaignModal');
+    if (!modalEl) return;
+    var showRule = "{{ popup_show_rule|default:'session' }}";
+    var keyBase = "sf_campaign_seen_{{ request.get_host|default:'siteforge' }}_{{ popup_seen_key|default:'default' }}";
+    var shouldShow = true;
+    if (showRule === "session") {
+      shouldShow = !sessionStorage.getItem(keyBase);
+    } else if (showRule === "day") {
+      var today = new Date().toISOString().slice(0, 10);
+      shouldShow = localStorage.getItem(keyBase) !== today;
+    }
+    if (!shouldShow) return;
+
+    function track(action) {
+      var url = "{% url 'campaign_event' %}?action=" + encodeURIComponent(action);
+      if (navigator.sendBeacon) {
+        try {
+          navigator.sendBeacon(url);
+          return;
+        } catch (e) {}
+      }
+      fetch(url, { method: "GET", keepalive: true, credentials: "same-origin" }).catch(function(){});
+    }
+
+    var modal = new bootstrap.Modal(modalEl, { backdrop: true, keyboard: true });
+    modal.show();
+    track("impression");
+    if (showRule === "session") {
+      sessionStorage.setItem(keyBase, "1");
+    } else if (showRule === "day") {
+      localStorage.setItem(keyBase, new Date().toISOString().slice(0, 10));
+    }
+
+    var closedByButton = false;
+    modalEl.addEventListener("click", function(e) {
+      if (e.target && e.target.matches("[data-bs-dismiss='modal']")) {
+        closedByButton = true;
+      }
+    });
+    modalEl.addEventListener("hidden.bs.modal", function() {
+      if (closedByButton) track("close");
+      closedByButton = false;
+    });
+    var cta = document.getElementById("sfCampaignCta");
+    if (cta) {
+      cta.addEventListener("click", function() { track("click"); });
+    }
+  })();
+  </script>
+  {% endif %}
+  <script>
+  (function() {
+    var bar = document.querySelector('.sf-announcement-bar');
+    if (!bar) return;
+    var bg = (bar.getAttribute('data-bg') || '').trim();
+    var fg = (bar.getAttribute('data-fg') || '').trim();
+    if (bg) bar.style.backgroundColor = bg;
+    if (fg) bar.style.color = fg;
   })();
   </script>
   {% block extra_js %}{% endblock %}

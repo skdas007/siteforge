@@ -51,3 +51,6 @@
 }
 </script>
 {% endif %}
+{% if seo_product_schema_json %}
+<script type="application/ld+json">{{ seo_product_schema_json|safe }}</script>
+{% endif %}

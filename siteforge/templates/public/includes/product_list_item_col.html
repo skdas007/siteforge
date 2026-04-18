@@ -2,7 +2,7 @@
 {% load static %}
 {% static 'img/no-image.svg' as no_image_url %}
 <div class="col-sm-6 col-lg-4 card-3d-wrap" data-reveal="fade-up">
-  <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-dark">
+  <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-dark" target="_blank" rel="noopener noreferrer">
     <div class="card card-3d card-3d-tilt h-100 shadow-sm position-relative">
       {% if product.has_discount and product.discount_percent %}
       <span class="position-absolute top-0 start-0 m-2 badge bg-danger z-1">{{ product.discount_percent }}% OFF</span>

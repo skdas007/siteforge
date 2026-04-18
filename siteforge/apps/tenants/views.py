@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, When
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.dateparse import parse_date
@@ -25,9 +25,9 @@ from apps.core.validators import (
     MAX_VIDEO_UPLOAD_BYTES,
 )
 
-from .forms import CategoryForm, ProductForm, SiteSettingsForm
+from .forms import CategoryForm, LegalPageForm, ProductForm, SiteSettingsForm
 from .mixins import DashboardClientMixin
-from .models import CarouselSlide
+from .models import CarouselSlide, LegalPage
 
 BUILTIN_THEMES = [
     ("default", "Default"),
@@ -37,7 +37,10 @@ BUILTIN_THEMES = [
     ("midnight", "Midnight (dark mode)"),
     ("blackred", "Black Red (bold contrast)"),
     ("emeraldgold", "Emerald Gold (premium)"),
+    ("goldforest", "Golden Forest (Gold + Forest)"),
 ]
+
+FONT_CHOICES = {"inter", "poppins", "dm-sans", "lato", "roboto", "playfair", "cormorant"}
 
 
 class DashboardHomeView(DashboardClientMixin, TemplateView):
@@ -249,8 +252,8 @@ def _theme_choices():
     from apps.themes.models import Theme
 
     _ensure_builtin_themes()
-    themes = Theme.objects.filter(is_active=True).order_by("name")
-    if not themes.exists():
+    themes = list(Theme.objects.filter(is_active=True).order_by("name"))
+    if not themes:
         return BUILTIN_THEMES
     return [(t.slug, t.name) for t in themes]
 
@@ -281,17 +284,38 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
 
     def get_initial(self):
         client = self.request.user.client
+        popup_start_at = getattr(client, "popup_start_at", None)
+        popup_end_at = getattr(client, "popup_end_at", None)
         return {
             "hero_title": client.hero_title or "",
             "hero_subtitle": client.hero_subtitle or "",
             "theme": client.theme.slug if client.theme_id else "default",
+            "font_body": (getattr(client, "font_body", "") or "inter"),
+            "font_heading": (getattr(client, "font_heading", "") or "poppins"),
             "contact_email": client.contact_email or "",
+            "footer_intro": getattr(client, "footer_intro", "") or "",
             "address_text": getattr(client, "address_text", "") or "",
             "whatsapp_number": getattr(client, "whatsapp_number", "") or "",
             "instagram_url": getattr(client, "instagram_url", "") or "",
             "facebook_url": getattr(client, "facebook_url", "") or "",
             "youtube_url": getattr(client, "youtube_url", "") or "",
             "map_embed_url": getattr(client, "map_embed_url", "") or "",
+            "announcement_enabled": bool(getattr(client, "announcement_enabled", False)),
+            "announcement_text": getattr(client, "announcement_text", "") or "",
+            "announcement_cta_label": getattr(client, "announcement_cta_label", "") or "",
+            "announcement_cta_url": getattr(client, "announcement_cta_url", "") or "",
+            "announcement_bg_color": getattr(client, "announcement_bg_color", "") or "#0d6efd",
+            "announcement_text_color": getattr(client, "announcement_text_color", "") or "#ffffff",
+            "popup_enabled": bool(getattr(client, "popup_enabled", False)),
+            "popup_title": getattr(client, "popup_title", "") or "",
+            "popup_message": getattr(client, "popup_message", "") or "",
+            "popup_cta_label": getattr(client, "popup_cta_label", "") or "",
+            "popup_cta_url": getattr(client, "popup_cta_url", "") or "",
+            "popup_show_rule": getattr(client, "popup_show_rule", "") or "session",
+            "popup_start_at": "",
+            "popup_end_at": "",
+            "popup_start_at_utc": popup_start_at.isoformat() if popup_start_at else "",
+            "popup_end_at_utc": popup_end_at.isoformat() if popup_end_at else "",
             "seo_title": getattr(client, "seo_title", "") or "",
             "seo_description": getattr(client, "seo_description", "") or "",
             "seo_keywords": getattr(client, "seo_keywords", "") or "",
@@ -317,13 +341,44 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         context["hero_title"] = post.get("hero_title") or client.hero_title or ""
         context["hero_subtitle"] = post.get("hero_subtitle") or client.hero_subtitle or ""
         context["theme_slug"] = post.get("theme") or (client.theme.slug if client.theme_id else "default")
+        context["font_body"] = post.get("font_body") or getattr(client, "font_body", "") or "inter"
+        context["font_heading"] = post.get("font_heading") or getattr(client, "font_heading", "") or "poppins"
         context["contact_email"] = post.get("contact_email") or client.contact_email or ""
+        context["footer_intro"] = post.get("footer_intro") or getattr(client, "footer_intro", "") or ""
         context["address_text"] = post.get("address_text") or getattr(client, "address_text", "") or ""
         context["whatsapp_number"] = post.get("whatsapp_number") or getattr(client, "whatsapp_number", "") or ""
         context["instagram_url"] = post.get("instagram_url") or getattr(client, "instagram_url", "") or ""
         context["facebook_url"] = post.get("facebook_url") or getattr(client, "facebook_url", "") or ""
         context["youtube_url"] = post.get("youtube_url") or getattr(client, "youtube_url", "") or ""
         context["map_embed_url"] = post.get("map_embed_url") or getattr(client, "map_embed_url", "") or ""
+        context["announcement_enabled"] = bool(post.get("announcement_enabled")) if self.request.method == "POST" else bool(getattr(client, "announcement_enabled", False))
+        context["announcement_text"] = post.get("announcement_text") if self.request.method == "POST" else (getattr(client, "announcement_text", "") or "")
+        context["announcement_cta_label"] = post.get("announcement_cta_label") if self.request.method == "POST" else (getattr(client, "announcement_cta_label", "") or "")
+        context["announcement_cta_url"] = post.get("announcement_cta_url") if self.request.method == "POST" else (getattr(client, "announcement_cta_url", "") or "")
+        context["announcement_bg_color"] = post.get("announcement_bg_color") if self.request.method == "POST" else (getattr(client, "announcement_bg_color", "") or "#0d6efd")
+        context["announcement_text_color"] = post.get("announcement_text_color") if self.request.method == "POST" else (getattr(client, "announcement_text_color", "") or "#ffffff")
+        context["popup_enabled"] = bool(post.get("popup_enabled")) if self.request.method == "POST" else bool(getattr(client, "popup_enabled", False))
+        context["popup_title"] = post.get("popup_title") if self.request.method == "POST" else (getattr(client, "popup_title", "") or "")
+        context["popup_message"] = post.get("popup_message") if self.request.method == "POST" else (getattr(client, "popup_message", "") or "")
+        context["popup_cta_label"] = post.get("popup_cta_label") if self.request.method == "POST" else (getattr(client, "popup_cta_label", "") or "")
+        context["popup_cta_url"] = post.get("popup_cta_url") if self.request.method == "POST" else (getattr(client, "popup_cta_url", "") or "")
+        context["popup_show_rule"] = post.get("popup_show_rule") if self.request.method == "POST" else (getattr(client, "popup_show_rule", "") or "session")
+        if self.request.method == "POST":
+            context["popup_start_at"] = post.get("popup_start_at", "")
+            context["popup_end_at"] = post.get("popup_end_at", "")
+            context["popup_start_at_utc"] = ""
+            context["popup_end_at_utc"] = ""
+        else:
+            popup_start = getattr(client, "popup_start_at", None)
+            popup_end = getattr(client, "popup_end_at", None)
+            context["popup_start_at"] = ""
+            context["popup_end_at"] = ""
+            context["popup_start_at_utc"] = popup_start.isoformat() if popup_start else ""
+            context["popup_end_at_utc"] = popup_end.isoformat() if popup_end else ""
+        context["popup_image_url_settings"] = client.popup_image.url if getattr(client, "popup_image", None) and client.popup_image else None
+        context["popup_impressions"] = getattr(client, "popup_impressions", 0) or 0
+        context["popup_clicks"] = getattr(client, "popup_clicks", 0) or 0
+        context["popup_closes"] = getattr(client, "popup_closes", 0) or 0
         slides = CarouselSlide.objects.filter(client=client).order_by("order")
         context["existing_slides"] = [
             {
@@ -383,13 +438,32 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         client.refresh_from_db()
         client.hero_title = form.cleaned_data.get("hero_title", "")[:300]
         client.hero_subtitle = form.cleaned_data.get("hero_subtitle", "")
+        body_font = (form.cleaned_data.get("font_body", "") or "inter").strip()
+        heading_font = (form.cleaned_data.get("font_heading", "") or "poppins").strip()
+        client.font_body = body_font if body_font in FONT_CHOICES else "inter"
+        client.font_heading = heading_font if heading_font in FONT_CHOICES else "poppins"
         client.contact_email = form.cleaned_data.get("contact_email", "") or ""
+        client.footer_intro = form.cleaned_data.get("footer_intro", "") or ""
         client.address_text = form.cleaned_data.get("address_text", "") or ""
         client.whatsapp_number = (form.cleaned_data.get("whatsapp_number", "") or "").strip()[:20]
         client.instagram_url = form.cleaned_data.get("instagram_url", "") or ""
         client.facebook_url = form.cleaned_data.get("facebook_url", "") or ""
         client.youtube_url = form.cleaned_data.get("youtube_url", "") or ""
         client.map_embed_url = (form.cleaned_data.get("map_embed_url", "") or "").strip()[:1200]
+        client.announcement_enabled = bool(form.cleaned_data.get("announcement_enabled"))
+        client.announcement_text = (form.cleaned_data.get("announcement_text", "") or "")[:240]
+        client.announcement_cta_label = (form.cleaned_data.get("announcement_cta_label", "") or "")[:40]
+        client.announcement_cta_url = form.cleaned_data.get("announcement_cta_url", "") or ""
+        client.announcement_bg_color = (form.cleaned_data.get("announcement_bg_color", "") or "#0d6efd")[:7]
+        client.announcement_text_color = (form.cleaned_data.get("announcement_text_color", "") or "#ffffff")[:7]
+        client.popup_enabled = bool(form.cleaned_data.get("popup_enabled"))
+        client.popup_title = (form.cleaned_data.get("popup_title", "") or "")[:160]
+        client.popup_message = form.cleaned_data.get("popup_message", "") or ""
+        client.popup_cta_label = (form.cleaned_data.get("popup_cta_label", "") or "")[:40]
+        client.popup_cta_url = form.cleaned_data.get("popup_cta_url", "") or ""
+        client.popup_show_rule = (form.cleaned_data.get("popup_show_rule", "") or "session")[:20]
+        client.popup_start_at = form.cleaned_data.get("popup_start_at")
+        client.popup_end_at = form.cleaned_data.get("popup_end_at")
 
         # Prefer new upload over "remove" so replace-by-file-picker deletes the old S3 object.
         # Banner
@@ -422,6 +496,12 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
         elif self.request.POST.get("remove_favicon"):
             delete_stored_file(getattr(client, "favicon", None))
             client.favicon = None
+        if form.cleaned_data.get("popup_image"):
+            delete_stored_file(getattr(client, "popup_image", None))
+            client.popup_image = form.cleaned_data["popup_image"]
+        elif self.request.POST.get("remove_popup_image"):
+            delete_stored_file(getattr(client, "popup_image", None))
+            client.popup_image = None
 
         client.seo_title = (form.cleaned_data.get("seo_title", "") or "")[:200]
         client.seo_description = form.cleaned_data.get("seo_description", "") or ""
@@ -501,17 +581,24 @@ class CarouselReorderView(DashboardClientMixin, View):
             return JsonResponse({"error": "Order must contain exactly your slide IDs"}, status=400)
         # QuerySet.update avoids model save()/full_clean() — file fields must not hit storage on reorder.
         with transaction.atomic():
-            for new_order, raw_id in enumerate(order_ids):
+            normalized_ids = []
+            for raw_id in order_ids:
                 try:
-                    pk = int(raw_id)
+                    normalized_ids.append(int(raw_id))
                 except (ValueError, TypeError):
                     continue
-                qs.filter(pk=pk).update(order=new_order)
+            if normalized_ids:
+                when_clauses = [When(pk=pk, then=new_order) for new_order, pk in enumerate(normalized_ids)]
+                qs.filter(pk__in=normalized_ids).update(order=Case(*when_clauses, output_field=IntegerField()))
         return JsonResponse({"ok": True})
 
 
 def _get_category_queryset(request):
     return Category.objects.filter(client=request.user.client).order_by("order", "name")
+
+
+def _get_legal_page_queryset(request):
+    return LegalPage.objects.filter(client=request.user.client).order_by("order", "title", "pk")
 
 
 def _get_product_queryset(request):
@@ -809,12 +896,15 @@ class ProductReorderView(DashboardClientMixin, View):
             return JsonResponse({"error": "Order must contain exactly your product IDs"}, status=400)
         # QuerySet.update avoids Product.save() → full_clean(); missing S3 objects would 500 on ImageField.size.
         with transaction.atomic():
-            for new_order, raw_id in enumerate(order_ids):
+            normalized_ids = []
+            for raw_id in order_ids:
                 try:
-                    pk = int(raw_id)
+                    normalized_ids.append(int(raw_id))
                 except (ValueError, TypeError):
                     continue
-                qs.filter(pk=pk).update(order=new_order)
+            if normalized_ids:
+                when_clauses = [When(pk=pk, then=new_order) for new_order, pk in enumerate(normalized_ids)]
+                qs.filter(pk__in=normalized_ids).update(order=Case(*when_clauses, output_field=IntegerField()))
         return JsonResponse({"ok": True})
 
 
@@ -989,5 +1079,74 @@ class ContactSubmissionBulkDeleteView(DashboardClientMixin, View):
         if params:
             return f"{base}?{urlencode(params)}"
         return base
+
+
+class LegalPageListView(DashboardClientMixin, ListView):
+    template_name = "dashboard/legal_page_list.html"
+    context_object_name = "pages"
+
+    def get_queryset(self):
+        return _get_legal_page_queryset(self.request)
+
+
+class LegalPageCreateView(DashboardClientMixin, FormView):
+    form_class = LegalPageForm
+    template_name = "dashboard/legal_page_form.html"
+    success_url = reverse_lazy("dashboard:legal_page_list")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["client"] = self.request.user.client
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["form_title"] = "Add legal page"
+        ctx["is_edit"] = False
+        return ctx
+
+    def form_valid(self, form):
+        page = form.save(commit=False)
+        page.client = self.request.user.client
+        page.order = _get_legal_page_queryset(self.request).count()
+        page.save()
+        messages.success(self.request, "Legal page added.")
+        return redirect(self.success_url)
+
+
+class LegalPageEditView(DashboardClientMixin, UpdateView):
+    model = LegalPage
+    form_class = LegalPageForm
+    template_name = "dashboard/legal_page_form.html"
+    success_url = reverse_lazy("dashboard:legal_page_list")
+
+    def get_queryset(self):
+        return _get_legal_page_queryset(self.request)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["client"] = self.request.user.client
+        kwargs["editing_pk"] = self.object.pk
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["form_title"] = "Edit legal page"
+        ctx["is_edit"] = True
+        return ctx
+
+    def form_valid(self, form):
+        messages.success(self.request, "Legal page updated.")
+        return super().form_valid(form)
+
+
+class LegalPageDeleteView(DashboardClientMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        page = get_object_or_404(_get_legal_page_queryset(request), pk=self.kwargs["pk"])
+        page.delete()
+        messages.success(request, "Legal page deleted.")
+        return redirect("dashboard:legal_page_list")
 
 

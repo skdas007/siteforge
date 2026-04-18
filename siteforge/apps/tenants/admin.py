@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CarouselSlide, Client
+from .models import CarouselSlide, Client, LegalPage
 
 
 class CarouselSlideInline(admin.TabularInline):
@@ -23,3 +23,11 @@ class ClientAdmin(admin.ModelAdmin):
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
     )
     inlines = [CarouselSlideInline]
+
+
+@admin.register(LegalPage)
+class LegalPageAdmin(admin.ModelAdmin):
+    list_display = ("title", "client", "page_type", "slug", "show_in_footer", "is_active", "order")
+    list_filter = ("page_type", "show_in_footer", "is_active")
+    search_fields = ("title", "slug", "client__business_name", "content")
+    ordering = ("client__business_name", "order", "title")

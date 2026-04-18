@@ -6,8 +6,8 @@
 {% endblock %}
 {% block title %}{{ seo_title }}{% endblock %}
 {% block content %}
-<section class="py-5 section-padding">
-  <div class="container">
+<section class="sf-product-detail py-5 section-padding">
+  <div class="container position-relative">
     <nav aria-label="breadcrumb" class="mb-4">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
@@ -262,7 +262,7 @@
           <div class="product-related-viewport" id="product-related-viewport" tabindex="0" role="region" aria-label="Related products in {{ product.category.name }}">
             {% for rp in related_products %}
             <div class="product-related-card-wrap">
-              <a href="{% url 'product_detail' rp.pk %}" class="text-decoration-none text-dark h-100 d-block">
+              <a href="{% url 'product_detail' rp.pk %}" class="sf-product-detail__related-link text-decoration-none h-100 d-block" target="_blank" rel="noopener noreferrer">
                 <div class="card card-3d card-3d-tilt h-100 shadow-sm position-relative">
                   {% if rp.has_discount and rp.discount_percent %}
                   <span class="position-absolute top-0 start-0 m-2 badge bg-danger z-1">{{ rp.discount_percent }}% OFF</span>

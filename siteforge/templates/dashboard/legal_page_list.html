@@ -1,0 +1,60 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Legal pages{% endblock %}
+{% block dashboard_content %}
+<div class="dashboard-page-head">
+  <h2 class="h4 mb-0">Legal pages</h2>
+  <a href="{% url 'dashboard:legal_page_add' %}" class="btn btn-primary rounded-pill px-4">+ Add page</a>
+</div>
+<div class="card dashboard-card">
+  <div class="card-body p-0">
+    <div class="table-responsive dashboard-table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th class="d-none d-md-table-cell">Type</th>
+            <th class="d-none d-md-table-cell text-center">Footer</th>
+            <th class="text-center">Active</th>
+            <th style="min-width: 11rem;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for page in pages %}
+          <tr>
+            <td class="align-middle">
+              <div class="fw-medium">{{ page.title }}</div>
+              <div class="small text-muted">/pages/{{ page.slug }}/</div>
+            </td>
+            <td class="align-middle d-none d-md-table-cell text-capitalize">{{ page.get_page_type_display }}</td>
+            <td class="align-middle d-none d-md-table-cell text-center">{% if page.show_in_footer %}Yes{% else %}No{% endif %}</td>
+            <td class="align-middle text-center">
+              {% if page.is_active %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Yes</span>
+              {% else %}
+              <span class="badge bg-secondary-subtle text-secondary border rounded-pill">No</span>
+              {% endif %}
+            </td>
+            <td class="align-middle">
+              <a href="{% url 'dashboard:legal_page_edit' page.pk %}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+              <form method="post" action="{% url 'dashboard:legal_page_delete' page.pk %}" class="d-inline" onsubmit="return confirm('Delete this page?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+              No legal pages yet. <a href="{% url 'dashboard:legal_page_add' %}">Add your first page</a>.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<p class="small text-muted mt-3 mb-0">
+  Use this for Terms &amp; Conditions, Privacy Policy, Refund Policy, Shipping, or any custom static page.
+</p>
+{% endblock %}

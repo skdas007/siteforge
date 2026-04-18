@@ -1,3 +1,87 @@
+/* Product detail page — section backdrop matches home Products (mesh + accent, themes extend) */
+.sf-product-detail {
+  --sf-pd-accent: var(--sf-primary, #0d6efd);
+  --sf-pd-bg-1: #f8fafc;
+  --sf-pd-bg-2: #f1f5f9;
+  --sf-pd-bg-3: #eef2ff;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-image: linear-gradient(
+    168deg,
+    color-mix(in srgb, var(--sf-pd-accent) 5%, var(--sf-pd-bg-1)) 0%,
+    color-mix(in srgb, var(--sf-pd-accent) 11%, var(--sf-pd-bg-2)) 12.5%,
+    color-mix(in srgb, var(--sf-pd-accent) 4%, var(--sf-pd-bg-1)) 25%,
+    color-mix(in srgb, var(--sf-pd-accent) 14%, var(--sf-pd-bg-3)) 37.5%,
+    color-mix(in srgb, var(--sf-pd-accent) 8%, var(--sf-pd-bg-2)) 50%,
+    color-mix(in srgb, var(--sf-pd-accent) 16%, var(--sf-pd-bg-3)) 62.5%,
+    color-mix(in srgb, var(--sf-pd-accent) 6%, var(--sf-pd-bg-1)) 75%,
+    color-mix(in srgb, var(--sf-pd-accent) 10%, var(--sf-pd-bg-2)) 87.5%,
+    color-mix(in srgb, var(--sf-pd-accent) 13%, var(--sf-pd-bg-3)) 100%
+  );
+}
+
+.sf-product-detail::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 82% 54% at 8% 10%,
+      color-mix(in srgb, var(--sf-pd-accent) 15%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 58% 48% at 96% 18%,
+      color-mix(in srgb, var(--sf-pd-accent) 10%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 72% 50% at 92% 82%,
+      color-mix(in srgb, var(--sf-pd-accent) 12%, transparent),
+      transparent 54%
+    ),
+    radial-gradient(
+      ellipse 48% 40% at 48% 98%,
+      color-mix(in srgb, var(--sf-pd-accent) 9%, transparent),
+      transparent 46%
+    ),
+    radial-gradient(
+      ellipse 36% 32% at 52% 42%,
+      color-mix(in srgb, var(--sf-pd-accent) 5%, transparent),
+      transparent 62%
+    );
+}
+
+.sf-product-detail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    118deg,
+    transparent 0%,
+    color-mix(in srgb, var(--sf-pd-accent) 18%, transparent) 38%,
+    color-mix(in srgb, var(--sf-pd-accent) 6%, transparent) 52%,
+    transparent 72%,
+    color-mix(in srgb, var(--sf-pd-accent) 12%, transparent) 100%
+  );
+}
+
+.sf-product-detail > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.sf-product-detail__related-link {
+  color: inherit;
+}
+
 /* Product detail: main carousel + ecommerce-style thumbnail strip */
 
 .product-media-column {

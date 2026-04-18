@@ -21,8 +21,10 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 
 from apps.core.views import (
+    CampaignEventView,
     ContactSubmitView,
     IndexView,
+    LegalPageDetailView,
     ProductDetailView,
     ProductListView,
     ProductSearchSuggestView,
@@ -34,8 +36,10 @@ urlpatterns = [
     path("sitemap.xml", tenant_public_sitemap, name="sitemap"),
     path("contact/", ContactSubmitView.as_view(), name="contact_submit"),
     path("api/product-suggest/", ProductSearchSuggestView.as_view(), name="product_search_suggest"),
+    path("api/campaign-event/", CampaignEventView.as_view(), name="campaign_event"),
     path("products/", ProductListView.as_view(), name="product_list"),
     path("products/<int:pk>/", ProductDetailView.as_view(), name="product_detail"),
+    path("pages/<slug:slug>/", LegalPageDetailView.as_view(), name="legal_page"),
     path(
         "accounts/login/",
         auth_views.LoginView.as_view(

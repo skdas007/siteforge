@@ -5,6 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Dashboard{% endblock %} — SiteForge</title>
+  {% if client and client.font_google_families_query %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family={{ client.font_google_families_query }}&display=swap" rel="stylesheet">
+  {% endif %}
   {% if favicon_url %}
   <link rel="icon" href="{{ favicon_url }}" sizes="any">
   {% endif %}
@@ -12,6 +17,14 @@
   <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
   <link href="{% static 'css/image-fallback.css' %}" rel="stylesheet">
   <style>
+    :root {
+      --sf-font-body: {% if client %}{{ client.font_body_css }}{% else %}system-ui, sans-serif{% endif %};
+      --sf-font-heading: {% if client %}{{ client.font_heading_css }}{% else %}system-ui, sans-serif{% endif %};
+    }
+    body.dashboard-body { font-family: var(--sf-font-body); }
+    .dashboard-main h1, .dashboard-main h2, .dashboard-main h3, .dashboard-main h4, .dashboard-main h5, .dashboard-main h6 {
+      font-family: var(--sf-font-heading);
+    }
     .navbar .nav-link.active { background: rgba(255,255,255,0.2); border-radius: 0.25rem; }
     /* Suggested pixel sizes next to file inputs (matches public-site CSS where relevant) */
     .upload-rec-size {
@@ -36,6 +49,20 @@
   {% block extra_css %}{% endblock %}
 </head>
 <body class="dashboard-body" data-sf-no-image="{% static 'img/no-image.svg' %}">
+  <div id="sf-dashboard-loader" class="sf-dashboard-loader" aria-hidden="true" aria-live="polite">
+    <div class="sf-dashboard-loader__topstrip" aria-hidden="true"></div>
+    <div class="sf-dashboard-loader__backdrop"></div>
+    <div class="sf-dashboard-loader__panel">
+      <div class="sf-dashboard-loader__viz" aria-hidden="true">
+        <span class="sf-dashboard-loader__orbit sf-dashboard-loader__orbit--a"></span>
+        <span class="sf-dashboard-loader__orbit sf-dashboard-loader__orbit--b"></span>
+        <span class="sf-dashboard-loader__orbit sf-dashboard-loader__orbit--c"></span>
+        <span class="sf-dashboard-loader__pulse"></span>
+      </div>
+      <p class="sf-dashboard-loader__label">Loading workspace…</p>
+      <p class="sf-dashboard-loader__hint">Please wait</p>
+    </div>
+  </div>
   <script src="{% static 'js/image-fallback.js' %}"></script>
   <nav class="navbar navbar-expand-lg navbar-dark dashboard-navbar">
     <div class="container">
@@ -59,6 +86,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'contact_list' or request.resolver_match.url_name == 'contact_delete' %}active{% endif %}" href="{% url 'dashboard:contact_list' %}">Contact messages</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'legal_page_list' or request.resolver_match.url_name == 'legal_page_add' or request.resolver_match.url_name == 'legal_page_edit' %}active{% endif %}" href="{% url 'dashboard:legal_page_list' %}">Legal pages</a>
           </li>
         </ul>
         <ul class="navbar-nav">
@@ -103,6 +133,7 @@
   </main>
 
   <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/dashboard-loader.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -6,6 +6,7 @@ def seed_more_themes(apps, schema_editor):
     rows = [
         ("Black Red (bold contrast)", "blackred"),
         ("Emerald Gold (premium)", "emeraldgold"),
+        ("Golden Forest (Gold + Forest)", "goldforest"),
     ]
     for name, slug in rows:
         Theme.objects.update_or_create(

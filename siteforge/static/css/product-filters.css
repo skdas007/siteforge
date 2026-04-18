@@ -1,0 +1,287 @@
+/* Product list — modern filter UI (mobile + desktop) */
+
+.sf-filter-responsive {
+  display: grid;
+  gap: 1rem 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .sf-filter-responsive {
+    grid-template-columns: minmax(12rem, 1.5fr) minmax(9.5rem, 1fr) auto;
+    align-items: end;
+  }
+  .sf-area-chips {
+    grid-column: 1 / -1;
+  }
+}
+
+.sf-product-filters {
+  --sf-filter-border: rgba(15, 23, 42, 0.08);
+  --sf-filter-bg: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--sf-filter-border);
+  border-radius: 1.25rem;
+  padding: 1rem 1.25rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 40px rgba(15, 23, 42, 0.06);
+}
+
+@media (max-width: 767.98px) {
+  .sf-product-filters {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .sf-filter-responsive {
+    gap: 0;
+  }
+
+  .sf-area-search .sf-filter-label {
+    margin-bottom: 0.45rem;
+  }
+
+  .sf-filter-mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-top: 0.85rem;
+    padding-top: 0.05rem;
+  }
+
+
+  .sf-filter-mobile-search-btn {
+    border-radius: 999px !important;
+    font-weight: 600;
+    padding: 0.65rem 1rem !important;
+    min-height: 2.75rem;
+  }
+}
+
+.sf-filter-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color, #64748b);
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.sf-filter-search-wrap .input-group {
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--sf-filter-border);
+  background: var(--sf-filter-bg);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sf-filter-search-wrap .input-group:focus-within {
+  border-color: var(--bs-primary, #0d6efd);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+}
+
+.sf-filter-search-wrap .input-group-text {
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color, #64748b);
+  padding-left: 1rem;
+}
+
+.sf-filter-search-wrap .form-control {
+  border: 0;
+  padding: 0.65rem 1rem 0.65rem 0;
+  font-size: 0.9375rem;
+  background: transparent;
+}
+
+.sf-filter-search-wrap .form-control:focus {
+  box-shadow: none;
+}
+
+.sf-filter-open-btn {
+  border-radius: 999px !important;
+  padding: 0.55rem 1rem !important;
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  border: 1px solid var(--sf-filter-border) !important;
+  background: var(--sf-filter-bg) !important;
+  color: var(--bs-body-color, #1e293b) !important;
+}
+
+.sf-filter-open-btn .sf-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  margin-left: auto;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--bs-primary, #0d6efd);
+  color: #fff;
+}
+
+.sf-filter-open-btn--wide {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.6rem 1rem !important;
+  border-color: rgba(13, 110, 253, 0.35) !important;
+  color: var(--bs-primary, #0d6efd) !important;
+}
+
+.sf-filter-open-btn--wide:hover {
+  background: rgba(13, 110, 253, 0.08) !important;
+  border-color: var(--bs-primary, #0d6efd) !important;
+}
+
+.sf-filter-open-btn__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.sf-filter-open-btn__text {
+  flex: 1;
+  text-align: left;
+  font-weight: 600;
+}
+
+.sf-filter-price-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sf-filter-price-range .form-control {
+  border-radius: 0.65rem;
+  border: 1px solid var(--sf-filter-border);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sf-filter-price-sep {
+  color: var(--bs-secondary-color, #94a3b8);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.sf-filter-btn-apply {
+  border-radius: 999px;
+  padding: 0.55rem 1.35rem;
+  font-weight: 600;
+}
+
+.sf-filter-btn-clear {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color, #64748b);
+  text-decoration: none;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.5rem;
+}
+
+.sf-filter-btn-clear:hover {
+  color: var(--bs-primary, #0d6efd);
+  background: rgba(13, 110, 253, 0.06);
+}
+
+/* Category chips */
+.sf-filter-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.45rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.15rem 0 0.35rem;
+  margin: 0 -0.15rem;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sf-filter-chips::-webkit-scrollbar {
+  height: 4px;
+}
+
+.sf-filter-chips::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+  border-radius: 4px;
+}
+
+.sf-filter-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--bs-body-color, #334155);
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid var(--sf-filter-border);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sf-filter-chip:hover {
+  border-color: rgba(13, 110, 253, 0.35);
+  color: var(--bs-primary, #0d6efd);
+}
+
+.sf-filter-chip.active {
+  background: var(--bs-primary, #0d6efd);
+  border-color: var(--bs-primary, #0d6efd);
+  color: #fff;
+}
+
+.sf-filter-chip-row-label {
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .sf-filter-chip-row-label {
+    margin-top: 0;
+    grid-column: 1 / -1;
+  }
+}
+
+/* Offcanvas (mobile filters) */
+.sf-filter-offcanvas.offcanvas-bottom {
+  height: auto;
+  max-height: min(85vh, 560px);
+  border-radius: 1.25rem 1.25rem 0 0;
+}
+
+.sf-filter-offcanvas .offcanvas-header {
+  border-bottom: 1px solid var(--sf-filter-border);
+  padding: 1rem 1.25rem;
+}
+
+.sf-filter-offcanvas .offcanvas-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.sf-filter-drawer-lead {
+  line-height: 1.45;
+}
+
+.sf-filter-offcanvas .offcanvas-body {
+  padding: 1rem 1.25rem 1.5rem;
+}
+
+.sf-filter-offcanvas .form-select {
+  border-radius: 0.65rem;
+}
+
+.sf-filter-offcanvas .sf-filter-price-range .form-control {
+  background: #fff;
+}

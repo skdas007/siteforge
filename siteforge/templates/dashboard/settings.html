@@ -6,6 +6,51 @@
 <style>
   .carousel-slide-row.carousel-dragging { opacity: 0.6; }
   .carousel-slide-row.carousel-drag-over { border: 2px dashed var(--bs-primary); }
+  .sf-settings-accordion {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.6rem;
+    background: #fff;
+    margin: 1rem 0 1.25rem;
+    overflow: hidden;
+  }
+  .sf-settings-accordion + .sf-settings-accordion {
+    margin-top: 0.85rem;
+  }
+  .sf-settings-accordion-btn {
+    width: 100%;
+    border: 0;
+    background: #f8fafc;
+    color: #0f172a;
+    text-align: left;
+    padding: 0.85rem 1rem;
+    font-weight: 700;
+    font-size: 0.84rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .sf-settings-accordion-btn:hover { background: #f1f5f9; }
+  .sf-settings-accordion-btn .sf-acc-icon {
+    font-size: 0.92rem;
+    transition: transform 0.2s ease;
+  }
+  .sf-settings-accordion-btn[aria-expanded="true"] .sf-acc-icon { transform: rotate(180deg); }
+  .sf-settings-accordion-panel {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 1rem;
+    border-top: 1px solid #e2e8f0;
+    opacity: 0;
+    transition: max-height 0.32s ease, opacity 0.2s ease, padding 0.2s ease;
+  }
+  .sf-settings-accordion.open .sf-settings-accordion-panel {
+    opacity: 1;
+    padding: 1rem;
+  }
+  .sf-settings-accordion-panel > .dashboard-form-section-title:first-child { display: none; }
 </style>
 {% endblock %}
 {% block dashboard_content %}
@@ -191,11 +236,37 @@
           {% endfor %}
         </div>
       </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label for="id_font_heading" class="form-label">Heading font</label>
+          <select name="font_heading" id="id_font_heading" class="form-select">
+            {% for value, label in form.fields.font_heading.choices %}
+            <option value="{{ value }}" data-font-key="{{ value }}" {% if font_heading == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <p class="small text-muted mt-2 mb-0">Preview:</p>
+          <div id="font-heading-preview" class="border rounded px-3 py-2 bg-light">The quick brown fox jumps over the lazy dog</div>
+        </div>
+        <div class="col-md-6">
+          <label for="id_font_body" class="form-label">Body font</label>
+          <select name="font_body" id="id_font_body" class="form-select">
+            {% for value, label in form.fields.font_body.choices %}
+            <option value="{{ value }}" data-font-key="{{ value }}" {% if font_body == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <p class="small text-muted mt-2 mb-0">Preview:</p>
+          <div id="font-body-preview" class="border rounded px-3 py-2 bg-light small">The quick brown fox jumps over the lazy dog. 1234567890</div>
+        </div>
+      </div>
 
       <p class="dashboard-form-section-title">Contact &amp; WhatsApp</p>
       <div class="mb-3">
         <label for="id_contact_email" class="form-label">Email for contact form notifications</label>
         <input type="email" name="contact_email" id="id_contact_email" class="form-control" value="{{ contact_email|default:'' }}" placeholder="you@example.com">
+      </div>
+      <div class="mb-3">
+        <label for="id_footer_intro" class="form-label">Footer intro text</label>
+        <textarea name="footer_intro" id="id_footer_intro" class="form-control" rows="2" maxlength="600" placeholder="Short text shown below business name in footer">{{ footer_intro|default:'' }}</textarea>
       </div>
       <div class="mb-3">
         <label for="id_address_text" class="form-label">Address</label>
@@ -226,6 +297,89 @@
         <p class="form-text small text-muted mb-0">Shown in the Contact section map block on homepage. Paste only trusted embed URLs (Google Maps/OpenStreetMap).</p>
       </div>
 
+      <p class="dashboard-form-section-title">Announcement bar &amp; popup campaign</p>
+      <div class="mb-3 form-check">
+        <input class="form-check-input" type="checkbox" name="announcement_enabled" id="id_announcement_enabled" value="1" {% if announcement_enabled %}checked{% endif %}>
+        <label class="form-check-label" for="id_announcement_enabled">Enable top announcement bar</label>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-8">
+          <label for="id_announcement_text" class="form-label">Announcement text</label>
+          <input type="text" name="announcement_text" id="id_announcement_text" class="form-control" maxlength="240" value="{{ announcement_text|default:'' }}" placeholder="Festival sale is live! Flat 20% off this week.">
+        </div>
+        <div class="col-md-4">
+          <label for="id_announcement_cta_label" class="form-label">Button label</label>
+          <input type="text" name="announcement_cta_label" id="id_announcement_cta_label" class="form-control" maxlength="40" value="{{ announcement_cta_label|default:'' }}" placeholder="Shop now">
+        </div>
+        <div class="col-md-8">
+          <label for="id_announcement_cta_url" class="form-label">Button URL</label>
+          <input type="url" name="announcement_cta_url" id="id_announcement_cta_url" class="form-control" value="{{ announcement_cta_url|default:'' }}" placeholder="https://example.com/products">
+        </div>
+        <div class="col-md-2">
+          <label for="id_announcement_bg_color" class="form-label">Background</label>
+          <input type="text" name="announcement_bg_color" id="id_announcement_bg_color" class="form-control" maxlength="7" value="{{ announcement_bg_color|default:'#0d6efd' }}" placeholder="#0d6efd">
+        </div>
+        <div class="col-md-2">
+          <label for="id_announcement_text_color" class="form-label">Text color</label>
+          <input type="text" name="announcement_text_color" id="id_announcement_text_color" class="form-control" maxlength="7" value="{{ announcement_text_color|default:'#ffffff' }}" placeholder="#ffffff">
+        </div>
+      </div>
+      <div class="mb-3 form-check">
+        <input class="form-check-input" type="checkbox" name="popup_enabled" id="id_popup_enabled" value="1" {% if popup_enabled %}checked{% endif %}>
+        <label class="form-check-label" for="id_popup_enabled">Enable popup campaign</label>
+      </div>
+      <div class="row g-3 mb-1">
+        <div class="col-md-6">
+          <label for="id_popup_title" class="form-label">Popup title</label>
+          <input type="text" name="popup_title" id="id_popup_title" class="form-control" maxlength="160" value="{{ popup_title|default:'' }}" placeholder="Big festive offer">
+        </div>
+        <div class="col-md-6">
+          <label for="id_popup_show_rule" class="form-label">Show rule</label>
+          <select name="popup_show_rule" id="id_popup_show_rule" class="form-select">
+            <option value="always" {% if popup_show_rule == 'always' %}selected{% endif %}>Show every page load</option>
+            <option value="session" {% if popup_show_rule == 'session' or not popup_show_rule %}selected{% endif %}>Once per browser session</option>
+            <option value="day" {% if popup_show_rule == 'day' %}selected{% endif %}>Once per day</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label for="id_popup_message" class="form-label">Popup message</label>
+          <textarea name="popup_message" id="id_popup_message" class="form-control" rows="3" maxlength="2000" placeholder="Offer details, coupon code, or short campaign message">{{ popup_message|default:'' }}</textarea>
+        </div>
+        <div class="col-md-4">
+          <label for="id_popup_cta_label" class="form-label">Popup button label</label>
+          <input type="text" name="popup_cta_label" id="id_popup_cta_label" class="form-control" maxlength="40" value="{{ popup_cta_label|default:'' }}" placeholder="Grab deal">
+        </div>
+        <div class="col-md-8">
+          <label for="id_popup_cta_url" class="form-label">Popup button URL</label>
+          <input type="url" name="popup_cta_url" id="id_popup_cta_url" class="form-control" value="{{ popup_cta_url|default:'' }}" placeholder="https://example.com/products">
+        </div>
+        <div class="col-md-6">
+          <label for="id_popup_start_at" class="form-label">Popup start</label>
+          <input type="datetime-local" name="popup_start_at" id="id_popup_start_at" class="form-control" value="{{ popup_start_at|default:'' }}" data-utc="{{ popup_start_at_utc|default:'' }}">
+        </div>
+        <div class="col-md-6">
+          <label for="id_popup_end_at" class="form-label">Popup end</label>
+          <input type="datetime-local" name="popup_end_at" id="id_popup_end_at" class="form-control" value="{{ popup_end_at|default:'' }}" data-utc="{{ popup_end_at_utc|default:'' }}">
+        </div>
+      </div>
+      <input type="hidden" name="popup_timezone_offset" id="id_popup_timezone_offset" value="">
+      <div class="mb-3">
+        <label for="id_popup_image" class="form-label">Popup image</label>
+        {% if popup_image_url_settings %}
+        <p class="small text-success mb-1">Current: <img src="{{ popup_image_url_settings }}" alt="" class="img-thumbnail" style="max-height: 60px;" onerror="this.onerror=null;this.src='{{ no_image_url }}';"> Saved.</p>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="remove_popup_image" id="id_remove_popup_image" value="1">
+          <label class="form-check-label" for="id_remove_popup_image">Remove current popup image</label>
+        </div>
+        {% endif %}
+        <input type="file" name="popup_image" id="id_popup_image" class="form-control" accept="image/*">
+        <p class="upload-rec-size mb-0">Recommended: <span class="upload-rec-size-dim">1200×800 px</span> or similar wide image. <strong>Max 3 MB.</strong></p>
+      </div>
+      <div class="dashboard-callout mb-3">
+        <p class="mb-1 small"><strong>Campaign analytics</strong></p>
+        <p class="small text-muted mb-0">Impressions: <strong>{{ popup_impressions|default:0 }}</strong> · CTA clicks: <strong>{{ popup_clicks|default:0 }}</strong> · Closes: <strong>{{ popup_closes|default:0 }}</strong></p>
+      </div>
+
       <p class="dashboard-form-section-title">SEO &amp; social previews</p>
       <p class="form-text text-muted small">Used for Google and when someone shares your site (WhatsApp, Facebook, LinkedIn). You can also set SEO per product on the product form.</p>
       <div class="mb-3">
@@ -245,7 +399,7 @@
       <div class="row g-3">
         <div class="col-md-6">
           <label for="id_seo_author" class="form-label">Author / brand</label>
-          <input type="text" name="seo_author" id="id_seo_author" class="form-control" maxlength="200" value="{{ seo_author|default:'' }}" placeholder="e.g. Bobdy International">
+          <input type="text" name="seo_author" id="id_seo_author" class="form-control" maxlength="200" value="{{ seo_author|default:'' }}" placeholder="e.g. Amber Saree Studio">
         </div>
         <div class="col-md-6">
           <label for="id_seo_robots" class="form-label">Robots</label>
@@ -280,7 +434,7 @@
         </div>
         <div class="col-md-6">
           <label for="id_seo_founder" class="form-label">Founder (Organization schema)</label>
-          <input type="text" name="seo_founder" id="id_seo_founder" class="form-control" maxlength="120" value="{{ seo_founder|default:'' }}" placeholder="Milan Sahoo">
+          <input type="text" name="seo_founder" id="id_seo_founder" class="form-control" maxlength="120" value="{{ seo_founder|default:'' }}" placeholder="SK Das">
         </div>
         <div class="col-md-6">
           <label for="id_seo_address_locality" class="form-label">Address locality</label>
@@ -323,6 +477,127 @@
 {% block extra_js %}
 <script>
 (function() {
+  var settingsForm = document.querySelector('form.dashboard-form--wide');
+  if (settingsForm) {
+    var titleNodes = Array.from(settingsForm.querySelectorAll(':scope > .dashboard-form-section-title'));
+    if (titleNodes.length > 1) {
+      titleNodes.forEach(function(titleEl, idx) {
+        var section = document.createElement('section');
+        section.className = 'sf-settings-accordion' + (idx === 0 ? ' open' : '');
+        var panelId = 'sf-settings-panel-' + (idx + 1);
+        var headingText = (titleEl.textContent || '').trim();
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'sf-settings-accordion-btn';
+        button.setAttribute('aria-expanded', idx === 0 ? 'true' : 'false');
+        button.setAttribute('aria-controls', panelId);
+        button.innerHTML = '<span>' + headingText + '</span><span class="sf-acc-icon" aria-hidden="true">▼</span>';
+
+        var panel = document.createElement('div');
+        panel.className = 'sf-settings-accordion-panel';
+        panel.id = panelId;
+
+        settingsForm.insertBefore(section, titleEl);
+        panel.appendChild(titleEl);
+
+        var next = section.nextSibling;
+        while (next) {
+          var current = next;
+          next = next.nextSibling;
+          if (!current || !current.classList) {
+            panel.appendChild(current);
+            continue;
+          }
+          if (current.classList.contains('dashboard-form-section-title') || current.classList.contains('dashboard-form-actions')) {
+            break;
+          }
+          panel.appendChild(current);
+        }
+
+        section.appendChild(button);
+        section.appendChild(panel);
+        if (idx === 0) {
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+        }
+        button.addEventListener('click', function() {
+          var isOpen = section.classList.contains('open');
+          if (isOpen) {
+            panel.style.maxHeight = panel.scrollHeight + 'px';
+            window.requestAnimationFrame(function() {
+              section.classList.remove('open');
+              button.setAttribute('aria-expanded', 'false');
+              panel.style.maxHeight = '0px';
+            });
+          } else {
+            section.classList.add('open');
+            button.setAttribute('aria-expanded', 'true');
+            panel.style.maxHeight = panel.scrollHeight + 'px';
+          }
+        });
+      });
+
+      window.addEventListener('resize', function() {
+        document.querySelectorAll('.sf-settings-accordion.open .sf-settings-accordion-panel').forEach(function(panel) {
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+        });
+      });
+    }
+  }
+
+  var tzOffsetInput = document.getElementById('id_popup_timezone_offset');
+  if (tzOffsetInput) {
+    tzOffsetInput.value = String(new Date().getTimezoneOffset());
+  }
+  var fontMap = {
+    "inter": '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+    "poppins": '"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+    "dm-sans": '"DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+    "lato": '"Lato", "Helvetica Neue", Arial, sans-serif',
+    "roboto": '"Roboto", "Helvetica Neue", Arial, sans-serif',
+    "playfair": '"Playfair Display", Georgia, "Times New Roman", serif',
+    "cormorant": '"Cormorant Garamond", Georgia, "Times New Roman", serif'
+  };
+  function enhanceFontSelect(selectId, previewId) {
+    var select = document.getElementById(selectId);
+    var preview = document.getElementById(previewId);
+    if (!select || !preview) return;
+    Array.from(select.options).forEach(function(opt) {
+      var key = opt.getAttribute('data-font-key') || opt.value;
+      var css = fontMap[key];
+      if (css) opt.style.fontFamily = css;
+    });
+    function syncPreview() {
+      var selected = select.options[select.selectedIndex];
+      var key = selected ? (selected.getAttribute('data-font-key') || selected.value) : "";
+      var css = fontMap[key] || fontMap["inter"];
+      preview.style.fontFamily = css;
+      select.style.fontFamily = css;
+    }
+    select.addEventListener('change', syncPreview);
+    syncPreview();
+  }
+  enhanceFontSelect('id_font_heading', 'font-heading-preview');
+  enhanceFontSelect('id_font_body', 'font-body-preview');
+
+  function setLocalFromUtc(fieldId) {
+    var input = document.getElementById(fieldId);
+    if (!input || input.value) return;
+    var utcRaw = input.getAttribute('data-utc');
+    if (!utcRaw) return;
+    var d = new Date(utcRaw);
+    if (isNaN(d.getTime())) return;
+    function pad(n) { return String(n).padStart(2, '0'); }
+    var localVal =
+      d.getFullYear() + '-' +
+      pad(d.getMonth() + 1) + '-' +
+      pad(d.getDate()) + 'T' +
+      pad(d.getHours()) + ':' +
+      pad(d.getMinutes());
+    input.value = localVal;
+  }
+  setLocalFromUtc('id_popup_start_at');
+  setLocalFromUtc('id_popup_end_at');
+
   var CAROUSEL_MAX_SLIDES = 100;
   var container = document.getElementById('carousel-slides-container');
   var tpl = document.getElementById('carousel-row-tpl');

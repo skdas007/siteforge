@@ -1,0 +1,209 @@
+/* Theme: goldforest — golden yellow + forest green */
+:root {
+  --sf-primary: #fec700;
+  --sf-hero-bg: linear-gradient(135deg, #02462e 0%, #013a25 100%);
+}
+
+body.theme-goldforest {
+  background: #f7f4e8;
+  color: #0f172a;
+
+  /* Bootstrap utility classes rely on these CSS variables */
+  --bs-primary: #fec700;
+  --bs-primary-rgb: 254, 199, 0;
+  --bs-body-color: #0f172a;
+  /* Used by `.text-secondary` across light sections */
+  --bs-secondary-color: rgba(2, 70, 46, 0.72);
+}
+
+body.theme-goldforest .navbar-public {
+  background: #02462e;
+  border-bottom: 1px solid rgba(254, 199, 0, 0.35);
+}
+
+body.theme-goldforest .navbar-public .nav-link,
+body.theme-goldforest .navbar-public .navbar-brand-text {
+  color: #ecfdf5 !important;
+}
+
+body.theme-goldforest .navbar-public .nav-link:hover,
+body.theme-goldforest .navbar-public .nav-link.active {
+  color: #fec700 !important;
+}
+
+body.theme-goldforest .sf-hero {
+  background: var(--sf-hero-bg);
+}
+
+body.theme-goldforest .btn-primary {
+  background: #fec700;
+  border-color: #fec700;
+  color: #0b1b12;
+  font-weight: 700;
+}
+
+body.theme-goldforest .btn-primary:hover,
+body.theme-goldforest .btn-primary:focus {
+  background: #f2b400;
+  border-color: #f2b400;
+}
+
+body.theme-goldforest a {
+  color: #02462e;
+  text-decoration: none;
+}
+
+body.theme-goldforest a:hover {
+  color: #013a25;
+  text-decoration: underline;
+}
+
+body.theme-goldforest .text-muted {
+  color: rgba(2, 70, 46, 0.72) !important;
+}
+
+body.theme-goldforest .section-subtitle,
+body.theme-goldforest .product-filter p,
+body.theme-goldforest .form-text {
+  color: rgba(2, 70, 46, 0.74) !important;
+}
+
+/* Dark hero sections (Welcome + Contact): ensure text stays visible */
+body.theme-goldforest .sf-hero {
+  --bs-secondary-color: rgba(236, 253, 245, 0.82);
+  color: #ecfdf5;
+}
+
+body.theme-goldforest .sf-hero h1,
+body.theme-goldforest .sf-hero h2,
+body.theme-goldforest .sf-hero h3 {
+  color: #ecfdf5 !important;
+}
+
+body.theme-goldforest .sf-hero .section-title {
+  color: #ecfdf5 !important;
+}
+
+body.theme-goldforest .sf-hero .text-muted,
+body.theme-goldforest .sf-hero .section-subtitle,
+body.theme-goldforest .sf-hero .lead,
+body.theme-goldforest .sf-hero .text-secondary {
+  color: rgba(236, 253, 245, 0.82) !important;
+}
+
+body.theme-goldforest .sf-hero .btn-outline-primary {
+  border-color: #fec700;
+  color: #fec700;
+}
+
+body.theme-goldforest .sf-hero .btn-outline-primary:hover,
+body.theme-goldforest .sf-hero .btn-outline-primary:focus {
+  background: #fec700;
+  color: #062014;
+  border-color: #fec700;
+}
+
+body.theme-goldforest .card,
+body.theme-goldforest .product-card,
+body.theme-goldforest .spotlight-card {
+  border: 1px solid rgba(2, 70, 46, 0.12);
+  border-radius: 14px;
+}
+
+body.theme-goldforest .section-title,
+body.theme-goldforest h1,
+body.theme-goldforest h2,
+body.theme-goldforest h3 {
+  color: #02462e;
+}
+
+body.theme-goldforest .badge,
+body.theme-goldforest .spotlight-pill {
+  background: #fec700 !important;
+  color: #0b1b12 !important;
+}
+
+body.theme-goldforest .btn-outline-secondary {
+  border-color: rgba(2, 70, 46, 0.35);
+  color: #02462e;
+}
+
+body.theme-goldforest .btn-outline-secondary:hover,
+body.theme-goldforest .btn-outline-secondary:focus {
+  background: #02462e;
+  border-color: #02462e;
+  color: #fff;
+}
+
+body.theme-goldforest .footer-bottom a {
+  color: #ecfdf5;
+  text-decoration: none;
+}
+
+body.theme-goldforest footer {
+  color: #ecfdf5;
+}
+
+body.theme-goldforest footer a {
+  color: #ecfdf5 !important;
+  text-decoration: none;
+}
+
+body.theme-goldforest footer a:hover {
+  text-decoration: underline;
+}
+
+body.theme-goldforest footer .opacity-75 {
+  color: rgba(236, 253, 245, 0.75) !important;
+}
+
+/* Home — Spotlight + Products: cream field + forest + gold accents */
+body.theme-goldforest .sf-showcase-section {
+  --sf-sc-accent: #fec700;
+  --sf-sc-bg: #f7f4e8;
+  --sf-sc-strip-bg: #f2efe4;
+  --sf-sc-heading: #02462e;
+  --sf-sc-sub: rgba(2, 70, 46, 0.74);
+  --sf-sc-tag-price-bg: #02462e;
+  --sf-sc-tag-code-bg: #013a25;
+  --sf-sc-tag-new-bg: rgba(255, 255, 255, 0.96);
+  --sf-sc-tag-new-fg: #02462e;
+  --sf-sc-bag-bg: #ffffff;
+  --sf-sc-bag-fg: #02462e;
+  --sf-sc-btn-bg: #ffffff;
+  --sf-sc-btn-fg: #02462e;
+  --sf-sc-btn-hover-bg: #fec700;
+  --sf-sc-btn-hover-fg: #0b1b12;
+}
+
+body.theme-goldforest .sf-home-products {
+  --sf-hp-accent: #fec700;
+  --sf-hp-bg-1: #fffefb;
+  --sf-hp-bg-2: color-mix(in srgb, #fec700 9%, #f5f1e5);
+  --sf-hp-bg-3: color-mix(in srgb, #02462e 11%, #e8e2d4);
+  --sf-hp-heading: #02462e;
+  --sf-hp-sub: rgba(2, 70, 46, 0.74);
+  --sf-hp-placeholder: rgba(2, 70, 46, 0.08);
+  --sf-hp-card-title: #02462e;
+  --sf-hp-card-muted: rgba(2, 70, 46, 0.72);
+  --sf-hp-card-border: rgba(2, 70, 46, 0.12);
+}
+
+body.theme-goldforest #contact.sf-contact-home {
+  background-image: linear-gradient(
+    180deg,
+    #fffefb 0%,
+    color-mix(in srgb, #fec700 8%, #f5f1e5) 38%,
+    color-mix(in srgb, #02462e 13%, #e6dfd0) 100%
+  );
+}
+
+body.theme-goldforest #contact.sf-contact-home::after {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, #fec700 8%, transparent) 52%,
+    color-mix(in srgb, #02462e 9%, transparent) 100%
+  );
+}
+

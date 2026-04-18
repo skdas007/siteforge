@@ -47,3 +47,43 @@ body.theme-emeraldgold {
   background: #b4872d !important;
   color: #fff8e6 !important;
 }
+
+/* Home — Spotlight + Products: mint paper + emerald primary */
+.theme-emeraldgold .sf-showcase-section {
+  --sf-sc-bg: color-mix(in srgb, var(--sf-primary) 8%, #f7fbf8);
+  --sf-sc-strip-bg: color-mix(in srgb, var(--sf-primary) 5%, #ffffff);
+  --sf-sc-heading: #173329;
+  --sf-sc-tag-price-bg: color-mix(in srgb, var(--sf-primary) 55%, #14532d);
+  --sf-sc-tag-code-bg: color-mix(in srgb, var(--sf-primary) 48%, #166534);
+  --sf-sc-btn-hover-bg: var(--sf-primary);
+  --sf-sc-btn-hover-fg: #ffffff;
+}
+
+.theme-emeraldgold .sf-home-products {
+  --sf-hp-accent: var(--sf-primary);
+  --sf-hp-bg-1: #ffffff;
+  --sf-hp-bg-2: color-mix(in srgb, var(--sf-primary) 8%, #f5fcf8);
+  --sf-hp-bg-3: color-mix(in srgb, var(--sf-primary) 13%, #e8f3ec);
+  --sf-hp-heading: #173329;
+  --sf-hp-sub: rgba(23, 51, 41, 0.72);
+  --sf-hp-card-title: #173329;
+  --sf-hp-card-muted: rgba(23, 51, 41, 0.65);
+}
+
+body.theme-emeraldgold #contact.sf-contact-home {
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    color-mix(in srgb, var(--sf-primary) 7%, #f6fcf9) 40%,
+    color-mix(in srgb, var(--sf-primary) 12%, #e4f1ea) 100%
+  );
+}
+
+body.theme-emeraldgold #contact.sf-contact-home::after {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--sf-primary) 7%, transparent) 55%,
+    color-mix(in srgb, var(--sf-primary) 11%, transparent) 100%
+  );
+}

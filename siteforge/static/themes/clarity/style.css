@@ -6,6 +6,7 @@
   --clarity-dark: #212529;
   --clarity-light: #f8f9fa;
   --clarity-section-padding: 5rem 0;
+  --sf-primary: var(--clarity-primary);
 }
 
 /* Typography */
@@ -225,4 +226,46 @@ body.theme-clarity {
   margin-top: 2rem;
   padding-top: 1.5rem;
   font-size: 0.9rem;
+}
+
+/* Home — Spotlight + Products align with Clarity teal + light gray */
+body.theme-clarity .sf-showcase-section {
+  --sf-sc-accent: var(--clarity-primary);
+  --sf-sc-bg: var(--clarity-light);
+  --sf-sc-strip-bg: #ffffff;
+  --sf-sc-heading: var(--clarity-dark);
+  --sf-sc-sub: #6c757d;
+  --sf-sc-tag-price-bg: color-mix(in srgb, var(--clarity-primary) 42%, #047857);
+  --sf-sc-tag-code-bg: color-mix(in srgb, var(--clarity-primary) 38%, #065f46);
+  --sf-sc-btn-hover-bg: var(--clarity-primary);
+  --sf-sc-btn-hover-fg: #ffffff;
+}
+
+body.theme-clarity .sf-home-products {
+  --sf-hp-accent: var(--clarity-primary);
+  --sf-hp-bg-1: #ffffff;
+  --sf-hp-bg-2: var(--clarity-light);
+  --sf-hp-bg-3: color-mix(in srgb, var(--clarity-primary) 11%, #e2e9ed);
+  --sf-hp-heading: var(--clarity-dark);
+  --sf-hp-sub: #6c757d;
+  --sf-hp-card-title: var(--clarity-dark);
+  --sf-hp-card-muted: #6c757d;
+}
+
+body.theme-clarity #contact.sf-contact-home {
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    var(--clarity-light) 28%,
+    color-mix(in srgb, var(--clarity-primary) 9%, #dee9ec) 100%
+  );
+}
+
+body.theme-clarity #contact.sf-contact-home::after {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--clarity-primary) 6%, transparent) 55%,
+    color-mix(in srgb, var(--clarity-primary) 10%, transparent) 100%
+  );
 }

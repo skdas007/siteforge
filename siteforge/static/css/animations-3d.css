@@ -173,6 +173,84 @@ a, .btn, .card, .nav-link, .feature-card, .feature-icon {
   }
 }
 
+/* Home contact: solid title — do not use .section-title-glow (clip breaks on dark / red themes) */
+.sf-contact-home__title {
+  font-weight: 700;
+  background: none !important;
+  -webkit-text-fill-color: unset !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  animation: none !important;
+  color: inherit;
+}
+
+.sf-contact-home__subtitle {
+  color: inherit;
+  opacity: 0.88;
+}
+
+/* Contact section backdrop: multi-stop band + ambient (override flat .sf-hero on dark themes) */
+#contact.sf-contact-home {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--sf-primary, #0d6efd) 3%, #ffffff) 0%,
+    color-mix(in srgb, var(--sf-primary, #0d6efd) 5%, #fafafa) 17%,
+    color-mix(in srgb, var(--sf-primary, #0d6efd) 7%, #f4f6f8) 34%,
+    color-mix(in srgb, var(--sf-primary, #0d6efd) 9%, #eef2f6) 51%,
+    color-mix(in srgb, var(--sf-primary, #0d6efd) 11%, #e8ecf2) 68%,
+    color-mix(in srgb, var(--sf-primary, #0d6efd) 13%, #e2e8ef) 84%,
+    color-mix(in srgb, var(--sf-primary, #0d6efd) 15%, #dce4ee) 100%
+  );
+}
+
+#contact.sf-contact-home::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 82% 52% at 50% 5%,
+      color-mix(in srgb, var(--sf-primary, #0d6efd) 13%, transparent),
+      transparent 56%
+    ),
+    radial-gradient(
+      ellipse 62% 46% at 88% 78%,
+      color-mix(in srgb, var(--sf-primary, #0d6efd) 11%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 44% 34% at 50% 100%,
+      color-mix(in srgb, var(--sf-primary, #0d6efd) 8%, transparent),
+      transparent 48%
+    );
+}
+
+#contact.sf-contact-home::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.34;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--sf-primary, #0d6efd) 7%, transparent) 52%,
+    color-mix(in srgb, var(--sf-primary, #0d6efd) 12%, transparent) 100%
+  );
+}
+
+#contact.sf-contact-home > .container {
+  position: relative;
+  z-index: 1;
+}
+
 /* ---- Form input focus 3D lift ---- */
 .input-lift {
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -201,7 +279,8 @@ a, .btn, .card, .nav-link, .feature-card, .feature-icon {
 /* Contact section: map + form side by side */
 .contact-map-wrap {
   min-height: 380px;
-  background: #e9ecef;
+  background: var(--sf-contact-map-bg, #e9ecef);
+  border: var(--sf-contact-map-border, 1px solid transparent);
 }
 .contact-map-wrap iframe {
   display: block;

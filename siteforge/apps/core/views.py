@@ -1,19 +1,71 @@
+import json
+from datetime import timedelta
+from decimal import Decimal, InvalidOperation
+
 from django.contrib.sitemaps.views import sitemap as sitemap_index_view
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import F, Min
+from django.db.models.functions import Coalesce
 from django.http import Http404, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.templatetags.static import static
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views import View
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
-from apps.core.seo_utils import add_seo_context, client_site_og_image_url, product_og_image_url
+from apps.core.seo_utils import (
+    absolute_media_url,
+    add_seo_context,
+    client_site_og_image_url,
+    plain_text_excerpt,
+    product_og_image_url,
+)
 from apps.core.sitemaps import TenantPublicSitemap
 
 HOME_PRODUCTS_PER_PAGE = 6
 PRODUCT_LIST_PER_PAGE = 9
+FONT_META = {
+    "inter": {"family": "Inter", "css": '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif', "google": "Inter:wght@400;500;600;700"},
+    "poppins": {"family": "Poppins", "css": '"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif', "google": "Poppins:wght@400;500;600;700"},
+    "dm-sans": {"family": "DM Sans", "css": '"DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif', "google": "DM+Sans:wght@400;500;700"},
+    "lato": {"family": "Lato", "css": '"Lato", "Helvetica Neue", Arial, sans-serif', "google": "Lato:wght@400;700"},
+    "roboto": {"family": "Roboto", "css": '"Roboto", "Helvetica Neue", Arial, sans-serif', "google": "Roboto:wght@400;500;700"},
+    "playfair": {"family": "Playfair Display", "css": '"Playfair Display", Georgia, "Times New Roman", serif', "google": "Playfair+Display:wght@500;600;700"},
+    "cormorant": {"family": "Cormorant Garamond", "css": '"Cormorant Garamond", Georgia, "Times New Roman", serif', "google": "Cormorant+Garamond:wght@500;600;700"},
+}
 
 from .forms import ContactForm
+
+
+def _parse_price_filter_param(raw):
+    """Parse ?min_price= / ?max_price= query values (decimals, commas ok)."""
+    if raw is None:
+        return None
+    s = str(raw).strip().replace(",", ".").replace(" ", "")
+    if not s:
+        return None
+    try:
+        return Decimal(s)
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+
+
+def _product_queryset_filter_by_price_range(qs, request_get):
+    """
+    Filter by min/max against the storefront list price: lowest variant price when size
+    variants exist, otherwise Product.price (matches Product.display_price).
+    """
+    min_p = _parse_price_filter_param(request_get.get("min_price"))
+    max_p = _parse_price_filter_param(request_get.get("max_price"))
+    if min_p is None and max_p is None:
+        return qs
+    qs = qs.annotate(_effective_list_price=Coalesce(Min("size_variants__price"), F("price")))
+    if min_p is not None:
+        qs = qs.filter(_effective_list_price__gte=min_p)
+    if max_p is not None:
+        qs = qs.filter(_effective_list_price__lte=max_p)
+    return qs
 
 
 def _whatsapp_product_inquiry_message(request, product):
@@ -45,10 +97,10 @@ def _whatsapp_product_inquiry_message(request, product):
     return "\n".join(lines)
 
 
-def _client_context(request):
+def _client_context(request, *, include_catalog_data=True):
     """Build template context from request.client when set (multi-tenant)."""
     from apps.catalog.models import Category, Product
-    from apps.tenants.models import CarouselSlide
+    from apps.tenants.models import CarouselSlide, LegalPage
 
     client = getattr(request, "client", None)
     if not client:
@@ -62,13 +114,52 @@ def _client_context(request):
             slider_slides.append({"media_type": "image", "image": s.image.url, "video": None, "caption": s.caption or ""})
     if not slider_slides:
         slider_slides = None
-    products = Product.objects.filter(client=client, is_active=True).prefetch_related("size_variants").order_by("order", "name")
-    main_product = products.filter(is_main=True).first() or products.first()
-    spotlight_categories = list(
-        Category.objects.filter(client=client, show_in_spotlight=True).order_by(
-            "spotlight_order", "order", "pk"
-        )[:4]
+    products = None
+    main_product = None
+    spotlight_categories = []
+    if include_catalog_data:
+        products = Product.objects.filter(client=client, is_active=True).prefetch_related("size_variants").order_by(
+            "order", "name"
+        )
+        main_product = products.order_by("-is_main", "order", "name").first()
+        spotlight_categories = list(
+            Category.objects.filter(client=client, show_in_spotlight=True).order_by(
+                "spotlight_order", "order", "pk"
+            )[:4]
+        )
+    legal_pages_footer = list(
+        LegalPage.objects.filter(client=client, is_active=True, show_in_footer=True)
+        .order_by("order", "title", "pk")
+        .values("title", "slug")
     )
+    now = timezone.now()
+    popup_start = getattr(client, "popup_start_at", None)
+    popup_end = getattr(client, "popup_end_at", None)
+    popup_is_active = bool(getattr(client, "popup_enabled", False))
+    if popup_is_active and popup_start and now < popup_start:
+        popup_is_active = False
+    if popup_is_active and popup_end and now > popup_end:
+        popup_is_active = False
+
+    def _safe_hex(value, fallback):
+        v = (value or "").strip()
+        if len(v) == 7 and v.startswith("#"):
+            body = v[1:]
+            if all(c in "0123456789abcdefABCDEF" for c in body):
+                return v
+        return fallback
+
+    body_font_key = (getattr(client, "font_body", "") or "inter").strip().lower()
+    heading_font_key = (getattr(client, "font_heading", "") or "poppins").strip().lower()
+    if body_font_key not in FONT_META:
+        body_font_key = "inter"
+    if heading_font_key not in FONT_META:
+        heading_font_key = "poppins"
+    google_families = {
+        FONT_META[body_font_key]["google"],
+        FONT_META[heading_font_key]["google"],
+    }
+
     return {
         "theme_slug": client.theme_slug,
         "business_name": client.business_name,
@@ -78,6 +169,7 @@ def _client_context(request):
         "hero_title": client.hero_title or "Welcome",
         "hero_subtitle": client.hero_subtitle or "Your tagline or short description goes here.",
         "contact_email": client.contact_email,
+        "footer_intro": getattr(client, "footer_intro", "") or "",
         "address_text": getattr(client, "address_text", "") or "",
         "whatsapp_number": (getattr(client, "whatsapp_number", "") or "").strip(),
         "whatsapp_digits": "".join(c for c in (getattr(client, "whatsapp_number", "") or "") if c.isdigit()),
@@ -103,6 +195,28 @@ def _client_context(request):
         "main_product": main_product,
         "products": products,
         "spotlight_categories": spotlight_categories,
+        "legal_pages_footer": legal_pages_footer,
+        "announcement_enabled": bool(getattr(client, "announcement_enabled", False)) and bool(
+            (getattr(client, "announcement_text", "") or "").strip()
+        ),
+        "announcement_text": getattr(client, "announcement_text", "") or "",
+        "announcement_cta_label": getattr(client, "announcement_cta_label", "") or "",
+        "announcement_cta_url": getattr(client, "announcement_cta_url", "") or "",
+        "announcement_bg_color": _safe_hex(getattr(client, "announcement_bg_color", ""), "#0d6efd"),
+        "announcement_text_color": _safe_hex(getattr(client, "announcement_text_color", ""), "#ffffff"),
+        "popup_enabled": popup_is_active,
+        "popup_title": getattr(client, "popup_title", "") or "",
+        "popup_message": getattr(client, "popup_message", "") or "",
+        "popup_image_url": client.popup_image.url if getattr(client, "popup_image", None) and client.popup_image else "",
+        "popup_cta_label": getattr(client, "popup_cta_label", "") or "",
+        "popup_cta_url": getattr(client, "popup_cta_url", "") or "",
+        "popup_show_rule": getattr(client, "popup_show_rule", "") or "session",
+        "popup_seen_key": f"{client.pk}-{int(client.updated_at.timestamp()) if getattr(client, 'updated_at', None) else client.pk}",
+        "font_body_key": body_font_key,
+        "font_heading_key": heading_font_key,
+        "font_body_css": FONT_META[body_font_key]["css"],
+        "font_heading_css": FONT_META[heading_font_key]["css"],
+        "font_google_families": "|".join(sorted(google_families)),
     }
 
 
@@ -142,6 +256,7 @@ class IndexView(TemplateView):
                 from django.db.models import Q
 
                 products_qs = products_qs.filter(Q(name__icontains=sq) | Q(description__icontains=sq))
+            products_qs = _product_queryset_filter_by_price_range(products_qs, self.request.GET)
             context["home_products_total_count"] = products_qs.count()
             paginator = Paginator(products_qs, HOME_PRODUCTS_PER_PAGE)
             raw_page = self.request.GET.get("page") or 1
@@ -160,6 +275,7 @@ class IndexView(TemplateView):
             context.setdefault("logo", None)
             context.setdefault("hero_title", "Welcome")
             context.setdefault("hero_subtitle", "Your tagline or short description goes here.")
+            context.setdefault("footer_intro", "")
             context.setdefault("address_text", "")
             context.setdefault("instagram_url", "")
             context.setdefault("facebook_url", "")
@@ -169,6 +285,29 @@ class IndexView(TemplateView):
             context.setdefault("current_category_id", None)
             context.setdefault("map_embed_url", None)
             context.setdefault("spotlight_categories", [])
+            context.setdefault("legal_pages_footer", [])
+            context.setdefault("announcement_enabled", False)
+            context.setdefault("announcement_text", "")
+            context.setdefault("announcement_cta_label", "")
+            context.setdefault("announcement_cta_url", "")
+            context.setdefault("announcement_bg_color", "#0d6efd")
+            context.setdefault("announcement_text_color", "#ffffff")
+            context.setdefault("popup_enabled", False)
+            context.setdefault("popup_title", "")
+            context.setdefault("popup_message", "")
+            context.setdefault("popup_image_url", "")
+            context.setdefault("popup_cta_label", "")
+            context.setdefault("popup_cta_url", "")
+            context.setdefault("popup_show_rule", "session")
+            context.setdefault("popup_seen_key", "default")
+            context.setdefault("font_body_key", "inter")
+            context.setdefault("font_heading_key", "poppins")
+            context.setdefault("font_body_css", FONT_META["inter"]["css"])
+            context.setdefault("font_heading_css", FONT_META["poppins"]["css"])
+            context.setdefault(
+                "font_google_families",
+                "|".join(sorted({FONT_META["inter"]["google"], FONT_META["poppins"]["google"]})),
+            )
             _empty = Paginator([], HOME_PRODUCTS_PER_PAGE)
             context["products"] = _empty.page(1)
             context["home_products_total_count"] = 0
@@ -287,6 +426,28 @@ class ProductSearchSuggestView(View):
         return JsonResponse({"results": results})
 
 
+class CampaignEventView(View):
+    """Track lightweight campaign analytics (impression/click/close) for popup."""
+
+    http_method_names = ["get"]
+
+    def get(self, request):
+        client = getattr(request, "client", None)
+        if not client:
+            return JsonResponse({"ok": False}, status=404)
+        action = (request.GET.get("action") or "").strip().lower()
+        if action == "impression":
+            client.__class__.objects.filter(pk=client.pk).update(popup_impressions=F("popup_impressions") + 1)
+            return JsonResponse({"ok": True})
+        if action == "click":
+            client.__class__.objects.filter(pk=client.pk).update(popup_clicks=F("popup_clicks") + 1)
+            return JsonResponse({"ok": True})
+        if action == "close":
+            client.__class__.objects.filter(pk=client.pk).update(popup_closes=F("popup_closes") + 1)
+            return JsonResponse({"ok": True})
+        return JsonResponse({"ok": False, "error": "unknown action"}, status=400)
+
+
 class ProductListView(ListView):
     """Public product list for current client. 404 if no client."""
     template_name = "public/product_list.html"
@@ -308,7 +469,7 @@ class ProductListView(ListView):
 
     def get_queryset(self):
         from django.db.models import Q
-        from apps.catalog.models import Category, Product
+        from apps.catalog.models import Product
 
         client = getattr(self.request, "client", None)
         if not client:
@@ -322,25 +483,13 @@ class ProductListView(ListView):
         cat_id = self.request.GET.get("category")
         if cat_id:
             try:
-                Category.objects.get(pk=int(cat_id), client=client)
                 qs = qs.filter(category_id=int(cat_id))
-            except (ValueError, TypeError, Category.DoesNotExist):
+            except (ValueError, TypeError):
                 pass
         search = (self.request.GET.get("q") or "").strip()
         if search:
             qs = qs.filter(Q(name__icontains=search) | Q(description__icontains=search))
-        try:
-            min_p = self.request.GET.get("min_price")
-            if min_p is not None and min_p != "":
-                qs = qs.filter(price__gte=float(min_p))
-        except (ValueError, TypeError):
-            pass
-        try:
-            max_p = self.request.GET.get("max_price")
-            if max_p is not None and max_p != "":
-                qs = qs.filter(price__lte=float(max_p))
-        except (ValueError, TypeError):
-            pass
+        qs = _product_queryset_filter_by_price_range(qs, self.request.GET)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -348,7 +497,7 @@ class ProductListView(ListView):
 
         context = super().get_context_data(**kwargs)
         if getattr(self.request, "client", None):
-            ctx = _client_context(self.request)
+            ctx = _client_context(self.request, include_catalog_data=False)
             for k, v in ctx.items():
                 if k != "products":
                     context.setdefault(k, v)
@@ -360,6 +509,25 @@ class ProductListView(ListView):
             context["filter_q"] = self.request.GET.get("q", "")
             context["filter_min_price"] = self.request.GET.get("min_price", "")
             context["filter_max_price"] = self.request.GET.get("max_price", "")
+            fa = 0
+            if (context.get("filter_q") or "").strip():
+                fa += 1
+            if context.get("current_category_id"):
+                fa += 1
+            if context.get("filter_min_price"):
+                fa += 1
+            if context.get("filter_max_price"):
+                fa += 1
+            context["filter_active_count"] = fa
+            # Category / price / chips only (excludes text search) — mobile drawer badge
+            fd = 0
+            if context.get("current_category_id"):
+                fd += 1
+            if context.get("filter_min_price"):
+                fd += 1
+            if context.get("filter_max_price"):
+                fd += 1
+            context["filter_drawer_active_count"] = fd
             c = self.request.client
             biz = context.get("business_name") or "SiteForge"
             desc = (getattr(c, "seo_description", "") or "").strip() or f"Browse products from {biz}."
@@ -396,7 +564,7 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if getattr(self.request, "client", None):
-            ctx = _client_context(self.request)
+            ctx = _client_context(self.request, include_catalog_data=False)
             for k, v in ctx.items():
                 if k != "products":
                     context.setdefault(k, v)
@@ -430,6 +598,71 @@ class ProductDetailView(DetailView):
             )
             context["seo_keywords"] = (getattr(product, "seo_keywords", "") or "").strip() or (getattr(c, "seo_keywords", "") or "")
             context["seo_author"] = (getattr(c, "seo_author", "") or "").strip() or biz
+
+            product_url = self.request.build_absolute_uri(reverse("product_detail", kwargs={"pk": product.pk}))
+            schema_image = absolute_media_url(self.request, img or (gallery_urls[0] if gallery_urls else ""))
+            seller_schema = {"@type": "Organization", "name": biz}
+            price_valid_until = (timezone.now().date() + timedelta(days=30)).isoformat()
+            if size_variants:
+                offers = []
+                low_price = None
+                high_price = None
+                for sv in size_variants:
+                    price_val = float(sv.price)
+                    low_price = price_val if low_price is None else min(low_price, price_val)
+                    high_price = price_val if high_price is None else max(high_price, price_val)
+                    offers.append(
+                        {
+                            "@type": "Offer",
+                            "priceCurrency": "INR",
+                            "price": f"{sv.price:.2f}",
+                            "availability": "https://schema.org/InStock"
+                            if int(sv.stock_qty or 0) > 0
+                            else "https://schema.org/OutOfStock",
+                            "url": product_url,
+                            "sku": f"{product.pk}-{sv.size_label}",
+                            "name": f"{product.name} - {sv.size_label}",
+                            "seller": seller_schema,
+                            "priceValidUntil": price_valid_until,
+                        }
+                    )
+                schema_payload = {
+                    "@context": "https://schema.org",
+                    "@type": "Product",
+                    "name": product.name,
+                    "description": plain_text_excerpt(product.description or "", 500),
+                    "image": [schema_image] if schema_image else [],
+                    "url": product_url,
+                    "brand": {"@type": "Brand", "name": biz},
+                    "offers": offers,
+                    "aggregateOffer": {
+                        "@type": "AggregateOffer",
+                        "priceCurrency": "INR",
+                        "lowPrice": f"{low_price:.2f}",
+                        "highPrice": f"{high_price:.2f}",
+                        "offerCount": len(offers),
+                    },
+                }
+            else:
+                schema_payload = {
+                    "@context": "https://schema.org",
+                    "@type": "Product",
+                    "name": product.name,
+                    "description": plain_text_excerpt(product.description or "", 500),
+                    "image": [schema_image] if schema_image else [],
+                    "url": product_url,
+                    "brand": {"@type": "Brand", "name": biz},
+                    "offers": {
+                        "@type": "Offer",
+                        "priceCurrency": "INR",
+                        "price": f"{product.price:.2f}",
+                        "availability": "https://schema.org/InStock",
+                        "url": product_url,
+                        "seller": seller_schema,
+                        "priceValidUntil": price_valid_until,
+                    },
+                }
+            context["seo_product_schema_json"] = json.dumps(schema_payload, ensure_ascii=False)
             from apps.catalog.models import Product
 
             if product.category_id:
@@ -446,6 +679,37 @@ class ProductDetailView(DetailView):
                 )
             else:
                 context["related_products"] = []
+        return context
+
+
+class LegalPageDetailView(TemplateView):
+    template_name = "public/legal_page.html"
+
+    def get_context_data(self, **kwargs):
+        from apps.tenants.models import LegalPage
+
+        context = super().get_context_data(**kwargs)
+        client = getattr(self.request, "client", None)
+        if not client:
+            raise Http404("No site configured for this domain.")
+        page = get_object_or_404(
+            LegalPage.objects.filter(client=client, is_active=True),
+            slug=self.kwargs["slug"],
+        )
+        base_ctx = _client_context(self.request, include_catalog_data=False)
+        for k, v in base_ctx.items():
+            if k not in {"products", "main_product"}:
+                context.setdefault(k, v)
+        context["legal_page"] = page
+        context["seo_keywords"] = (getattr(client, "seo_keywords", "") or "").strip()
+        context["seo_author"] = (getattr(client, "seo_author", "") or "").strip() or context.get("business_name") or "SiteForge"
+        add_seo_context(
+            self.request,
+            context,
+            title=f"{page.title} — {context.get('business_name') or 'SiteForge'}",
+            description=plain_text_excerpt(page.content or page.title, 300),
+            image_url=client_site_og_image_url(client, context),
+        )
         return context
 
 

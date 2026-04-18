@@ -1,0 +1,329 @@
+/* “What We Offer” — ties to theme via --sf-primary + optional --sf-o-* overrides on .sf-offer */
+
+.sf-offer {
+  /* Accent follows dashboard / theme (--sf-primary on :root from static/themes/.../style.css) */
+  --sf-o-accent: var(--sf-primary, #0d6efd);
+  /* Neutral bases; section bg mixes accent in gradient below */
+  --sf-o-bg-1: #f8fafc;
+  --sf-o-bg-2: #f1f5f9;
+  --sf-o-bg-3: #eef2ff;
+  --sf-o-card-border: rgba(255, 255, 255, 0.85);
+  --sf-o-card-s1: rgba(255, 255, 255, 0.94);
+  --sf-o-card-s2: rgba(255, 255, 255, 0.72);
+  --sf-o-card-s3: rgba(248, 250, 252, 0.88);
+  --sf-o-shadow-outline: rgba(15, 23, 42, 0.04);
+  --sf-o-shadow-soft: rgba(15, 23, 42, 0.05);
+  --sf-o-shadow-drop: rgba(15, 23, 42, 0.18);
+  --sf-o-shadow-hover: rgba(15, 23, 42, 0.22);
+  --sf-o-title: #0f172a;
+  --sf-o-body: #64748b;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--sf-o-accent) 6%, var(--sf-o-bg-1)) 0%,
+    color-mix(in srgb, var(--sf-o-accent) 8%, var(--sf-o-bg-2)) 45%,
+    color-mix(in srgb, var(--sf-o-accent) 14%, var(--sf-o-bg-3)) 100%
+  );
+}
+
+.sf-offer__ambient {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 80% 55% at 15% 20%,
+      color-mix(in srgb, var(--sf-o-accent) 12%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 85% 75%,
+      color-mix(in srgb, var(--sf-o-accent) 10%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 50% 100%,
+      color-mix(in srgb, var(--sf-o-accent) 8%, transparent),
+      transparent 45%
+    );
+}
+
+.sf-offer .sf-offer__title.section-title,
+.sf-offer .sf-offer__title {
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--sf-o-title, #0f172a);
+  background: none !important;
+  -webkit-text-fill-color: unset !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  animation: none !important;
+}
+
+.sf-offer .section-subtitle {
+  max-width: 32rem;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--sf-o-body, #64748b);
+}
+
+.sf-offer-card {
+  height: 100%;
+  border: none;
+  background: transparent;
+  perspective: 1100px;
+}
+
+.sf-offer-card.card-3d-tilt {
+  transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.35s ease;
+  will-change: transform;
+}
+
+.sf-offer-card__surface {
+  position: relative;
+  height: 100%;
+  padding: 1.75rem 1.5rem;
+  border-radius: 1.35rem;
+  overflow: hidden;
+  border: 1px solid var(--sf-o-card-border);
+  background: linear-gradient(
+    155deg,
+    var(--sf-o-card-s1) 0%,
+    var(--sf-o-card-s2) 48%,
+    var(--sf-o-card-s3) 100%
+  );
+  box-shadow:
+    0 0 0 1px var(--sf-o-shadow-outline),
+    0 1px 2px var(--sf-o-shadow-soft),
+    0 18px 40px -18px var(--sf-o-shadow-drop),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transition: box-shadow 0.35s ease;
+}
+
+.sf-offer-card:hover .sf-offer-card__surface,
+.sf-offer-card:focus-within .sf-offer-card__surface {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--sf-o-accent) 18%, transparent),
+    0 24px 48px -20px var(--sf-o-shadow-hover),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.sf-offer-card__shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 42%;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.sf-offer-card__depth {
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 40%;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--sf-o-accent) 10%, transparent),
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+.sf-offer-card__icon-ring {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1.25rem;
+  border-radius: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--sf-o-accent) 18%, transparent),
+    color-mix(in srgb, var(--sf-o-accent) 10%, transparent)
+  );
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 6px color-mix(in srgb, var(--sf-o-accent) 8%, transparent),
+    0 10px 22px -12px color-mix(in srgb, var(--sf-o-accent) 38%, transparent);
+  transform: translateZ(0);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+}
+
+.sf-offer-card:hover .sf-offer-card__icon-ring {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 8px color-mix(in srgb, var(--sf-o-accent) 12%, transparent),
+    0 16px 32px -14px color-mix(in srgb, var(--sf-o-accent) 48%, transparent);
+}
+
+.sf-offer-card__icon-ring svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--bs-primary, var(--sf-primary, #0d6efd));
+  filter: drop-shadow(
+    0 2px 3px color-mix(in srgb, var(--sf-o-accent) 28%, transparent)
+  );
+}
+
+.sf-offer-card__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  color: var(--sf-o-title);
+}
+
+.sf-offer-card__text {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--sf-o-body);
+  margin-bottom: 0;
+}
+
+.sf-offer-card__edge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--sf-o-accent) 50%, transparent),
+    color-mix(in srgb, var(--sf-o-accent) 35%, transparent),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.sf-offer-card:hover .sf-offer-card__edge,
+.sf-offer-card:focus-within .sf-offer-card__edge {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-offer-card.card-3d-tilt {
+    transition: none;
+  }
+  .sf-offer-card__icon-ring {
+    transition: none;
+  }
+  .sf-offer-card:hover .sf-offer-card__icon-ring {
+    transform: none;
+  }
+}
+
+/* ── Fade carousel: stacked col-12 on xs, 3 cols from md up (features-offer-rotator.js) ── */
+.sf-offer-fade-carousel {
+  width: 100%;
+}
+
+.sf-offer-slot {
+  min-height: auto;
+  min-width: 0;
+  perspective: 1100px;
+}
+
+@media (min-width: 768px) {
+  .sf-offer-slot {
+    min-height: 12rem;
+  }
+}
+
+.sf-offer-animated-slots .sf-offer-card__surface {
+  padding: 1.2rem 0.75rem;
+}
+
+@media (min-width: 576px) {
+  .sf-offer-animated-slots .sf-offer-card__surface {
+    padding: 1.75rem 1.5rem;
+  }
+}
+
+.sf-offer-animated-slots .sf-offer-card__title {
+  font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+}
+
+.sf-offer-animated-slots .sf-offer-card__text {
+  font-size: clamp(0.9rem, 2vw, 0.9375rem);
+}
+
+.sf-offer-animated-slots .sf-offer-card__icon-ring {
+  width: clamp(3rem, 7vw, 4rem);
+  height: clamp(3rem, 7vw, 4rem);
+  margin-bottom: clamp(0.85rem, 2vw, 1.25rem);
+}
+
+.sf-offer-animated-slots .sf-offer-card__icon-ring svg {
+  width: clamp(1.5rem, 3.5vw, 1.75rem);
+  height: clamp(1.5rem, 3.5vw, 1.75rem);
+}
+
+@media (min-width: 768px) {
+  .sf-offer-animated-slots .sf-offer-card__title {
+    font-size: 1.2rem;
+  }
+
+  .sf-offer-animated-slots .sf-offer-card__text {
+    font-size: 0.9375rem;
+  }
+
+  .sf-offer-animated-slots .sf-offer-card__icon-ring {
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .sf-offer-animated-slots .sf-offer-card__icon-ring svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+}
+
+.sf-offer-slot__inner {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1) rotateX(0deg);
+  filter: blur(0);
+  transform-origin: 50% 85%;
+  transition-property: opacity, transform, filter;
+  transition-duration: 0.65s;
+  transition-timing-function: cubic-bezier(0.33, 0.82, 0.32, 1);
+  will-change: opacity, transform;
+}
+
+.sf-offer-slot__inner.sf-offer-slot__inner--hide {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0) scale(0.9) rotateX(8deg);
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+.sf-offer-slot__inner.sf-offer-slot__inner--enter {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) scale(0.86) rotateX(10deg);
+  filter: blur(6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-offer-slot__inner,
+  .sf-offer-slot__inner.sf-offer-slot__inner--hide,
+  .sf-offer-slot__inner.sf-offer-slot__inner--enter {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}

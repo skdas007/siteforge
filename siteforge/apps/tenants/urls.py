@@ -20,4 +20,8 @@ urlpatterns = [
     path("contacts/", views.ContactSubmissionListView.as_view(), name="contact_list"),
     path("contacts/bulk-delete/", views.ContactSubmissionBulkDeleteView.as_view(), name="contact_bulk_delete"),
     path("contacts/<int:pk>/delete/", views.ContactSubmissionDeleteView.as_view(), name="contact_delete"),
+    path("legal-pages/", views.LegalPageListView.as_view(), name="legal_page_list"),
+    path("legal-pages/add/", views.LegalPageCreateView.as_view(), name="legal_page_add"),
+    path("legal-pages/<int:pk>/edit/", views.LegalPageEditView.as_view(), name="legal_page_edit"),
+    path("legal-pages/<int:pk>/delete/", views.LegalPageDeleteView.as_view(), name="legal_page_delete"),
 ]
