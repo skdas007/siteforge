@@ -80,7 +80,13 @@
               <div class="col-12 col-lg-6">
                 <label class="form-label mb-1">Media file</label>
                 <p class="form-text small mb-2">Image or MP4 video</p>
-                <input type="file" name="carousel_image_{{ forloop.counter0 }}" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4">
+                <input type="file" name="carousel_image_{{ forloop.counter0 }}" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4"
+                  data-sf-upload
+                  data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+                  data-sf-max-bytes-video="{{ max_video_upload_bytes|default:15728640 }}"
+                  data-sf-soft-max-side="2200"
+                  data-sf-soft-max-side-video="1920"
+                  data-sf-rec-label="about 1920×1080 (image) or 1280×720 (MP4), as described above">
                 {% if slide.image_url %}<div class="mt-2"><img src="{{ slide.image_url }}" alt="" class="img-thumbnail carousel-preview rounded-3 border" style="max-height: 72px;" onerror="this.onerror=null;this.src='{{ no_image_url }}';"></div>{% elif slide.is_video %}<div class="mt-2 text-muted small">Current: video (MP4)</div>{% endif %}
               </div>
               <div class="col-12 col-lg-6 d-flex flex-column">
@@ -105,7 +111,13 @@
               <div class="col-12 col-lg-6">
                 <label class="form-label mb-1">Media file</label>
                 <p class="form-text small mb-2">Image or MP4 video</p>
-                <input type="file" name="carousel_image_0" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4">
+                <input type="file" name="carousel_image_0" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4"
+                  data-sf-upload
+                  data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+                  data-sf-max-bytes-video="{{ max_video_upload_bytes|default:15728640 }}"
+                  data-sf-soft-max-side="2200"
+                  data-sf-soft-max-side-video="1920"
+                  data-sf-rec-label="about 1920×1080 (image) or 1280×720 (MP4), as described above">
                 <div class="mt-2 carousel-preview-wrap" style="display: none;"><img src="" alt="" class="img-thumbnail carousel-preview rounded-3 border" style="max-height: 72px;" data-no-img-fallback="1"></div>
               </div>
               <div class="col-12 col-lg-6 d-flex flex-column">
@@ -136,7 +148,13 @@
               <div class="col-12 col-lg-6">
                 <label class="form-label mb-1">Media file</label>
                 <p class="form-text small mb-2">Image or MP4 video</p>
-                <input type="file" name="carousel_image_TMP" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4">
+                <input type="file" name="carousel_image_TMP" class="form-control carousel-image-input" accept="image/*,video/mp4,.mp4"
+                  data-sf-upload
+                  data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+                  data-sf-max-bytes-video="{{ max_video_upload_bytes|default:15728640 }}"
+                  data-sf-soft-max-side="2200"
+                  data-sf-soft-max-side-video="1920"
+                  data-sf-rec-label="about 1920×1080 (image) or 1280×720 (MP4), as described above">
                 <div class="mt-2 carousel-preview-wrap" style="display: none;"><img src="" alt="" class="img-thumbnail carousel-preview rounded-3 border" style="max-height: 72px;" data-no-img-fallback="1"></div>
               </div>
               <div class="col-12 col-lg-6 d-flex flex-column">
@@ -160,7 +178,12 @@
           <label class="form-check-label" for="id_remove_banner">Remove current banner (and delete from storage)</label>
         </div>
         {% endif %}
-        <input type="file" name="banner_image" id="id_banner" class="form-control" accept="image/*">
+        <input type="file" name="banner_image" id="id_banner" class="form-control" accept="image/*"
+          data-sf-upload
+          data-sf-kind="image"
+          data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+          data-sf-soft-max-side="2200"
+          data-sf-rec-label="around 1920×720 px wide landscape (see help text)">
         <p class="upload-rec-size">Recommended: <span class="upload-rec-size-dim">1920×720 px</span> or <span class="upload-rec-size-dim">1600×600 px</span> landscape (full-width fallback). <strong>Max 3 MB.</strong></p>
       </div>
 
@@ -185,7 +208,12 @@
           <label class="form-check-label" for="id_remove_hero_image">Remove current welcome image (and delete from storage)</label>
         </div>
         {% endif %}
-        <input type="file" name="hero_image" id="id_hero_image" class="form-control" accept="image/*">
+        <input type="file" name="hero_image" id="id_hero_image" class="form-control" accept="image/*"
+          data-sf-upload
+          data-sf-kind="image"
+          data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+          data-sf-soft-max-side="1100"
+          data-sf-rec-label="around 800×800 px square or 800×1000 portrait (see help text)">
         <p class="upload-rec-size">Recommended: <span class="upload-rec-size-dim">800×800 px</span> square or <span class="upload-rec-size-dim">800×1000 px</span> portrait (welcome section beside text). <strong>Max 3 MB.</strong></p>
       </div>
 
@@ -199,7 +227,12 @@
           <label class="form-check-label" for="id_remove_logo">Remove current logo (and delete from storage)</label>
         </div>
         {% endif %}
-        <input type="file" name="logo" id="id_logo" class="form-control" accept="image/*">
+        <input type="file" name="logo" id="id_logo" class="form-control" accept="image/*"
+          data-sf-upload
+          data-sf-kind="image"
+          data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+          data-sf-soft-max-side="220"
+          data-sf-rec-label="about 180–240 px on the longest side for the header (much larger images are scaled down; see help text)">
         <p class="upload-rec-size">Recommended: <span class="upload-rec-size-dim">240×112 px</span> or wider, or square <span class="upload-rec-size-dim">240×240 px</span> — site header shows your logo up to about <span class="upload-rec-size-dim">200×56 px</span> (PNG or JPG with transparent or solid background). <strong>Max 3 MB.</strong></p>
       </div>
 
@@ -217,7 +250,12 @@
           <label class="form-check-label" for="id_remove_favicon">Remove favicon (and delete from storage)</label>
         </div>
         {% endif %}
-        <input type="file" name="favicon" id="id_favicon" class="form-control" accept=".ico,.png,.svg,.webp,.gif,image/*">
+        <input type="file" name="favicon" id="id_favicon" class="form-control" accept=".ico,.png,.svg,.webp,.gif,image/*"
+          data-sf-upload
+          data-sf-kind="image"
+          data-sf-max-bytes="{{ max_favicon_bytes|default:524288 }}"
+          data-sf-soft-max-side="72"
+          data-sf-rec-label="32×32 px or 48×48 px (SVG can be larger; see help text)">
         <p class="upload-rec-size mb-0">Use <strong>.ico</strong>, <strong>PNG</strong>, <strong>SVG</strong>, WebP, or GIF. Recommended <span class="upload-rec-size-dim">32×32</span> or <span class="upload-rec-size-dim">48×48</span> px. <strong>Max 512 KB.</strong></p>
       </div>
 
@@ -372,7 +410,12 @@
           <label class="form-check-label" for="id_remove_popup_image">Remove current popup image</label>
         </div>
         {% endif %}
-        <input type="file" name="popup_image" id="id_popup_image" class="form-control" accept="image/*">
+        <input type="file" name="popup_image" id="id_popup_image" class="form-control" accept="image/*"
+          data-sf-upload
+          data-sf-kind="image"
+          data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+          data-sf-soft-max-side="1400"
+          data-sf-rec-label="around 1200×800 px or similar wide image (see help text)">
         <p class="upload-rec-size mb-0">Recommended: <span class="upload-rec-size-dim">1200×800 px</span> or similar wide image. <strong>Max 3 MB.</strong></p>
       </div>
       <div class="dashboard-callout mb-3">
@@ -462,7 +505,12 @@
           <label class="form-check-label" for="id_remove_seo_image">Remove current SEO image</label>
         </div>
         {% endif %}
-        <input type="file" name="seo_image" id="id_seo_image" class="form-control" accept="image/*">
+        <input type="file" name="seo_image" id="id_seo_image" class="form-control" accept="image/*"
+          data-sf-upload
+          data-sf-kind="image"
+          data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+          data-sf-soft-max-side="2000"
+          data-sf-rec-label="about 1200×630 px (1.91∶1) for link previews (see help text)">
         <p class="upload-rec-size">Recommended: <span class="upload-rec-size-dim">1200×630 px</span> (1.91∶1) for WhatsApp, Facebook, and Google link previews. <strong>Max 3 MB.</strong></p>
       </div>
 

@@ -20,6 +20,7 @@ from apps.catalog.models import Category, Product
 from apps.leads.models import ContactSubmission
 from apps.core.storage_cleanup import delete_stored_file
 from apps.core.validators import (
+    MAX_FAVICON_BYTES,
     MAX_IMAGE_UPLOAD_BYTES,
     MAX_PRODUCT_GALLERY_IMAGES,
     MAX_VIDEO_UPLOAD_BYTES,
@@ -336,6 +337,9 @@ class DashboardSettingsView(DashboardClientMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["max_image_upload_bytes"] = MAX_IMAGE_UPLOAD_BYTES
+        context["max_video_upload_bytes"] = MAX_VIDEO_UPLOAD_BYTES
+        context["max_favicon_bytes"] = MAX_FAVICON_BYTES
         client = self.request.user.client
         post = self.request.POST if self.request.method == "POST" else {}
         context["hero_title"] = post.get("hero_title") or client.hero_title or ""

@@ -123,6 +123,8 @@ body.theme-midnight {
 
 /* Product detail page — same treatment as home Products */
 .theme-midnight .sf-product-detail {
+  --sf-pd-prose-fg: #c5cce8;
+  --sf-pd-prose-link: #b8c8ff;
   background-image: linear-gradient(
     180deg,
     #243248 0%,
@@ -219,6 +221,20 @@ body.theme-midnight {
 .theme-midnight .sf-product-detail .product-qty-input:focus {
   border-color: #5f87ff;
   box-shadow: 0 0 0 0.2rem rgba(95, 135, 255, 0.28);
+}
+
+.theme-midnight .sf-product-detail .sf-product-desc-details__summary {
+  background: rgba(30, 40, 68, 0.75);
+  border-color: rgba(148, 170, 225, 0.28);
+}
+
+.theme-midnight .sf-product-detail .sf-product-desc-details__summary:hover {
+  background: rgba(40, 52, 86, 0.85);
+}
+
+.theme-midnight .sf-product-detail .sf-product-desc-details__body {
+  background: rgba(10, 14, 28, 0.4);
+  border-color: rgba(148, 170, 225, 0.22);
 }
 
 .theme-midnight #contact.sf-contact-home {

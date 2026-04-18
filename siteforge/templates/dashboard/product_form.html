@@ -33,7 +33,7 @@
         <label for="id_description" class="form-label">Description</label>
         <div id="id_description_editor" class="sf-rich-editor mb-2"></div>
         <textarea name="description" id="id_description" class="form-control" rows="3">{% if form.is_bound %}{{ form.description.value|default:'' }}{% else %}{{ product.description|default:'' }}{% endif %}</textarea>
-        <p class="form-text small text-muted mb-0">Use the editor for long, formatted descriptions (headings, bold, lists, links).</p>
+        <p class="form-text small text-muted mb-0">Use the editor for long, formatted descriptions (headings, bold, lists, links). Use <strong>A</strong> for text colour and highlight colour.</p>
       </div>
       <p class="dashboard-form-section-title">SEO and social previews <span class="fw-normal text-muted">(optional)</span></p>
       <div class="dashboard-callout mb-3">
@@ -64,7 +64,12 @@
           </div>
         </div>
         {% endif %}
-        <input type="file" name="seo_image" id="id_seo_image" class="form-control" accept="image/*">
+        <input type="file" name="seo_image" id="id_seo_image" class="form-control" accept="image/*"
+          data-sf-upload
+          data-sf-kind="image"
+          data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+          data-sf-soft-max-side="2000"
+          data-sf-rec-label="about 1200×630 px for social previews (see help text)">
       </div>
       <p class="dashboard-form-section-title">Pricing</p>
       <div class="row g-3 mb-1">
@@ -137,7 +142,12 @@
             </div>
           </div>
           {% endif %}
-          <input type="file" name="image" id="id_image" class="form-control" accept="image/*">
+          <input type="file" name="image" id="id_image" class="form-control" accept="image/*"
+            data-sf-upload
+            data-sf-kind="image"
+            data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+            data-sf-soft-max-side="2600"
+            data-sf-rec-label="about 1000×1000 px or larger square (see help text)">
         </div>
         <div class="col-lg-6">
           <label for="id_extra_images" class="form-label">Additional images</label>
@@ -153,7 +163,12 @@
             {% endfor %}
           </div>
           {% endif %}
-          <input type="file" name="extra_images" id="id_extra_images" class="form-control" accept="image/*" multiple>
+          <input type="file" name="extra_images" id="id_extra_images" class="form-control" accept="image/*" multiple
+            data-sf-upload
+            data-sf-kind="image"
+            data-sf-max-bytes="{{ max_image_upload_bytes|default:3145728 }}"
+            data-sf-soft-max-side="2600"
+            data-sf-rec-label="about 1000×1000 px or larger square (see help text)">
         </div>
       </div>
       <p class="dashboard-form-section-title">Visibility</p>
@@ -199,6 +214,7 @@
         toolbar: [
           [{ header: [2, 3, false] }],
           ["bold", "italic", "underline"],
+          [{ color: [] }, { background: [] }],
           [{ list: "ordered" }, { list: "bullet" }],
           ["link", "clean"],
         ],

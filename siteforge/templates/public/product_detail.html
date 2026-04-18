@@ -172,7 +172,21 @@
           {% endif %}
         </div>
         {% if product.description %}
-        <div class="text-muted mb-4">{{ product.description|safe }}</div>
+        <div class="sf-product-desc-details mb-4">
+          <input type="checkbox" id="sf-product-desc-toggle" class="sf-product-desc-details__chk visually-hidden">
+          <label class="sf-product-desc-details__summary" for="sf-product-desc-toggle">
+            <span class="sf-product-desc-details__title">Product description</span>
+            <span class="sf-product-desc-details__cta small" aria-hidden="true">
+              <span class="sf-product-desc-details__cta-show">Show details</span>
+              <span class="sf-product-desc-details__cta-hide">Hide details</span>
+            </span>
+          </label>
+          <div class="sf-product-desc-details__collapse">
+            <div class="sf-product-desc-details__collapse-inner">
+              <div class="sf-product-description sf-product-desc-details__body">{{ product.description|safe }}</div>
+            </div>
+          </div>
+        </div>
         {% endif %}
         <div class="product-purchase-box mb-4">
           <div class="product-purchase-head d-flex align-items-center justify-content-between flex-wrap">

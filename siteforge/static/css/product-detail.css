@@ -4,6 +4,9 @@
   --sf-pd-bg-1: #f8fafc;
   --sf-pd-bg-2: #f1f5f9;
   --sf-pd-bg-3: #eef2ff;
+  /* Rich-text description (Quill): storefront always uses these, not dashboard inline colours */
+  --sf-pd-prose-fg: #334155;
+  --sf-pd-prose-link: var(--sf-primary, #0d6efd);
   position: relative;
   overflow: hidden;
   isolation: isolate;
@@ -78,8 +81,141 @@
   z-index: 1;
 }
 
+/*
+ * Dashboard HTML may include inline color/background from Quill; on dark themes that
+ * makes body copy unreadable. Force readable theme colours here only (links stay distinct).
+ */
+.sf-product-detail .sf-product-description {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--sf-pd-prose-fg);
+}
+
+.sf-product-detail .sf-product-description * {
+  color: inherit !important;
+}
+
+.sf-product-detail .sf-product-description a,
+.sf-product-detail .sf-product-description a * {
+  color: var(--sf-pd-prose-link) !important;
+}
+
+.sf-product-detail .sf-product-description ul,
+.sf-product-detail .sf-product-description ol {
+  padding-left: 1.25rem;
+}
+
+/*
+ * Collapsible description — checkbox + grid row animation (smooth expand/collapse).
+ * Full HTML stays in DOM for SEO; progressive enhancement if grid animation unsupported.
+ */
+.sf-product-detail .sf-product-desc-details__collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-product-detail .sf-product-desc-details__chk:checked ~ .sf-product-desc-details__collapse {
+  grid-template-rows: 1fr;
+}
+
+.sf-product-detail .sf-product-desc-details__collapse-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sf-product-detail .sf-product-desc-details__summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--sf-pd-prose-fg);
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 0.65rem;
+  margin-bottom: 0;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    border-radius 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-product-detail .sf-product-desc-details__summary:hover {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.sf-product-detail .sf-product-desc-details__chk:checked ~ .sf-product-desc-details__summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+
+.sf-product-detail .sf-product-desc-details__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.sf-product-detail .sf-product-desc-details__title::before {
+  content: "";
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
+  opacity: 0.85;
+}
+
+.sf-product-detail .sf-product-desc-details__chk:checked ~ .sf-product-desc-details__summary .sf-product-desc-details__title::before {
+  transform: rotate(45deg) translateY(0.1rem);
+}
+
+.sf-product-detail .sf-product-desc-details__cta {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.sf-product-detail .sf-product-desc-details__cta-hide {
+  display: none;
+}
+
+.sf-product-detail .sf-product-desc-details__chk:checked ~ .sf-product-desc-details__summary .sf-product-desc-details__cta-show {
+  display: none;
+}
+
+.sf-product-detail .sf-product-desc-details__chk:checked ~ .sf-product-desc-details__summary .sf-product-desc-details__cta-hide {
+  display: inline;
+}
+
+.sf-product-detail .sf-product-desc-details__body {
+  padding: 1rem 1rem 1.1rem;
+  margin: 0;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-top: none;
+  border-radius: 0 0 0.65rem 0.65rem;
+  background: rgba(255, 255, 255, 0.35);
+}
+
 .sf-product-detail__related-link {
   color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-product-detail .sf-product-desc-details__collapse {
+    transition-duration: 0.01ms;
+  }
+
+  .sf-product-detail .sf-product-desc-details__summary,
+  .sf-product-detail .sf-product-desc-details__title::before {
+    transition: none;
+  }
 }
 
 /* Product detail: main carousel + ecommerce-style thumbnail strip */

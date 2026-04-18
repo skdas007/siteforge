@@ -126,6 +126,8 @@ body.theme-blackred {
 
 /* Product detail page — same vertical backdrop + mesh as home Products */
 .theme-blackred .sf-product-detail {
+  --sf-pd-prose-fg: #d4d4d4;
+  --sf-pd-prose-link: #ffb3bc;
   background-image: linear-gradient(
     180deg,
     #2c2426 0%,
@@ -294,6 +296,20 @@ body.theme-blackred {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.14);
+}
+
+.theme-blackred .sf-product-detail .sf-product-desc-details__summary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.theme-blackred .sf-product-detail .sf-product-desc-details__summary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-blackred .sf-product-detail .sf-product-desc-details__body {
+  background: rgba(12, 10, 11, 0.42);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .theme-blackred #contact.sf-contact-home {
