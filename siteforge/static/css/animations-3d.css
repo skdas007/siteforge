@@ -173,8 +173,8 @@ a, .btn, .card, .nav-link, .feature-card, .feature-icon {
   }
 }
 
-/* Home contact: solid title — do not use .section-title-glow (clip breaks on dark / red themes) */
-.sf-contact-home__title {
+/* Home contact: solid titles only when not using theme gradient headings (section-headings.css) */
+.sf-contact-home__title:not(.sf-heading-gradient) {
   font-weight: 700;
   background: none !important;
   -webkit-text-fill-color: unset !important;
@@ -184,9 +184,17 @@ a, .btn, .card, .nav-link, .feature-card, .feature-icon {
   color: inherit;
 }
 
-.sf-contact-home__subtitle {
+.sf-contact-home__subtitle:not(.sf-subheading-gradient) {
   color: inherit;
   opacity: 0.88;
+}
+
+.sf-contact-home__title.sf-heading-gradient {
+  font-weight: 700;
+}
+
+.sf-contact-home__subtitle.sf-subheading-gradient {
+  opacity: 1;
 }
 
 /* Contact section backdrop: multi-stop band + ambient (override flat .sf-hero on dark themes) */
@@ -260,21 +268,7 @@ a, .btn, .card, .nav-link, .feature-card, .feature-icon {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* ---- Scroll reveal enhancements: longer stagger for more drama ---- */
-.reveal-stagger [data-reveal]:nth-child(1) { transition-delay: 0.1s; }
-.reveal-stagger [data-reveal]:nth-child(2) { transition-delay: 0.2s; }
-.reveal-stagger [data-reveal]:nth-child(3) { transition-delay: 0.3s; }
-.reveal-stagger [data-reveal]:nth-child(4) { transition-delay: 0.4s; }
-.reveal-stagger [data-reveal]:nth-child(5) { transition-delay: 0.5s; }
-.reveal-stagger [data-reveal]:nth-child(6) { transition-delay: 0.6s; }
-.reveal-stagger [data-reveal]:nth-child(7) { transition-delay: 0.7s; }
-.reveal-stagger [data-reveal]:nth-child(8) { transition-delay: 0.8s; }
-.reveal-stagger [data-reveal]:nth-child(9) { transition-delay: 0.9s; }
-
-[data-reveal] {
-  transition-duration: 0.8s;
-  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+/* Scroll reveal timing + stagger: see scroll-reveal.css (.reveal-stagger--dramatic optional) */
 
 /* Contact section: map + form side by side */
 .contact-map-wrap {

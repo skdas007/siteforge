@@ -72,21 +72,31 @@ body.theme-goldforest .form-text {
 body.theme-goldforest .sf-hero {
   --bs-secondary-color: rgba(236, 253, 245, 0.82);
   color: #ecfdf5;
+  /* section-headings.css: gradient + clip must stay light on dark green hero */
+  --sf-hero-heading-flow-a: #ecfdf5;
+  --sf-hero-heading-flow-b: #fec700;
+  --sf-hero-heading-flow-c: #fffef0;
+  --sf-hero-heading-shine: rgba(255, 255, 255, 0.95);
+  --sf-hero-sub-flow-a: rgba(209, 250, 229, 0.95);
+  --sf-hero-sub-flow-b: #fef3c7;
+  --sf-hero-sub-flow-c: rgba(236, 253, 245, 0.92);
+  --sf-hero-heading-fallback: #ecfdf5;
+  --sf-hero-sub-fallback: rgba(236, 253, 245, 0.88);
 }
 
-body.theme-goldforest .sf-hero h1,
-body.theme-goldforest .sf-hero h2,
-body.theme-goldforest .sf-hero h3 {
+body.theme-goldforest .sf-hero h1:not(.sf-heading-gradient),
+body.theme-goldforest .sf-hero h2:not(.sf-heading-gradient),
+body.theme-goldforest .sf-hero h3:not(.sf-heading-gradient) {
   color: #ecfdf5 !important;
 }
 
-body.theme-goldforest .sf-hero .section-title {
+body.theme-goldforest .sf-hero .section-title:not(.sf-heading-gradient) {
   color: #ecfdf5 !important;
 }
 
 body.theme-goldforest .sf-hero .text-muted,
-body.theme-goldforest .sf-hero .section-subtitle,
-body.theme-goldforest .sf-hero .lead,
+body.theme-goldforest .sf-hero .section-subtitle:not(.sf-subheading-gradient),
+body.theme-goldforest .sf-hero .lead:not(.sf-subheading-gradient),
 body.theme-goldforest .sf-hero .text-secondary {
   color: rgba(236, 253, 245, 0.82) !important;
 }
@@ -110,10 +120,10 @@ body.theme-goldforest .spotlight-card {
   border-radius: 14px;
 }
 
-body.theme-goldforest .section-title,
-body.theme-goldforest h1,
-body.theme-goldforest h2,
-body.theme-goldforest h3 {
+body.theme-goldforest .section-title:not(.sf-heading-gradient),
+body.theme-goldforest h1:not(.sf-heading-gradient),
+body.theme-goldforest h2:not(.sf-heading-gradient),
+body.theme-goldforest h3:not(.sf-heading-gradient) {
   color: #02462e;
 }
 

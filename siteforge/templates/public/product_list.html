@@ -9,8 +9,8 @@
 <section class="sf-home-products py-5 section-padding">
   <div class="container position-relative">
     <div class="text-center mb-5" data-reveal="fade-up">
-      <h1 class="section-title section-title-glow">Products</h1>
-      <p class="section-subtitle">Explore what we have for you.</p>
+      <h1 class="section-title sf-heading-gradient">Products</h1>
+      <p class="section-subtitle sf-subheading-gradient">Explore what we have for you.</p>
     </div>
 
     <form id="sf-product-filter-form" method="get" action="{% url 'product_list' %}" class="sf-product-filters mb-4" data-reveal="fade-up">
@@ -163,6 +163,9 @@
               }
               if (typeof window.initCard3dTilt === "function") {
                 window.initCard3dTilt(rows);
+              }
+              if (typeof window.sfRefreshScrollReveal === "function") {
+                window.sfRefreshScrollReveal(rows);
               }
             }
             if (!data.more) {

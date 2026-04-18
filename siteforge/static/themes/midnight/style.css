@@ -263,12 +263,12 @@ body.theme-midnight {
   border-color: #5f87ff;
 }
 
-/* Home contact: no broken title clip; map + form match blue night storefront */
-.theme-midnight .sf-contact-home__title {
+/* Home contact: solid text only if animated gradient classes are not used */
+.theme-midnight .sf-contact-home__title:not(.sf-heading-gradient) {
   color: #f0f4ff;
 }
 
-.theme-midnight .sf-contact-home__subtitle {
+.theme-midnight .sf-contact-home__subtitle:not(.sf-subheading-gradient) {
   color: #aeb8e6;
   opacity: 1;
 }

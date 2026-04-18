@@ -18,8 +18,11 @@
 .sf-product-filters {
   --sf-filter-border: rgba(15, 23, 42, 0.08);
   --sf-filter-bg: rgba(255, 255, 255, 0.92);
+  /* Full panel surface so labels aren’t drawn on transparent over dark section bg */
+  --sf-filter-panel-bg: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  background: var(--sf-filter-panel-bg);
   border: 1px solid var(--sf-filter-border);
   border-radius: 1.25rem;
   padding: 1rem 1.25rem;

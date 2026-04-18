@@ -35,10 +35,10 @@ body.theme-emeraldgold {
   box-shadow: 0 6px 20px rgba(14, 94, 68, 0.08);
 }
 
-.theme-emeraldgold .section-title,
-.theme-emeraldgold h1,
-.theme-emeraldgold h2,
-.theme-emeraldgold h3 {
+.theme-emeraldgold .section-title:not(.sf-heading-gradient),
+.theme-emeraldgold h1:not(.sf-heading-gradient),
+.theme-emeraldgold h2:not(.sf-heading-gradient),
+.theme-emeraldgold h3:not(.sf-heading-gradient) {
   color: #173329;
 }
 

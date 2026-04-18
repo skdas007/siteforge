@@ -16,11 +16,14 @@
   {% endif %}
   {% include "includes/seo_meta.html" %}
   <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="preload" href="{% static 'css/section-headings.css' %}" as="style">
+  <link rel="preload" href="{% static 'css/scroll-reveal.css' %}" as="style">
   {% if theme_slug %}
   <link href="{% static 'themes/' %}{{ theme_slug }}/style.css" rel="stylesheet">
   {% else %}
   <link href="{% static 'themes/default/style.css' %}" rel="stylesheet">
   {% endif %}
+  <link href="{% static 'css/section-headings.css' %}" rel="stylesheet">
   <link href="{% static 'css/scroll-reveal.css' %}" rel="stylesheet">
   <link href="{% static 'css/animations-3d.css' %}" rel="stylesheet">
   <link href="{% static 'css/hero-split.css' %}" rel="stylesheet">

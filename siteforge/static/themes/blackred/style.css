@@ -22,6 +22,13 @@ body.theme-blackred {
   color: #f0f0f0 !important;
 }
 
+/* navbar-public.css hovers nav links to near-black — invisible on dark bar */
+.theme-blackred .navbar-public .nav-link-nav:hover,
+.theme-blackred .navbar-public .nav-link-nav:focus {
+  color: #fafafa !important;
+  background: rgba(217, 4, 41, 0.14) !important;
+}
+
 .theme-blackred .btn-primary {
   background: #d90429;
   border-color: #d90429;
@@ -266,12 +273,12 @@ body.theme-blackred {
   border-color: #d90429;
 }
 
-/* Home contact: readable headings, dark map chrome, form fields match storefront */
-.theme-blackred .sf-contact-home__title {
+/* Home contact: solid headings only without gradient utility classes */
+.theme-blackred .sf-contact-home__title:not(.sf-heading-gradient) {
   color: #fafafa;
 }
 
-.theme-blackred .sf-contact-home__subtitle {
+.theme-blackred .sf-contact-home__subtitle:not(.sf-subheading-gradient) {
   color: #c4c4c4;
   opacity: 1;
 }
@@ -310,4 +317,125 @@ body.theme-blackred {
 /* Stronger description copy on product cards (was losing to global .text-muted) */
 .theme-blackred .sf-home-products .card-text.text-muted {
   color: #cfcfcf !important;
+}
+
+/* Product list — filters: panel + labels readable on charcoal band (avoid dark-on-dark) */
+.theme-blackred .sf-home-products .sf-product-filters {
+  --sf-filter-panel-bg: rgba(47, 45, 46, 0.96);
+  --sf-filter-bg: rgba(56, 54, 56, 0.98);
+  --sf-filter-border: rgba(255, 255, 255, 0.13);
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-label {
+  color: #dcd8d9;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-price-sep {
+  color: #aaa;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-search-wrap .input-group-text {
+  color: #bdbdbd;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-search-wrap .form-control {
+  color: #fafafa;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-search-wrap .form-control::placeholder {
+  color: rgba(245, 245, 245, 0.42);
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-search-wrap .input-group:focus-within {
+  border-color: rgba(217, 4, 41, 0.65);
+  box-shadow: 0 0 0 3px rgba(217, 4, 41, 0.18);
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-open-btn {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(56, 54, 56, 0.98) !important;
+  color: #f0f0f0 !important;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-open-btn--wide {
+  border-color: rgba(217, 4, 41, 0.45) !important;
+  color: #ffb3bc !important;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-open-btn--wide:hover {
+  background: rgba(217, 4, 41, 0.12) !important;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-price-range .form-control {
+  background: rgba(30, 29, 30, 0.96);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #fafafa;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-price-range .form-control::placeholder {
+  color: rgba(245, 245, 245, 0.52);
+  opacity: 1;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-btn-clear {
+  color: #d0d0d0;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-btn-clear:hover {
+  color: #ffb3bc;
+  background: rgba(217, 4, 41, 0.12);
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-chip:not(.active) {
+  background: rgba(66, 64, 65, 0.96);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f4f4f4;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-chip:hover {
+  border-color: rgba(217, 4, 41, 0.55);
+  color: #ffb3bc;
+}
+
+.theme-blackred .sf-home-products .sf-product-filters .sf-filter-chips::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Mobile filter drawer — same palette */
+.theme-blackred .sf-filter-offcanvas {
+  background: #2a2829;
+  color: #f2f2f2;
+}
+
+.theme-blackred .sf-filter-offcanvas .offcanvas-header {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.theme-blackred .sf-filter-offcanvas .offcanvas-title {
+  color: #fafafa;
+}
+
+.theme-blackred .sf-filter-offcanvas .sf-filter-drawer-lead {
+  color: #b5b5b5;
+}
+
+.theme-blackred .sf-filter-offcanvas .sf-filter-label {
+  color: #d6d6d6;
+}
+
+.theme-blackred .sf-filter-offcanvas .form-select {
+  background-color: rgba(38, 37, 38, 0.97);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #fafafa;
+}
+
+.theme-blackred .sf-filter-offcanvas .sf-filter-price-range .form-control {
+  background: rgba(30, 29, 30, 0.96);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #fafafa;
+}
+
+.theme-blackred .sf-filter-offcanvas .sf-filter-price-range .form-control::placeholder {
+  color: rgba(245, 245, 245, 0.52);
+  opacity: 1;
 }

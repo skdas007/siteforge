@@ -1,0 +1,411 @@
+/**
+ * Theme-aware section headings: flowing gradient + light sweep on titles,
+ * softer flowing accent on subtitles. Uses --sf-primary from each theme.
+ * Classes: .sf-heading-gradient  .sf-subheading-gradient
+ */
+
+:root {
+  --sf-heading-flow-a: color-mix(in srgb, var(--sf-primary, #0d6efd) 18%, #0f172a);
+  --sf-heading-flow-b: var(--sf-primary, #0d6efd);
+  --sf-heading-flow-c: color-mix(in srgb, var(--sf-primary, #0d6efd) 42%, #ffffff);
+  --sf-heading-shine: rgba(255, 255, 255, 0.78);
+  --sf-heading-fallback: #0f172a;
+  --sf-sub-flow-a: color-mix(in srgb, var(--sf-primary, #0d6efd) 22%, #64748b);
+  --sf-sub-flow-b: color-mix(in srgb, var(--sf-primary, #0d6efd) 55%, #94a3b8);
+  --sf-sub-flow-c: color-mix(in srgb, var(--sf-primary, #0d6efd) 22%, #64748b);
+  --sf-sub-fallback: #64748b;
+}
+
+body.theme-minimal {
+  --sf-heading-flow-a: #1e293b;
+  --sf-heading-flow-b: #334155;
+  --sf-heading-flow-c: #64748b;
+  --sf-heading-shine: rgba(255, 255, 255, 0.85);
+  --sf-heading-fallback: #212529;
+  --sf-sub-flow-a: #64748b;
+  --sf-sub-flow-b: #94a3b8;
+  --sf-sub-flow-c: #64748b;
+  --sf-sub-fallback: #6c757d;
+}
+
+body.theme-clarity {
+  --sf-heading-flow-a: var(--clarity-dark, #212529);
+  --sf-heading-flow-b: var(--clarity-primary, #0ea2bd);
+  --sf-heading-flow-c: color-mix(in srgb, var(--clarity-primary, #0ea2bd) 40%, #ffffff);
+  --sf-heading-shine: rgba(255, 255, 255, 0.82);
+  --sf-heading-fallback: var(--clarity-dark, #212529);
+  --sf-sub-flow-a: #6c757d;
+  --sf-sub-flow-b: color-mix(in srgb, var(--clarity-primary, #0ea2bd) 38%, #64748b);
+  --sf-sub-flow-c: #6c757d;
+  --sf-sub-fallback: #6c757d;
+}
+
+body.theme-aurora {
+  --sf-heading-flow-a: #252a52;
+  --sf-heading-flow-b: var(--sf-primary, #5b5bd6);
+  --sf-heading-flow-c: #c084fc;
+  --sf-heading-shine: rgba(255, 255, 255, 0.88);
+  --sf-heading-fallback: #252a52;
+  --sf-sub-flow-a: #64748b;
+  --sf-sub-flow-b: color-mix(in srgb, var(--sf-primary, #5b5bd6) 45%, #94a3b8);
+  --sf-sub-flow-c: #64748b;
+  --sf-sub-fallback: rgba(37, 42, 82, 0.72);
+}
+
+body.theme-emeraldgold {
+  --sf-heading-flow-a: #14532d;
+  --sf-heading-flow-b: var(--sf-primary, #0f8a5f);
+  --sf-heading-flow-c: #b4872d;
+  --sf-heading-shine: rgba(255, 250, 235, 0.85);
+  --sf-heading-fallback: #173329;
+  --sf-sub-flow-a: rgba(23, 51, 41, 0.72);
+  --sf-sub-flow-b: color-mix(in srgb, var(--sf-primary, #0f8a5f) 42%, #64748b);
+  --sf-sub-flow-c: rgba(23, 51, 41, 0.72);
+  --sf-sub-fallback: rgba(23, 51, 41, 0.72);
+}
+
+body.theme-goldforest {
+  /* Light page sections: deep green + gold + mint (readable on cream #f7f4e8) */
+  --sf-heading-flow-a: #02462e;
+  --sf-heading-flow-b: var(--sf-primary, #fec700);
+  --sf-heading-flow-c: #ecfdf5;
+  --sf-heading-shine: rgba(255, 248, 220, 0.92);
+  --sf-heading-fallback: #02462e;
+  --sf-sub-flow-a: rgba(2, 70, 46, 0.75);
+  --sf-sub-flow-b: color-mix(in srgb, #fec700 40%, #0f3d2a);
+  --sf-sub-flow-c: rgba(2, 70, 46, 0.75);
+  --sf-sub-fallback: rgba(2, 70, 46, 0.76);
+}
+
+body.theme-midnight {
+  --sf-heading-flow-a: #7aa2ff;
+  --sf-heading-flow-b: #e7ecff;
+  --sf-heading-flow-c: #9eb6ff;
+  --sf-heading-shine: rgba(255, 255, 255, 0.55);
+  --sf-heading-fallback: #e7ecff;
+  --sf-sub-flow-a: #9ea8cf;
+  --sf-sub-flow-b: #c7d2fe;
+  --sf-sub-flow-c: #9ea8cf;
+  --sf-sub-fallback: #9ea8cf;
+}
+
+body.theme-blackred {
+  --sf-heading-flow-a: #f5f5f5;
+  --sf-heading-flow-b: var(--sf-primary, #d90429);
+  --sf-heading-flow-c: #fecaca;
+  --sf-heading-shine: rgba(255, 255, 255, 0.6);
+  --sf-heading-fallback: #f5f5f5;
+  --sf-sub-flow-a: #b5b5b5;
+  --sf-sub-flow-b: #fca5a5;
+  --sf-sub-flow-c: #b5b5b5;
+  --sf-sub-fallback: #b5b5b5;
+}
+
+@keyframes sf-heading-flow-shine {
+  0% {
+    background-position: 0% 50%, -80% 50%;
+  }
+  100% {
+    background-position: 200% 50%, 180% 50%;
+  }
+}
+
+@keyframes sf-subheading-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/*
+ * Hero blocks often use a dark bg while the rest of the page is light.
+ * Use --sf-hero-heading-flow-* / --sf-hero-sub-flow-* on .sf-hero (set per theme)
+ * so gradient text stays bright; falls back to global --sf-heading-flow-* outside hero.
+ */
+.sf-hero .sf-heading-gradient {
+  background-image:
+    linear-gradient(
+      102deg,
+      var(--sf-hero-heading-flow-a, var(--sf-heading-flow-a)) 0%,
+      var(--sf-hero-heading-flow-b, var(--sf-heading-flow-b)) 38%,
+      var(--sf-hero-heading-flow-c, var(--sf-heading-flow-c)) 52%,
+      var(--sf-hero-heading-flow-b, var(--sf-heading-flow-b)) 72%,
+      var(--sf-hero-heading-flow-a, var(--sf-heading-flow-a)) 100%
+    ),
+    linear-gradient(
+      115deg,
+      transparent 28%,
+      rgba(255, 255, 255, 0.24) 43%,
+      var(--sf-hero-heading-shine, var(--sf-heading-shine)) 50%,
+      rgba(255, 255, 255, 0.2) 57%,
+      transparent 72%
+    );
+}
+
+.sf-hero .sf-subheading-gradient {
+  background-image: linear-gradient(
+    92deg,
+    var(--sf-hero-sub-flow-a, var(--sf-sub-flow-a)) 0%,
+    var(--sf-hero-sub-flow-b, var(--sf-sub-flow-b)) 48%,
+    var(--sf-hero-sub-flow-c, var(--sf-sub-flow-c)) 100%
+  );
+}
+
+/* Home contact section — gradient tuned via --sf-contact-* per theme (see bottom of file) */
+#contact.sf-contact-home .sf-heading-gradient {
+  background-image:
+    linear-gradient(
+      102deg,
+      var(--sf-contact-heading-flow-a, var(--sf-heading-flow-a)) 0%,
+      var(--sf-contact-heading-flow-b, var(--sf-heading-flow-b)) 38%,
+      var(--sf-contact-heading-flow-c, var(--sf-heading-flow-c)) 52%,
+      var(--sf-contact-heading-flow-b, var(--sf-heading-flow-b)) 72%,
+      var(--sf-contact-heading-flow-a, var(--sf-heading-flow-a)) 100%
+    ),
+    linear-gradient(
+      115deg,
+      transparent 28%,
+      rgba(255, 255, 255, 0.22) 43%,
+      var(--sf-contact-heading-shine, var(--sf-heading-shine)) 50%,
+      rgba(255, 255, 255, 0.18) 57%,
+      transparent 72%
+    );
+}
+
+#contact.sf-contact-home .sf-subheading-gradient {
+  background-image: linear-gradient(
+    92deg,
+    var(--sf-contact-sub-flow-a, var(--sf-sub-flow-a)) 0%,
+    var(--sf-contact-sub-flow-b, var(--sf-sub-flow-b)) 48%,
+    var(--sf-contact-sub-flow-c, var(--sf-sub-flow-c)) 100%
+  );
+}
+
+.sf-heading-gradient {
+  display: block;
+  max-width: 100%;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  background-image:
+    linear-gradient(
+      102deg,
+      var(--sf-heading-flow-a) 0%,
+      var(--sf-heading-flow-b) 38%,
+      var(--sf-heading-flow-c) 52%,
+      var(--sf-heading-flow-b) 72%,
+      var(--sf-heading-flow-a) 100%
+    ),
+    linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.18) 44%,
+      var(--sf-heading-shine) 50%,
+      rgba(255, 255, 255, 0.18) 56%,
+      transparent 70%
+    );
+  background-size: 240% 100%, 160% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: sf-heading-flow-shine 10s linear infinite;
+}
+
+.sf-subheading-gradient {
+  display: block;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0.35rem;
+  line-height: 1.55;
+  background-image: linear-gradient(
+    92deg,
+    var(--sf-sub-flow-a) 0%,
+    var(--sf-sub-flow-b) 45%,
+    var(--sf-sub-flow-c) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: sf-subheading-flow 14s ease-in-out infinite;
+}
+
+.sf-showcase-sub.sf-subheading-gradient {
+  display: block;
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: var(--sf-showcase-sans, system-ui, sans-serif);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+@supports not (background-clip: text) {
+  .sf-heading-gradient {
+    background: none;
+    color: var(--sf-heading-fallback);
+    -webkit-text-fill-color: unset;
+    animation: none;
+  }
+
+  .sf-subheading-gradient {
+    background: none;
+    color: var(--sf-sub-fallback);
+    -webkit-text-fill-color: unset;
+    animation: none;
+  }
+
+  .sf-hero .sf-heading-gradient {
+    color: var(--sf-hero-heading-fallback, var(--sf-heading-fallback));
+  }
+
+  .sf-hero .sf-subheading-gradient {
+    color: var(--sf-hero-sub-fallback, var(--sf-sub-fallback));
+  }
+
+  #contact.sf-contact-home .sf-heading-gradient {
+    color: var(--sf-contact-heading-fallback, var(--sf-heading-fallback));
+  }
+
+  #contact.sf-contact-home .sf-subheading-gradient {
+    color: var(--sf-contact-sub-fallback, var(--sf-sub-fallback));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-heading-gradient {
+    animation: none !important;
+    background: none !important;
+    color: var(--sf-heading-fallback) !important;
+    -webkit-text-fill-color: unset !important;
+    background-clip: unset !important;
+    -webkit-background-clip: unset !important;
+  }
+
+  .sf-subheading-gradient {
+    animation: none !important;
+    background: none !important;
+    color: var(--sf-sub-fallback) !important;
+    -webkit-text-fill-color: unset !important;
+    background-clip: unset !important;
+    -webkit-background-clip: unset !important;
+  }
+
+  .sf-hero .sf-heading-gradient {
+    color: var(--sf-hero-heading-fallback, var(--sf-heading-fallback)) !important;
+  }
+
+  .sf-hero .sf-subheading-gradient {
+    color: var(--sf-hero-sub-fallback, var(--sf-sub-fallback)) !important;
+  }
+
+  #contact.sf-contact-home .sf-heading-gradient {
+    color: var(--sf-contact-heading-fallback, var(--sf-heading-fallback)) !important;
+  }
+
+  #contact.sf-contact-home .sf-subheading-gradient {
+    color: var(--sf-contact-sub-fallback, var(--sf-sub-fallback)) !important;
+  }
+}
+
+/* ── Contact section: gradient stops matched to each theme’s #contact background ── */
+body.theme-midnight #contact.sf-contact-home {
+  --sf-contact-heading-flow-a: #98aef8;
+  --sf-contact-heading-flow-b: #eef1ff;
+  --sf-contact-heading-flow-c: #7aa2ff;
+  --sf-contact-heading-shine: rgba(255, 255, 255, 0.62);
+  --sf-contact-sub-flow-a: #aeb8e6;
+  --sf-contact-sub-flow-b: #d9e0ff;
+  --sf-contact-sub-flow-c: #9ea8cf;
+  --sf-contact-heading-fallback: #f0f4ff;
+  --sf-contact-sub-fallback: #c5cce8;
+}
+
+body.theme-blackred #contact.sf-contact-home {
+  --sf-contact-heading-flow-a: #fecaca;
+  --sf-contact-heading-flow-b: #ffffff;
+  --sf-contact-heading-flow-c: #fb7185;
+  --sf-contact-heading-shine: rgba(255, 255, 255, 0.55);
+  --sf-contact-sub-flow-a: #d4d4d4;
+  --sf-contact-sub-flow-b: #fca5a5;
+  --sf-contact-sub-flow-c: #b5b5b5;
+  --sf-contact-heading-fallback: #fafafa;
+  --sf-contact-sub-fallback: #d4d4d4;
+}
+
+body.theme-clarity #contact.sf-contact-home {
+  --sf-contact-heading-flow-a: var(--clarity-dark, #212529);
+  --sf-contact-heading-flow-b: var(--clarity-primary, #0ea2bd);
+  --sf-contact-heading-flow-c: color-mix(in srgb, var(--clarity-primary, #0ea2bd) 35%, #ffffff);
+  --sf-contact-heading-shine: rgba(255, 255, 255, 0.88);
+  --sf-contact-sub-flow-a: #6c757d;
+  --sf-contact-sub-flow-b: color-mix(in srgb, var(--clarity-primary, #0ea2bd) 42%, #94a3b8);
+  --sf-contact-sub-flow-c: #6c757d;
+  --sf-contact-heading-fallback: var(--clarity-dark, #212529);
+  --sf-contact-sub-fallback: #5d6b75;
+}
+
+body.theme-goldforest #contact.sf-contact-home {
+  --sf-contact-heading-flow-a: #02462e;
+  --sf-contact-heading-flow-b: #fec700;
+  --sf-contact-heading-flow-c: #ecfdf5;
+  --sf-contact-heading-shine: rgba(255, 248, 220, 0.9);
+  --sf-contact-sub-flow-a: rgba(2, 70, 46, 0.72);
+  --sf-contact-sub-flow-b: color-mix(in srgb, #fec700 42%, #14532d);
+  --sf-contact-sub-flow-c: rgba(2, 70, 46, 0.72);
+  --sf-contact-heading-fallback: #02462e;
+  --sf-contact-sub-fallback: rgba(2, 70, 46, 0.78);
+}
+
+body.theme-emeraldgold #contact.sf-contact-home {
+  --sf-contact-heading-flow-a: #166534;
+  --sf-contact-heading-flow-b: var(--sf-primary, #0f8a5f);
+  --sf-contact-heading-flow-c: #d4a574;
+  --sf-contact-heading-shine: rgba(255, 252, 245, 0.88);
+  --sf-contact-sub-flow-a: rgba(23, 51, 41, 0.72);
+  --sf-contact-sub-flow-b: color-mix(in srgb, var(--sf-primary, #0f8a5f) 38%, #64748b);
+  --sf-contact-sub-flow-c: rgba(23, 51, 41, 0.72);
+  --sf-contact-heading-fallback: #173329;
+  --sf-contact-sub-fallback: rgba(23, 51, 41, 0.78);
+}
+
+body.theme-aurora #contact.sf-contact-home {
+  --sf-contact-heading-flow-a: #252a52;
+  --sf-contact-heading-flow-b: var(--sf-primary, #5b5bd6);
+  --sf-contact-heading-flow-c: #e9d5ff;
+  --sf-contact-heading-shine: rgba(255, 255, 255, 0.88);
+  --sf-contact-sub-flow-a: #64748b;
+  --sf-contact-sub-flow-b: color-mix(in srgb, var(--sf-primary, #5b5bd6) 48%, #a5b4fc);
+  --sf-contact-sub-flow-c: #64748b;
+  --sf-contact-heading-fallback: #252a52;
+  --sf-contact-sub-fallback: rgba(37, 42, 82, 0.78);
+}
+
+body.theme-minimal #contact.sf-contact-home {
+  --sf-contact-heading-flow-a: #334155;
+  --sf-contact-heading-flow-b: #475569;
+  --sf-contact-heading-flow-c: #64748b;
+  --sf-contact-heading-shine: rgba(255, 255, 255, 0.85);
+  --sf-contact-sub-flow-a: #64748b;
+  --sf-contact-sub-flow-b: #94a3b8;
+  --sf-contact-sub-flow-c: #64748b;
+  --sf-contact-heading-fallback: #212529;
+  --sf-contact-sub-fallback: #6c757d;
+}
+
+body.theme-default #contact.sf-contact-home {
+  --sf-contact-heading-flow-a: color-mix(in srgb, var(--sf-primary, #0d6efd) 20%, #0f172a);
+  --sf-contact-heading-flow-b: var(--sf-primary, #0d6efd);
+  --sf-contact-heading-flow-c: color-mix(in srgb, var(--sf-primary, #0d6efd) 38%, #ffffff);
+  --sf-contact-heading-shine: rgba(255, 255, 255, 0.82);
+  --sf-contact-sub-flow-a: color-mix(in srgb, var(--sf-primary, #0d6efd) 25%, #64748b);
+  --sf-contact-sub-flow-b: color-mix(in srgb, var(--sf-primary, #0d6efd) 52%, #94a3b8);
+  --sf-contact-sub-flow-c: color-mix(in srgb, var(--sf-primary, #0d6efd) 25%, #64748b);
+  --sf-contact-heading-fallback: #0f172a;
+  --sf-contact-sub-fallback: #64748b;
+}

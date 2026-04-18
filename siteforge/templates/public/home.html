@@ -88,16 +88,16 @@
     <div class="row align-items-center g-4 g-lg-5">
       <div class="col-lg-6 order-lg-1 order-2">
         <div class="hero-content-block reveal-stagger">
-          <h1 class="display-5 fw-bold hero-title" data-reveal="fade-right">{{ hero_title|default:"Welcome" }}</h1>
-          <p class="lead text-secondary hero-subtitle mt-3" data-reveal="fade-right">{{ hero_subtitle|default:"Your tagline or short description goes here." }}</p>
-          <div class="mt-4 hero-cta" data-reveal="fade-right">
+          <h1 class="display-5 fw-bold hero-title sf-heading-gradient" data-reveal="fade-right" data-reveal-once>{{ hero_title|default:"Welcome" }}</h1>
+          <p class="lead hero-subtitle sf-subheading-gradient mt-3" data-reveal="fade-right" data-reveal-once>{{ hero_subtitle|default:"Your tagline or short description goes here." }}</p>
+          <div class="mt-4 hero-cta" data-reveal="fade-right" data-reveal-once>
             <a href="#products" class="btn btn-primary btn-3d px-4 py-2">Explore</a>
             <a href="#contact" class="btn btn-outline-primary ms-2 px-4 py-2">Contact</a>
           </div>
         </div>
       </div>
       <div class="col-lg-6 order-lg-2 order-1">
-        <div class="hero-image-wrap" data-reveal="fade-left">
+        <div class="hero-image-wrap" data-reveal="fade-left" data-reveal-once>
           {% if hero_image %}
           <img src="{{ hero_image }}" alt="{{ hero_title|default:'Hero' }}" class="hero-image img-fluid rounded-3 shadow" onerror="this.onerror=null;this.src='{{ no_image_url }}';">
           {% elif banner_image %}
@@ -119,11 +119,11 @@
   <div class="sf-offer__ambient" aria-hidden="true"></div>
   <div class="container position-relative">
     <div class="text-center mb-5" data-reveal="fade-up">
-      <h2 class="section-title sf-offer__title">What We Offer</h2>
-      <p class="section-subtitle">Quality and service you can rely on.</p>
+      <h2 class="section-title sf-offer__title sf-heading-gradient">What We Offer</h2>
+      <p class="section-subtitle sf-subheading-gradient">Quality and service you can rely on.</p>
     </div>
     <div
-      class="sf-offer-fade-carousel reveal-stagger"
+      class="sf-offer-fade-carousel reveal-stagger reveal-stagger--dramatic"
       data-interval-ms="2800"
       data-fade-ms="700"
       role="region"
@@ -286,8 +286,8 @@
 {% if spotlight_categories %}
 <section class="sf-showcase-section" id="highlights" aria-labelledby="highlights-heading">
   <div class="container text-center pb-2 pb-lg-3" data-reveal="fade-up">
-    <h2 class="sf-showcase-heading" id="highlights-heading">Spotlight</h2>
-    <p class="sf-showcase-sub mb-0">Shop curated offers by category — managed in your dashboard under Categories.</p>
+    <h2 class="sf-showcase-heading sf-heading-gradient" id="highlights-heading">Spotlight</h2>
+    <p class="sf-showcase-sub sf-subheading-gradient mb-0">Shop curated offers by category — managed in your dashboard under Categories.</p>
   </div>
   <div class="sf-showcase-strip">
     <div class="sf-showcase-grid reveal-stagger sf-showcase-grid--count-{{ spotlight_categories|length }}">
@@ -335,8 +335,8 @@
 <section id="products" class="sf-home-products py-5 section-padding">
   <div class="container position-relative">
     <div class="text-center mb-5" data-reveal="fade-up">
-      <h2 class="section-title sf-home-products__title">Products</h2>
-      <p class="section-subtitle sf-home-products__subtitle">Explore what we have for you.</p>
+      <h2 class="section-title sf-home-products__title sf-heading-gradient">Products</h2>
+      <p class="section-subtitle sf-home-products__subtitle sf-subheading-gradient">Explore what we have for you.</p>
     </div>
     {% if categories %}
     <div class="d-flex flex-wrap justify-content-center gap-2 mb-4" data-reveal="fade-up">
@@ -368,8 +368,8 @@
 <section id="contact" class="sf-hero sf-contact-home py-5 section-padding" data-reveal="fade-up">
   <div class="container">
     <div class="text-center mb-5" data-reveal="fade-up">
-      <h2 class="section-title sf-contact-home__title">Contact us</h2>
-      <p class="section-subtitle sf-contact-home__subtitle">Find us on the map or send a message — we'll get back to you.</p>
+      <h2 class="section-title sf-contact-home__title sf-heading-gradient">Contact us</h2>
+      <p class="section-subtitle sf-contact-home__subtitle sf-subheading-gradient">Find us on the map or send a message — we'll get back to you.</p>
     </div>
     <div class="row g-4 align-items-stretch" data-reveal="fade-up">
       <div class="col-lg-6 order-2 order-lg-1">

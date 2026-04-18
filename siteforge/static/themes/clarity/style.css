@@ -17,7 +17,9 @@ body.theme-clarity {
 
 .theme-clarity .display-4,
 .theme-clarity .display-5,
-.theme-clarity h1, .theme-clarity h2, .theme-clarity .h2 {
+.theme-clarity h1:not(.sf-heading-gradient),
+.theme-clarity h2:not(.sf-heading-gradient),
+.theme-clarity .h2 {
   font-weight: 700;
   color: var(--clarity-dark);
 }
@@ -28,7 +30,7 @@ body.theme-clarity {
   margin-bottom: 0.5rem;
 }
 
-.theme-clarity .section-subtitle {
+.theme-clarity .section-subtitle:not(.sf-subheading-gradient) {
   color: #6c757d;
   max-width: 600px;
   margin-left: auto;
