@@ -175,7 +175,7 @@
         <div class="text-muted mb-4">{{ product.description|safe }}</div>
         {% endif %}
         <div class="product-purchase-box mb-4">
-          <div class="product-purchase-head d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div class="product-purchase-head d-flex align-items-center justify-content-between flex-wrap">
             <h3 class="h6 mb-0">Choose options</h3>
             <span class="product-purchase-hint">Fast order via WhatsApp</span>
           </div>
@@ -234,7 +234,7 @@
             <label for="product-qty" class="form-label fw-semibold mb-1">Quantity</label>
             <input type="number" id="product-qty" class="form-control product-qty-input" min="1" step="1" value="1">
           </div>
-          <div class="product-purchase-actions d-flex flex-wrap gap-2">
+          <div class="product-purchase-actions d-flex flex-wrap">
             {% if whatsapp_digits %}
             <a id="buy-whatsapp-btn" href="https://wa.me/{{ whatsapp_digits }}?text={{ whatsapp_message|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-success btn-buy-whatsapp">
               Buy in WhatsApp

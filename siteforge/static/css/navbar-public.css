@@ -11,6 +11,9 @@
   --sf-nav-logo-scale: 1.12;
   /* Optional: nudge logo from container left edge */
   --sf-nav-logo-inset-left: 0;
+  /* Hover/focus on .nav-link-nav — dark themes override (see theme style.css) */
+  --sf-nav-link-hover-fg: #0f172a;
+  --sf-nav-link-hover-bg: rgba(37, 99, 235, 0.06);
   background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
@@ -289,9 +292,10 @@
   transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), left 0.28s ease;
 }
 
-.navbar-public .nav-link-nav:hover {
-  color: #0f172a !important;
-  background: rgba(37, 99, 235, 0.06);
+.navbar-public .nav-link-nav:hover,
+.navbar-public .nav-link-nav:focus {
+  color: var(--sf-nav-link-hover-fg) !important;
+  background: var(--sf-nav-link-hover-bg) !important;
   transform: translateY(-2px);
   letter-spacing: 0.03em;
 }

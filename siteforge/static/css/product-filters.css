@@ -5,11 +5,17 @@
   gap: 1rem 1.25rem;
 }
 
+/* Allow grid column to shrink without clipping overflow; track min comes from grid-template minmax */
+.sf-area-search {
+  min-width: 0;
+}
+
 @media (min-width: 768px) {
   .sf-filter-responsive {
     grid-template-columns: minmax(12rem, 1.5fr) minmax(9.5rem, 1fr) auto;
     align-items: end;
   }
+
   .sf-area-chips {
     grid-column: 1 / -1;
   }
@@ -20,6 +26,9 @@
   --sf-filter-bg: rgba(255, 255, 255, 0.92);
   /* Full panel surface so labels aren’t drawn on transparent over dark section bg */
   --sf-filter-panel-bg: rgba(255, 255, 255, 0.94);
+  /* Typed + placeholder text on light glass row (dark themes inherit light body color otherwise) */
+  --sf-filter-q-color: #0f172a;
+  --sf-filter-q-placeholder: rgba(15, 23, 42, 0.42);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   background: var(--sf-filter-panel-bg);
@@ -97,6 +106,12 @@
   padding: 0.65rem 1rem 0.65rem 0;
   font-size: 0.9375rem;
   background: transparent;
+  color: var(--sf-filter-q-color);
+}
+
+.sf-filter-search-wrap .form-control::placeholder {
+  color: var(--sf-filter-q-placeholder);
+  opacity: 1;
 }
 
 .sf-filter-search-wrap .form-control:focus {

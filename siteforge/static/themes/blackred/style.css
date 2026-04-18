@@ -15,18 +15,13 @@ body.theme-blackred {
 .theme-blackred .navbar-public {
   background: #121212;
   border-bottom: 1px solid #2b2b2b;
+  --sf-nav-link-hover-fg: #fafafa;
+  --sf-nav-link-hover-bg: rgba(217, 4, 41, 0.14);
 }
 
 .theme-blackred .navbar-public .nav-link,
 .theme-blackred .navbar-public .navbar-brand-text {
   color: #f0f0f0 !important;
-}
-
-/* navbar-public.css hovers nav links to near-black — invisible on dark bar */
-.theme-blackred .navbar-public .nav-link-nav:hover,
-.theme-blackred .navbar-public .nav-link-nav:focus {
-  color: #fafafa !important;
-  background: rgba(217, 4, 41, 0.14) !important;
 }
 
 .theme-blackred .btn-primary {
@@ -183,13 +178,50 @@ body.theme-blackred {
 }
 
 .theme-blackred .sf-product-detail .product-purchase-box {
-  background: #404040;
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  background:
+    linear-gradient(
+      165deg,
+      rgba(52, 52, 54, 0.98) 0%,
+      rgba(42, 41, 43, 0.99) 45%,
+      rgba(36, 35, 37, 1) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 12px 36px rgba(0, 0, 0, 0.45);
+}
+
+.theme-blackred .sf-product-detail .product-purchase-head {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .theme-blackred .sf-product-detail .product-purchase-head h3 {
-  color: #f0f0f0;
+  color: #fafafa;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.theme-blackred .sf-product-detail .product-purchase-hint {
+  color: #ffc9cf;
+  background: rgba(217, 4, 41, 0.22);
+  border-color: rgba(217, 4, 41, 0.5);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.theme-blackred .sf-product-detail .product-purchase-actions {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-blackred .sf-product-detail .size-chart-link {
+  color: #ff8a9a;
+}
+
+.theme-blackred .sf-product-detail .size-chart-link:hover {
+  color: #ffb3bc;
+}
+
+.theme-blackred .sf-product-detail .size-chart-link:focus-visible {
+  outline-color: rgba(217, 4, 41, 0.65);
 }
 
 .theme-blackred .sf-product-detail .product-option-group label {
@@ -214,19 +246,54 @@ body.theme-blackred {
 }
 
 .theme-blackred .sf-product-detail .size-chart-panel {
-  background: #383838;
-  border-color: #6a6a6a;
+  background: rgba(22, 22, 24, 0.65);
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.theme-blackred .sf-product-detail .size-chart-panel .table {
+  color: #ececec;
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.04);
+}
+
+.theme-blackred .sf-product-detail .size-chart-panel thead th {
+  color: #c8c8c8;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-blackred .sf-product-detail .size-chart-panel tbody td {
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .theme-blackred .sf-product-detail .product-qty-input {
-  background: #383838;
-  border-color: #707070;
-  color: #f5f5f5;
+  background: rgba(55, 54, 56, 0.95);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fafafa;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .theme-blackred .sf-product-detail .product-qty-input:focus {
   border-color: #d90429;
   box-shadow: 0 0 0 0.2rem rgba(217, 4, 41, 0.22);
+}
+
+.theme-blackred .sf-product-detail .btn-buy-whatsapp {
+  box-shadow: 0 6px 16px rgba(25, 135, 84, 0.35);
+}
+
+.theme-blackred .sf-product-detail .btn-view-products {
+  color: #f4f4f4;
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.theme-blackred .sf-product-detail .btn-view-products:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .theme-blackred #contact.sf-contact-home {

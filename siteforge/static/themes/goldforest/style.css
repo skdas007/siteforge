@@ -19,6 +19,8 @@ body.theme-goldforest {
 body.theme-goldforest .navbar-public {
   background: #02462e;
   border-bottom: 1px solid rgba(254, 199, 0, 0.35);
+  --sf-nav-link-hover-fg: #fec700;
+  --sf-nav-link-hover-bg: rgba(254, 199, 0, 0.12);
 }
 
 body.theme-goldforest .navbar-public .nav-link,
@@ -26,7 +28,6 @@ body.theme-goldforest .navbar-public .navbar-brand-text {
   color: #ecfdf5 !important;
 }
 
-body.theme-goldforest .navbar-public .nav-link:hover,
 body.theme-goldforest .navbar-public .nav-link.active {
   color: #fec700 !important;
 }
