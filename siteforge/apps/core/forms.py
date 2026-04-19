@@ -1,4 +1,30 @@
+import re
+
 from django import forms
+
+
+class OptionalPhoneForm(forms.Form):
+    """Optional modal — phone only; submitted only when user chooses to."""
+
+    phone = forms.CharField(
+        max_length=50,
+        required=True,
+        strip=True,
+        error_messages={"required": "Please enter your phone number."},
+    )
+
+    def clean_phone(self):
+        raw = (self.cleaned_data.get("phone") or "").strip()
+        if re.search(r"[A-Za-z]", raw):
+            raise forms.ValidationError(
+                "Letters are not allowed. Enter exactly 10 digits."
+            )
+        digits = re.sub(r"\D", "", raw)
+        if len(digits) != 10:
+            raise forms.ValidationError(
+                "Enter exactly 10 digits (mobile number)."
+            )
+        return digits
 
 
 class ContactForm(forms.Form):

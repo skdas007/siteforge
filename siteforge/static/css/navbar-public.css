@@ -527,3 +527,19 @@
     flex-shrink: 0;
   }
 }
+
+/* ----- Bootstrap modals: blur + dim everything behind (campaign, optional phone, etc.) ----- */
+body.modal-open .modal-backdrop {
+  backdrop-filter: blur(22px) saturate(118%);
+  -webkit-backdrop-filter: blur(22px) saturate(118%);
+  background-color: rgba(15, 23, 42, 0.52) !important;
+  /* Helps backdrop-filter paint reliably in WebKit */
+  transform: translateZ(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.modal-open .modal-backdrop {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}

@@ -29,6 +29,13 @@
   <link href="{% static 'css/hero-split.css' %}" rel="stylesheet">
   <link href="{% static 'css/navbar-public.css' %}" rel="stylesheet">
   <link href="{% static 'css/image-fallback.css' %}" rel="stylesheet">
+  {% if request.client %}
+  {% with p=request.path|default:"" %}
+  {% if p|length < 9 or p|slice:":9" != "/accounts" %}
+  <link href="{% static 'css/optional-phone-modal.css' %}" rel="stylesheet">
+  {% endif %}
+  {% endwith %}
+  {% endif %}
   <style>
     :root {
       --sf-font-body: {% firstof font_body_css "system-ui, sans-serif" %};
@@ -200,6 +207,75 @@
     </div>
   </div>
   {% endif %}
+  {% if request.client %}
+  {% with p=request.path|default:"" %}
+  {% if p|length < 9 or p|slice:":9" != "/accounts" %}
+  {% url 'optional_phone_submit' as sf_optional_phone_submit_url %}
+  {{ sf_optional_phone_submit_url|json_script:"sf-optional-phone-url" }}
+  {{ request.client.business_name|default:""|json_script:"sf-optional-phone-brand" }}
+  <div
+    class="modal fade sf-opt-phone-modal"
+    id="sfOptionalPhoneModal"
+    tabindex="-1"
+    aria-labelledby="sfOptionalPhoneModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content sf-opt-phone-modal__shell border-0 shadow-lg position-relative">
+        <!-- <button
+          type="button"
+          class="btn-close sf-opt-phone-modal__close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button> -->
+        <div class="sf-opt-phone-modal__hero">
+          <div class="sf-opt-phone-modal__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+          </div>
+          <h2 class="sf-opt-phone-modal__title" id="sfOptionalPhoneModalLabel">Stay in touch?</h2>
+          <p class="sf-opt-phone-modal__lead">
+            To browse our complete website, please submit your mobile number for secure access. <span data-sf-opt-brand></span>.
+          </p>
+        </div>
+        <div class="sf-opt-phone-modal__body">
+          <form id="sfOptionalPhoneForm" class="sf-opt-phone-modal__form" novalidate>
+            {% csrf_token %}
+            <label for="sfOptionalPhoneInput" class="form-label small text-muted mb-1">Mobile number <span class="text-muted fw-normal">(10 digits)</span></label>
+            <input
+              type="tel"
+              class="form-control sf-opt-phone-modal__input"
+              id="sfOptionalPhoneInput"
+              name="phone"
+              inputmode="numeric"
+              pattern="[0-9]{10}"
+              autocomplete="tel"
+              placeholder="9876543210"
+              maxlength="10"
+              minlength="10"
+            />
+            <div id="sfOptionalPhoneError" class="small text-danger mt-1 visually-hidden" role="alert"></div>
+            <div class="d-flex flex-column flex-sm-row gap-2 mt-2 align-items-stretch">
+              <button type="submit" class="btn sf-opt-phone-modal__submit flex-grow-1">Submit</button>
+              <!-- <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">No thanks</button> -->
+            </div>
+            <p class="sf-opt-phone-modal__fine mb-0 mt-2">
+              Fully optional — keep browsing if you prefer. By submitting, you agree we may contact you about this store on WhatsApp or phone.
+            </p>
+          </form>
+          <div id="sfOptionalPhoneThanks" class="sf-opt-phone-modal__thanks d-none">
+            <p class="mb-2 fw-semibold text-success">Thank you!</p>
+            <p class="small text-muted mb-3">We&apos;ll only use your number for relevant updates.</p>
+            <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+  {% endif %}
   <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'js/scroll-reveal.js' %}"></script>
   <script src="{% static 'js/card-3d-tilt.js' %}"></script>
@@ -280,6 +356,13 @@
     if (fg) bar.style.color = fg;
   })();
   </script>
+  {% if request.client %}
+  {% with p=request.path|default:"" %}
+  {% if p|length < 9 or p|slice:":9" != "/accounts" %}
+  <script src="{% static 'js/optional-phone-modal.js' %}"></script>
+  {% endif %}
+  {% endwith %}
+  {% endif %}
   {% block extra_js %}{% endblock %}
 </body>
 </html>

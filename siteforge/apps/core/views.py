@@ -35,7 +35,7 @@ FONT_META = {
     "cormorant": {"family": "Cormorant Garamond", "css": '"Cormorant Garamond", Georgia, "Times New Roman", serif', "google": "Cormorant+Garamond:wght@500;600;700"},
 }
 
-from .forms import ContactForm
+from .forms import ContactForm, OptionalPhoneForm
 
 
 def _parse_price_filter_param(raw):
@@ -389,6 +389,40 @@ class ContactSubmitView(FormView):
                 status=400,
             )
         return super().form_invalid(form)
+
+
+class OptionalPhoneSubmitView(View):
+    """POST-only: save optional phone from public modal (tenant-scoped)."""
+
+    http_method_names = ["post"]
+
+    def post(self, request):
+        client = getattr(request, "client", None)
+        if not client:
+            return JsonResponse({"success": False, "message": "Not available."}, status=404)
+
+        if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+            return JsonResponse({"success": False, "message": "Invalid request."}, status=400)
+
+        form = OptionalPhoneForm(request.POST)
+        if not form.is_valid():
+            return JsonResponse(
+                {"success": False, "errors": {k: list(v) for k, v in form.errors.items()}},
+                status=400,
+            )
+
+        from apps.leads.models import OptionalPhoneCapture
+
+        OptionalPhoneCapture.objects.create(
+            client=client,
+            phone=form.cleaned_data["phone"],
+        )
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Thank you — we'll reach out when it matters.",
+            }
+        )
 
 
 class ProductSearchSuggestView(View):
