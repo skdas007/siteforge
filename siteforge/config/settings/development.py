@@ -4,7 +4,7 @@ Development settings for SiteForge.
 from .base import *  # noqa: F401, F403
 
 DEBUG = True
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "bobdy", "bobdyinternational", "amber", "*"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "bobdy", "bobdyinternational", "amber", "amberonlinestore.com", "www.amberonlinestore.com", "*"]
 
 # Allow CSRF when using different local hostnames (e.g. localhost vs bobdy)
 CSRF_TRUSTED_ORIGINS = [
@@ -13,6 +13,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://bobdy:8000",
     "http://bobdyinternational:8000",
     "http://amber:8000",
+    "http://amberonlinestore.com:8000",
+    "http://www.amberonlinestore.com:8000",
 ]
 
 # Store CSRF token in session so it matches the same domain as your login (avoids cookie mismatch)

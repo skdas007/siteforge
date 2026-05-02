@@ -74,7 +74,7 @@ Use these variables for **production** (adjust values):
 # Required
 DJANGO_SETTINGS_MODULE=config.settings.production
 SECRET_KEY=your-long-random-secret-key-here
-ALLOWED_HOSTS=bobdyinternational.com,www.bobdyinternational.com
+ALLOWED_HOSTS=bobdyinternational.com,www.bobdyinternational.com,amberonlinestore.com,www.amberonlinestore.com
 
 # Optional (defaults shown)
 DEBUG=False
@@ -192,7 +192,7 @@ If `EnvironmentFile` doesn’t load `.env` on your system, either fix the path s
 ```ini
 Environment=DJANGO_SETTINGS_MODULE=config.settings.production
 Environment=SECRET_KEY=your-secret-key
-Environment=ALLOWED_HOSTS=bobdyinternational.com,www.bobdyinternational.com
+Environment=ALLOWED_HOSTS=bobdyinternational.com,www.bobdyinternational.com,amberonlinestore.com,www.amberonlinestore.com
 ```
 
 Then:
@@ -219,7 +219,7 @@ Copy the config, replace placeholders with your app path and domain, then enable
 cd /root/Mythee/siteforge/siteforge/siteforge
 APP_ROOT=/root/Mythee/siteforge/siteforge/siteforge
 sudo cp deploy/siteforge.nginx.conf /etc/nginx/sites-available/siteforge
-sudo sed -i "s|APP_ROOT|$APP_ROOT|g; s|SERVER_NAME|bobdyinternational.com www.bobdyinternational.com|g" /etc/nginx/sites-available/siteforge
+sudo sed -i "s|APP_ROOT|$APP_ROOT|g; s|SERVER_NAME|bobdyinternational.com www.bobdyinternational.com amberonlinestore.com www.amberonlinestore.com|g" /etc/nginx/sites-available/siteforge
 sudo ln -s /etc/nginx/sites-available/siteforge /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
@@ -231,7 +231,7 @@ If your server path and domain are fixed, you can replace placeholders in the pr
 
 ```bash
 cd /root/Mythee/siteforge/siteforge/siteforge
-sed -i "s|APP_ROOT|/root/Mythee/siteforge/siteforge/siteforge|g; s|SERVER_NAME|bobdyinternational.com www.bobdyinternational.com|g" deploy/siteforge.nginx.conf
+sed -i "s|APP_ROOT|/root/Mythee/siteforge/siteforge/siteforge|g; s|SERVER_NAME|bobdyinternational.com www.bobdyinternational.com amberonlinestore.com www.amberonlinestore.com|g" deploy/siteforge.nginx.conf
 sudo ln -sf /root/Mythee/siteforge/siteforge/siteforge/deploy/siteforge.nginx.conf /etc/nginx/sites-enabled/siteforge
 sudo nginx -t
 sudo systemctl reload nginx
@@ -245,7 +245,7 @@ sudo systemctl reload nginx
 
 ```bash
 sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d bobdyinternational.com -d www.bobdyinternational.com
+sudo certbot --nginx -d bobdyinternational.com -d www.bobdyinternational.com -d amberonlinestore.com -d www.amberonlinestore.com
 ```
 
 Certbot will adjust your Nginx config for HTTPS. Renewal is automatic.
@@ -285,7 +285,7 @@ sudo systemctl restart siteforge
 - **502 Bad Gateway**: Gunicorn not running or not listening on `127.0.0.1:8000`. Check `systemctl status siteforge` and `journalctl -u siteforge -n 50`.
 - **Static files 404**: Run `collectstatic` and ensure `location /static/` alias path matches `STATIC_ROOT`.
 - **ModuleNotFoundError / dotenv**: Ensure `python-dotenv` is installed (`pip install -r requirements/production.txt`) and `.env` path is correct.
-- **ALLOWED_HOSTS**: Ensure your domain (e.g. `bobdyinternational.com,www.bobdyinternational.com`) and server IP are in `ALLOWED_HOSTS` in `.env`.
-- **S3 images not loading (local or production)**: By default the app uses signed (querystring) URLs for media. Browsers can block these or the URLs can be malformed. **Fix:** (1) In `.env` set `AWS_S3_QUERYSTRING_AUTH=false` so media URLs are plain (no signature). (2) In AWS S3: open your bucket → Permissions → Block public access: turn off for this bucket if you want public read. (3) Add a bucket policy allowing public GetObject, e.g. `{"Version":"2012-10-17","Statement":[{"Sid":"PublicRead","Effect":"Allow","Principal":"*","Action":"s3:GetObject","Resource":"arn:aws:s3:::YOUR_BUCKET_NAME/media/*"}]}`. (4) If you keep signed URLs, add CORS to the bucket for your origins (e.g. `https://bobdyinternational.com`, `http://bobdy:8000`). Then restart the app (`sudo systemctl restart siteforge`).
+- **ALLOWED_HOSTS**: Ensure your domains (e.g. `bobdyinternational.com,www.bobdyinternational.com,amberonlinestore.com,www.amberonlinestore.com`) and server IP are in `ALLOWED_HOSTS` in `.env`.
+- **S3 images not loading (local or production)**: By default the app uses signed (querystring) URLs for media. Browsers can block these or the URLs can be malformed. **Fix:** (1) In `.env` set `AWS_S3_QUERYSTRING_AUTH=false` so media URLs are plain (no signature). (2) In AWS S3: open your bucket → Permissions → Block public access: turn off for this bucket if you want public read. (3) Add a bucket policy allowing public GetObject, e.g. `{"Version":"2012-10-17","Statement":[{"Sid":"PublicRead","Effect":"Allow","Principal":"*","Action":"s3:GetObject","Resource":"arn:aws:s3:::YOUR_BUCKET_NAME/media/*"}]}`. (4) If you keep signed URLs, add CORS to the bucket for your origins (e.g. `https://bobdyinternational.com`, `https://amberonlinestore.com`, `http://bobdy:8000`). Then restart the app (`sudo systemctl restart siteforge`).
 
 If you use **PostgreSQL** later, set `DATABASE_URL` (or equivalent) in `.env` and switch `config.settings.base` to use it; the same deployment steps apply.
